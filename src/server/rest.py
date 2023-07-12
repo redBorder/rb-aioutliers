@@ -37,19 +37,22 @@ class APIServer:
     def __init__(self):
         self.app = Flask(__name__)
 
-        @self.app.route('/api/v1/outliers', methods=['GET'])
+        @self.app.route('/api/v1/outliers', methods=['POST'])
         def calculate():
             logger.logger.info("Calculating predictions with Keras model")
-            if request.args.get('query') != None:
-                druid_query = base64.b64decode(request.args.get('query')).decode('utf-8')
-                data = druid_client.execute_query(json.loads(druid_query))
+            if request.form.get('query') != None:
+                
+                druid_query = json.loads(base64.b64decode(request.form.get('query')).decode('utf-8'))
+                druid_query['aggregations'] = [ { "type": "longSum", "name": "bytes", "fieldName": "sum_bytes" }, { "type": "longSum", "name": "pkts", "fieldName": "sum_pkts" }, { "type": "hyperUnique", "name": "clients", "fieldName": "clients" }, { "type": "longSum", "name": "flows", "fieldName": "events" } ]
+                data = druid_client.execute_query(druid_query)
                 logger.logger.info("Returning predicted data")
+                print(druid_query)
                 try:
                     return jsonify(outliers.OutliersModel.execute_prediction_model(
                         data,
                         config.get("OutliersServer", "metric"),
                         os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "IA", "autoencoder.keras")
-                    ))
+                    ))	
                 except Exception as e:
                     logger.logger.error("Error while calculating prediction model -> " + str(e))
                     return jsonify(outliers.OutliersModel.return_error(error=str(e)))
@@ -58,4 +61,4 @@ class APIServer:
                 return jsonify(outliers.OutliersModel.return_error())
     
     def start_server(self):
-        self.app.run(debug=False, port=config.get("OutliersServer", "outliers_server_port"))
+        self.app.run(debug=False, host="0.0.0.0", port=config.get("OutliersServer", "outliers_server_port"))

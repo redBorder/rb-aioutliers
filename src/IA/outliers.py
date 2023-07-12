@@ -34,20 +34,6 @@ class KerasModel:
         self.model_file = model_file
         self.metric = metric
 
-    def convert_timestamp(self, timestamp_records):
-        converted_timestamps = []
-        for record in timestamp_records:
-            original_timestamp = record['timestamp']
-            dt = datetime.strptime(str(original_timestamp), '%Y-%m-%dT%H:%M:%S.%fZ')
-            current_datetime = datetime.now(pytz.utc)
-            local_timezone = datetime.now().astimezone().tzinfo
-            local_datetime = current_datetime.astimezone(local_timezone)
-            timezone_string = local_datetime.strftime('%z')
-            converted_timestamp = local_datetime.strftime('%Y-%m-%d %H:%M:%S') + ' ' + timezone_string
-            record['timestamp'] = converted_timestamp
-            converted_timestamps.append(record)
-        return converted_timestamps
-
     def standard_scale(self,dataframe):
         scaled = dataframe[self.standard_cols].copy()
         params = {}
@@ -117,14 +103,12 @@ class KerasModel:
         anomalies=anomalies.join(timestamp)
         anomalies.rename(columns={self.metric:"expected"},inplace=True)
         anomalies=anomalies[["expected",'timestamp']].to_dict(orient="records")
-        predicted = self.convert_timestamp(predicted)
-        anomalies = self.convert_timestamp(anomalies)
         return  anomalies, predicted
     
     def calculate_predictions(self):
         data_file = self.data_file
         model_file = self.model_file
-        self.standard_cols= ["bytes","pkts","clients","flows"]
+        self.standard_cols= ["clients", "flows", "bytes", "pkts"]
         self.minmax_cols=["minute", "weekday_0","weekday_1","weekday_2","weekday_3","weekday_4","weekday_5","weekday_6"]
         self.percentile=99.9
         temp_data = pd.json_normalize(data_file)
@@ -138,6 +122,9 @@ class KerasModel:
         data = data.join(one_hot)
         data.set_index("timestamp")
         data=data[data.columns.drop(["timestamp"])]
+        for col in self.minmax_cols:
+            if col not in data.columns:
+                data[col]= 0
         self.data_columns= data.columns
         data = data.dropna()
         data=self.rescale(data)
