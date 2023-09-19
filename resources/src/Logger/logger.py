@@ -20,13 +20,16 @@
 import os
 import logging
 from Config import configmanager
-from pylogrus import PyLogrus, JsonFormatter
+from pylogrus import PyLogrus
 
 config = configmanager.ConfigManager(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "config.ini"))
 
 class CustomFormatter(logging.Formatter):
+    def __init__(self, fmt=None, datefmt=None):
+        super().__init__(fmt, datefmt)
+
     def format(self, record):
-        log_time = self.formatTime(record, self.datefmt)
+        log_time = self.formatTime(record)
         log_level = record.levelname
         log_message = record.getMessage()
         return f"[[{log_time}]]\t{log_level} {log_message}"
@@ -36,13 +39,17 @@ class Logger:
         log_file = config.get('Logger', 'log_file')
         self.logger = PyLogrus(name="OutliersLogger")
 
+        log_dir = os.path.dirname(log_file)
+        if not os.path.isdir(log_dir):
+            os.makedirs(log_dir)
+            
         console_handler = logging.StreamHandler()
-        console_formatter = CustomFormatter("%Y-%m-%d %H:%M:%S")
+        console_formatter = CustomFormatter("%(asctime)s %(levelname)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
         console_handler.setFormatter(console_formatter)
 
         if log_file:
             file_handler = logging.FileHandler(log_file)
-            file_formatter = CustomFormatter("%Y-%m-%d %H:%M:%S")
+            file_formatter = CustomFormatter("%(asctime)s %(levelname)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
             file_handler.setFormatter(file_formatter)
 
         self.logger.addHandler(console_handler)
