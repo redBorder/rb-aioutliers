@@ -29,7 +29,7 @@ from src.Logger.logger import Logger
 
 class TestLogger(unittest.TestCase):
     def setUp(self):
-        self.temp_log_file = '/var/log/test_log.log'
+        self.temp_log_file = './test_log.log'
         self.logger = Logger(log_file=self.temp_log_file, log_level=logging.DEBUG)
 
     def tearDown(self):

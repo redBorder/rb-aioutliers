@@ -27,40 +27,31 @@ from src.Druid.client import DruidClient
 
 class TestDruidClient(unittest.TestCase):
     def setUp(self):
-        # Create an instance of the DruidClient with a mock endpoint
         self.druid_endpoint = "http://mock.druid.endpoint"
         self.druid_client = DruidClient(self.druid_endpoint)
 
     def test_execute_query_success(self):
-        # Mock the response from the requests.post method
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {"result": "mocked_data"}
 
         with patch("requests.post", return_value=mock_response):
-            # Define a sample Druid query
             druid_query = {"query": "sample_query"}
 
-            # Execute the query
             response = self.druid_client.execute_query(druid_query)
 
-            # Assert that the response is as expected
             self.assertEqual(response, {"result": "mocked_data"})
 
     def test_execute_query_failure(self):
-        # Mock a failed response with a non-200 status code
         mock_response = MagicMock()
         mock_response.status_code = 500
 
         with patch("requests.post", return_value=mock_response):
-            # Define a sample Druid query
             druid_query = {"query": "sample_query"}
 
-            # Execute the query and expect an exception
             with self.assertRaises(Exception) as context:
                 self.druid_client.execute_query(druid_query)
 
-            # Assert that the exception message contains the status code
             self.assertIn("status code 500", str(context.exception))
 
 if __name__ == '__main__':
