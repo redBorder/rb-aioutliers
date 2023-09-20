@@ -9,7 +9,7 @@ on:
       - '*'
 
 jobs:
-  code_test:
+  test:
     runs-on: ubuntu-latest
 
     steps:
@@ -54,3 +54,21 @@ jobs:
     - name: Run safety check
       run: |
         safety check --full-report -r resources/src/requirements.txt
+
+  create_rpm:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Docker
+      run: |
+        sudo apt update
+        sudo apt install -y docker.io
+        sudo systemctl start docker
+        sudo systemctl enable docker
+
+    - name: Build RPM Package in CentOS 7 Docker Container
+      run: |
+        docker run --rm -v $PWD:/rpmbuild -w /rpmbuild centos:7 /bin/bash -c "yum install -y rpm-build && rpmbuild -bb /rpmbuild/packaging/rpm/rb-aioutliers.spec"
