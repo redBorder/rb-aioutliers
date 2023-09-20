@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import sys
 from Logger.logger import logger
 from server.rest import APIServer
 
@@ -25,6 +26,10 @@ class Outliers:
         logger.info("Starting Outliersss API REST")
         self.api = APIServer()
         logger.info("Starting Outliers Server")
-        self.api.start_server()
+        print(sys.argv)
+        if len(sys.argv) > 1:
+            self.api.start_server(True)
+        else:
+            self.api.start_server(False)
 
 Outliers_ = Outliers()

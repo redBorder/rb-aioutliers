@@ -55,30 +55,28 @@ jobs:
       run: |
         safety check --full-report -r resources/src/requirements.txt
 
-  create_rpm:
+  run_outliers:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        os: [centos7]
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Set up CentOS 7
-      uses: docker/setup-qemu-action@v1
-      with:
-        platforms: ${{ matrix.os }}
-
-    - name: Build RPM Package
+    - name: Set up Python 3.8 and pip
       run: |
-        docker run --rm -v $(pwd):/rpmbuild -w /rpmbuild centos:7 bash -c '
-          yum -y install rpm-build make gcc centos-release-scl
+        sudo add-apt-repository ppa:deadsnakes/ppa -y
+        sudo apt update
+        sudo apt install -y python3.8 python3.8-distutils
+        curl -s https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+        sudo python3.8 get-pip.py
 
-          cp /rpmbuild/packaging/rpm/rb-aioutliers.spec /root/rpmbuild/SPECS/
+    - name: Install dependencies
+      run: |
+        pip install -r /resources/src/requirements.txt
 
-          rpmbuild -bb /root/rpmbuild/SPECS/rb-aioutliers.spec
+    - name: Run outliers
+      run: |
+        sudo python3.8 /resources/src/__main__.py --test
+      
 
-          cp /root/rpmbuild/RPMS/x86_64/* /rpmbuild/
         

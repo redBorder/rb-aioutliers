@@ -60,5 +60,8 @@ class APIServer:
                 logger.logger.error("Error while proccessing, Druid query is empty")
                 return jsonify(outliers.OutliersModel.return_error())
     
-    def start_server(self):
-        self.app.run(debug=False, host="0.0.0.0", port=config.get("OutliersServer", "outliers_server_port"))
+    def start_server(self, test):
+        if test:
+            return
+        else:
+            self.app.run(debug=False, host="0.0.0.0", port=config.get("OutliersServer", "outliers_server_port"))
