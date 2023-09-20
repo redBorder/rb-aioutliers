@@ -18,8 +18,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import sys
 import json
+import time
 import base64
+import threading
 from IA import outliers
 from Druid import client
 from Logger import logger
@@ -60,8 +63,20 @@ class APIServer:
                 logger.logger.error("Error while proccessing, Druid query is empty")
                 return jsonify(outliers.OutliersModel.return_error())
     
+    def run_app(self):
+        self.app.run(debug=False, host="0.0.0.0", port=config.get("OutliersServer", "outliers_server_port"))
+
+
     def start_server(self, test):
         if test:
+            app_thread = threading.Thread(target=self.run_app)
+            app_thread.daemon = True
+            app_thread.start()
+
+            time.sleep(15)
+
+            sys.exit(0)
+
             return
         else:
-            self.app.run(debug=False, host="0.0.0.0", port=config.get("OutliersServer", "outliers_server_port"))
+            self.run_app()

@@ -26,7 +26,6 @@ class Outliers:
         logger.info("Starting Outliersss API REST")
         self.api = APIServer()
         logger.info("Starting Outliers Server")
-        print(sys.argv)
         if len(sys.argv) > 1:
             self.api.start_server(True)
         else:
