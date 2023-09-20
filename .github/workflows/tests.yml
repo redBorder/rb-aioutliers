@@ -72,7 +72,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        pip install -r resources/src/requirements.txt
+        sudo pip install -r resources/src/requirements.txt
 
     - name: Run outliers
       run: |
