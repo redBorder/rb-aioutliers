@@ -1,4 +1,4 @@
-name: Unit Tests on CentOS 7
+name: Run Tests and Security Check
 
 on:
   pull_request:
@@ -9,24 +9,46 @@ on:
       - '*'
 
 jobs:
-  centos7:
+  test:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        os: [centos7]
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Set up CentOS 7
-      uses: docker/setup-qemu-action@v1
-      with:
-        platforms: ${{ matrix.os }}
-
-    - name: Build and run tests
+    - name: Set up Python 3.8 and pip
       run: |
-        docker run --rm -v $(pwd):/app -w /app centos:7 bash -c '
-          yum -y install gcc make your-dependency-package
-        '
+        sudo apt update
+        sudo apt install -y python3.8 python3.8-distutils
+        curl -s https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+        sudo python3.8 get-pip.py
+
+    - name: Install project dependencies
+      run: |
+        pip install -r resources/src/requirements.txt
+
+    - name: Run tests
+      run: |
+        python3.8 -m unittest discover -s resources/tests -p 'test_*.py'
+
+  security_check:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python 3.8 and pip
+      run: |
+        sudo apt update
+        sudo apt install -y python3.8 python3.8-distutils
+        curl -s https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+        sudo python3.8 get-pip.py
+
+    - name: Install safety for security checks
+      run: |
+        pip install safety
+
+    - name: Run safety check
+      run: |
+        safety check --full-report -r resources/src/requirements.txt
