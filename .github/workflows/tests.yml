@@ -1,0 +1,29 @@
+name: Unit Tests on CentOS 7
+
+on:
+  push:
+    branches:
+      - '*'
+
+jobs:
+  centos7:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        os: [centos7]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up CentOS 7
+      uses: docker/setup-qemu-action@v1
+      with:
+        platforms: ${{ matrix.os }}
+
+    - name: Build and run tests
+      run: |
+        docker run --rm -v $(pwd):/app -w /app centos:7 bash -c '
+          yum -y install gcc make your-dependency-package
+        '
