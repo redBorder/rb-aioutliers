@@ -72,11 +72,11 @@ jobs:
 
     - name: Install dependencies
       run: |
-        sudo pip install -r resources/src/requirements.txt
+        pip install -r resources/src/requirements.txt
 
     - name: Run outliers
       run: |
-        sudo python3.8 resources/src/__main__.py --test
+        python3.8 resources/src/__main__.py --test
       
 
         
