@@ -39,6 +39,7 @@ druid_client = client.DruidClient(config.get("Druid", "druid_endpoint"))
 class APIServer:
     def __init__(self):
         self.app = Flask(__name__)
+        self.exit_code = 0
 
         @self.app.route('/api/v1/outliers', methods=['POST'])
         def calculate():
@@ -64,19 +65,18 @@ class APIServer:
                 return jsonify(outliers.OutliersModel.return_error())
     
     def run_app(self):
-        self.app.run(debug=False, host="0.0.0.0", port=config.get("OutliersServer", "outliers_server_port"))
-
+        try:
+            self.app.run(debug=False, host="0.0.0.0", port=config.get("OutliersServer", "outliers_server_port"))
+        except Exception as e:
+            print(f"Exception in server thread: {e}")
+            self.exit_code = 1
 
     def start_server(self, test):
         if test:
-            app_thread = threading.Thread(target=self.run_app)
-            app_thread.daemon = True
-            app_thread.start()
-
-            time.sleep(15)
-
-            sys.exit(0)
-
-            return
+            self.server_thread = threading.Thread(target=self.run_app)
+            self.server_thread.daemon = True 
+            self.server_thread.start()
+            time.sleep(30)
+            sys.exit(self.exit_code)
         else:
             self.run_app()
