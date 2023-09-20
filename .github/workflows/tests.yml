@@ -58,17 +58,27 @@ jobs:
   create_rpm:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        os: [centos7]
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Set up Docker
-      run: |
-        sudo apt update
-        sudo apt install -y docker.io
-        sudo systemctl start docker
-        sudo systemctl enable docker
+    - name: Set up CentOS 7
+      uses: docker/setup-qemu-action@v1
+      with:
+        platforms: ${{ matrix.os }}
 
-    - name: Build RPM Package in CentOS 7 Docker Container
+    - name: Build RPM Package
       run: |
-        docker run --rm -v $PWD:/rpmbuild -w /rpmbuild centos:7 /bin/bash -c "yum install -y rpm-build && rpmbuild -bb /rpmbuild/packaging/rpm/rb-aioutliers.spec"
+        docker run --rm -v $(pwd):/rpmbuild -w /rpmbuild centos:7 bash -c '
+          yum -y install rpm-build make gcc centos-release-scl
+
+          cp /rpmbuild/packaging/rpm/rb-aioutliers.spec /root/rpmbuild/SPECS/
+
+          rpmbuild -bb /root/rpmbuild/SPECS/rb-aioutliers.spec
+
+          cp /root/rpmbuild/RPMS/x86_64/* /rpmbuild/
+        
