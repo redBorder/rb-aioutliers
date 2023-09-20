@@ -18,8 +18,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import sys
 import json
+import time
 import base64
+import threading
 from IA import outliers
 from Druid import client
 from Logger import logger
@@ -36,6 +39,7 @@ druid_client = client.DruidClient(config.get("Druid", "druid_endpoint"))
 class APIServer:
     def __init__(self):
         self.app = Flask(__name__)
+        self.exit_code = 0
 
         @self.app.route('/api/v1/outliers', methods=['POST'])
         def calculate():
@@ -60,5 +64,19 @@ class APIServer:
                 logger.logger.error("Error while proccessing, Druid query is empty")
                 return jsonify(outliers.OutliersModel.return_error())
     
-    def start_server(self):
-        self.app.run(debug=False, host="0.0.0.0", port=config.get("OutliersServer", "outliers_server_port"))
+    def run_app(self):
+        try:
+            self.app.run(debug=False, host="0.0.0.0", port=config.get("OutliersServer", "outliers_server_port"))
+        except Exception as e:
+            print(f"Exception in server thread: {e}")
+            self.exit_code = 1
+
+    def start_server(self, test):
+        if test:
+            self.server_thread = threading.Thread(target=self.run_app)
+            self.server_thread.daemon = True 
+            self.server_thread.start()
+            time.sleep(30)
+            sys.exit(self.exit_code)
+        else:
+            self.run_app()
