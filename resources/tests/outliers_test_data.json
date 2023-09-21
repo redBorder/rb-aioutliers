@@ -1,0 +1,901 @@
+[ {
+    "timestamp" : "2023-09-21T09:00:00.000Z",
+    "result" : {
+      "flows_per_client" : 40.91986963872697,
+      "flows_per_sec_per_client" : 0.005683315227600969,
+      "pps" : 1.3195833333333333,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 461180.40444406576,
+      "bps" : 4107.408888888889,
+      "flows" : 328,
+      "bytes" : 3696668,
+      "fps" : 0.04555555555555556,
+      "bits_per_sec_per_client" : 512.4226716045175,
+      "pkts" : 9501
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:01:00.000Z",
+    "result" : {
+      "flows_per_client" : 35.68013023376803,
+      "flows_per_sec_per_client" : 0.004955573643578893,
+      "pps" : 1.6404166666666666,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 811811.6641210066,
+      "bps" : 7230.234444444444,
+      "flows" : 286,
+      "bytes" : 6507211,
+      "fps" : 0.03972222222222222,
+      "bits_per_sec_per_client" : 902.0129601344519,
+      "pkts" : 11811
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:02:00.000Z",
+    "result" : {
+      "flows_per_client" : 43.290227940970304,
+      "flows_per_sec_per_client" : 0.0060125316584680975,
+      "pps" : 1.7754166666666666,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 684022.778665966,
+      "bps" : 6092.108888888889,
+      "flows" : 347,
+      "bytes" : 5482898,
+      "fps" : 0.04819444444444444,
+      "bits_per_sec_per_client" : 760.0253096288511,
+      "pkts" : 12783
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:03:00.000Z",
+    "result" : {
+      "flows_per_client" : 44.912052042505216,
+      "flows_per_sec_per_client" : 0.0062377850059035025,
+      "pps" : 5.399305555555555,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 5808204.0974980425,
+      "bps" : 51729.58111111111,
+      "flows" : 360,
+      "bytes" : 46556623,
+      "fps" : 0.05,
+      "bits_per_sec_per_client" : 6453.5601083311585,
+      "pkts" : 38875
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:04:00.000Z",
+    "result" : {
+      "flows_per_client" : 39.357710903752654,
+      "flows_per_sec_per_client" : 0.005466348736632313,
+      "pps" : 4.34875,
+      "clients" : 9.019833517963864,
+      "bytes_per_client" : 3787638.0902107987,
+      "bps" : 37959.85,
+      "flows" : 355,
+      "bytes" : 34163865,
+      "fps" : 0.049305555555555554,
+      "bits_per_sec_per_client" : 4208.486766900887,
+      "pkts" : 31311
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:05:00.000Z",
+    "result" : {
+      "flows_per_client" : 49.52801294687381,
+      "flows_per_sec_per_client" : 0.0068788906870658065,
+      "pps" : 2.789861111111111,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 1494281.3590762028,
+      "bps" : 13308.511111111111,
+      "flows" : 397,
+      "bytes" : 11977660,
+      "fps" : 0.05513888888888889,
+      "bits_per_sec_per_client" : 1660.3126211957808,
+      "pkts" : 20087
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:06:00.000Z",
+    "result" : {
+      "flows_per_client" : 44.787296342387144,
+      "flows_per_sec_per_client" : 0.006220457825331548,
+      "pps" : 1.9681944444444444,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 1390458.1683695435,
+      "bps" : 12383.83111111111,
+      "flows" : 359,
+      "bytes" : 11145448,
+      "fps" : 0.04986111111111111,
+      "bits_per_sec_per_client" : 1544.953520410604,
+      "pkts" : 14171
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:07:00.000Z",
+    "result" : {
+      "flows_per_client" : 43.41498364108838,
+      "flows_per_sec_per_client" : 0.006029858839040052,
+      "pps" : 0.8815277777777778,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 299324.1056906833,
+      "bps" : 2665.8688888888887,
+      "flows" : 348,
+      "bytes" : 2399282,
+      "fps" : 0.04833333333333333,
+      "bits_per_sec_per_client" : 332.5823396563148,
+      "pkts" : 6347
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:08:00.000Z",
+    "result" : {
+      "flows_per_client" : 38.17524423612943,
+      "flows_per_sec_per_client" : 0.0053021172550179775,
+      "pps" : 1.5715277777777779,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 924395.8238684575,
+      "bps" : 8232.942222222222,
+      "flows" : 306,
+      "bytes" : 7409648,
+      "fps" : 0.0425,
+      "bits_per_sec_per_client" : 1027.1064709649527,
+      "pkts" : 11315
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:09:00.000Z",
+    "result" : {
+      "flows_per_client" : 39.1359773211963,
+      "flows_per_sec_per_client" : 0.005435552405721709,
+      "pps" : 1.89625,
+      "clients" : 9.019833517963864,
+      "bytes_per_client" : 557902.3149349618,
+      "bps" : 5591.317777777777,
+      "flows" : 353,
+      "bytes" : 5032186,
+      "fps" : 0.04902777777777778,
+      "bits_per_sec_per_client" : 619.8914610388464,
+      "pkts" : 13653
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:10:00.000Z",
+    "result" : {
+      "flows_per_client" : 58.01140055490257,
+      "flows_per_sec_per_client" : 0.008057138965958692,
+      "pps" : 3.1145833333333335,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 2214412.5542944423,
+      "bps" : 19722.21222222222,
+      "flows" : 465,
+      "bytes" : 17749991,
+      "fps" : 0.06458333333333334,
+      "bits_per_sec_per_client" : 2460.4583936604913,
+      "pkts" : 22425
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:11:00.000Z",
+    "result" : {
+      "flows_per_client" : 46.90814324439434,
+      "flows_per_sec_per_client" : 0.006515019895054769,
+      "pps" : 0.9454166666666667,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 334436.9717560145,
+      "bps" : 2978.5944444444444,
+      "flows" : 376,
+      "bytes" : 2680735,
+      "fps" : 0.052222222222222225,
+      "bits_per_sec_per_client" : 371.59663528446055,
+      "pkts" : 6807
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:12:00.000Z",
+    "result" : {
+      "flows_per_client" : 46.284364743803984,
+      "flows_per_sec_per_client" : 0.006428383992194997,
+      "pps" : 0.7934722222222222,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 248052.38232325925,
+      "bps" : 2209.2277777777776,
+      "flows" : 371,
+      "bytes" : 1988305,
+      "fps" : 0.051527777777777777,
+      "bits_per_sec_per_client" : 275.6137581369547,
+      "pkts" : 5713
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:13:00.000Z",
+    "result" : {
+      "flows_per_client" : 41.793159539553464,
+      "flows_per_sec_per_client" : 0.005804605491604648,
+      "pps" : 2.471388888888889,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 1545488.5837466659,
+      "bps" : 13764.577777777778,
+      "flows" : 335,
+      "bytes" : 12388120,
+      "fps" : 0.04652777777777778,
+      "bits_per_sec_per_client" : 1717.2095374962955,
+      "pkts" : 17794
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:14:00.000Z",
+    "result" : {
+      "flows_per_client" : 38.02730940841453,
+      "flows_per_sec_per_client" : 0.005281570751168686,
+      "pps" : 5.817916666666667,
+      "clients" : 9.019833517963864,
+      "bytes_per_client" : 4069940.5290450365,
+      "bps" : 40789.095555555556,
+      "flows" : 343,
+      "bytes" : 36710186,
+      "fps" : 0.04763888888888889,
+      "bits_per_sec_per_client" : 4522.156143383374,
+      "pkts" : 41889
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:15:00.000Z",
+    "result" : {
+      "flows_per_client" : 37.55146573553908,
+      "flows_per_sec_per_client" : 0.0052154813521582055,
+      "pps" : 5.262083333333333,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 3749894.3585789376,
+      "bps" : 33397.666666666664,
+      "flows" : 301,
+      "bytes" : 30057900,
+      "fps" : 0.041805555555555554,
+      "bits_per_sec_per_client" : 4166.54928730993,
+      "pkts" : 37887
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:16:00.000Z",
+    "result" : {
+      "flows_per_client" : 31.18892502951751,
+      "flows_per_sec_per_client" : 0.004331795142988543,
+      "pps" : 5.1090277777777775,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 3704588.3280354594,
+      "bps" : 32994.15777777778,
+      "flows" : 250,
+      "bytes" : 29694742,
+      "fps" : 0.034722222222222224,
+      "bits_per_sec_per_client" : 4116.209253372733,
+      "pkts" : 36785
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:17:00.000Z",
+    "result" : {
+      "flows_per_client" : 37.301954335302945,
+      "flows_per_sec_per_client" : 0.005180826991014297,
+      "pps" : 6.119583333333333,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 4506362.023769266,
+      "bps" : 40134.991111111114,
+      "flows" : 299,
+      "bytes" : 36121492,
+      "fps" : 0.041527777777777775,
+      "bits_per_sec_per_client" : 5007.0689152991845,
+      "pkts" : 44061
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:18:00.000Z",
+    "result" : {
+      "flows_per_client" : 34.93159603305961,
+      "flows_per_sec_per_client" : 0.004851610560147168,
+      "pps" : 4.6161111111111115,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 3425544.009933169,
+      "bps" : 30508.906666666666,
+      "flows" : 280,
+      "bytes" : 27458016,
+      "fps" : 0.03888888888888889,
+      "bits_per_sec_per_client" : 3806.1600110368545,
+      "pkts" : 33236
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:19:00.000Z",
+    "result" : {
+      "flows_per_client" : 35.68013023376803,
+      "flows_per_sec_per_client" : 0.004955573643578893,
+      "pps" : 5.726666666666667,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 4815172.178629827,
+      "bps" : 42885.345555555556,
+      "flows" : 286,
+      "bytes" : 38596811,
+      "fps" : 0.03972222222222222,
+      "bits_per_sec_per_client" : 5350.191309588697,
+      "pkts" : 41232
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:20:00.000Z",
+    "result" : {
+      "flows_per_client" : 30.06612372845488,
+      "flows_per_sec_per_client" : 0.004175850517840956,
+      "pps" : 5.677222222222222,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 4081928.6603063783,
+      "bps" : 36354.862222222226,
+      "flows" : 241,
+      "bytes" : 32719376,
+      "fps" : 0.03347222222222222,
+      "bits_per_sec_per_client" : 4535.476289229309,
+      "pkts" : 40876
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:21:00.000Z",
+    "result" : {
+      "flows_per_client" : 30.377500810220354,
+      "flows_per_sec_per_client" : 0.004219097334752828,
+      "pps" : 5.35375,
+      "clients" : 9.019833517963864,
+      "bytes_per_client" : 3352197.1264526765,
+      "bps" : 33595.84444444445,
+      "flows" : 274,
+      "bytes" : 30236260,
+      "fps" : 0.03805555555555556,
+      "bits_per_sec_per_client" : 3724.6634738363073,
+      "pkts" : 38547
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:22:00.000Z",
+    "result" : {
+      "flows_per_client" : 31.945281293283028,
+      "flows_per_sec_per_client" : 0.004436844624067087,
+      "pps" : 5.163888888888889,
+      "clients" : 7.011990219885757,
+      "bytes_per_client" : 4230217.965204646,
+      "bps" : 32958.05222222222,
+      "flows" : 224,
+      "bytes" : 29662247,
+      "fps" : 0.03111111111111111,
+      "bits_per_sec_per_client" : 4700.2421835607165,
+      "pkts" : 37180
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:23:00.000Z",
+    "result" : {
+      "flows_per_client" : 33.3097719315247,
+      "flows_per_sec_per_client" : 0.004626357212711764,
+      "pps" : 5.527777777777778,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 4031339.60013,
+      "bps" : 35904.30111111111,
+      "flows" : 267,
+      "bytes" : 32313871,
+      "fps" : 0.037083333333333336,
+      "bits_per_sec_per_client" : 4479.266222366667,
+      "pkts" : 39800
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:24:00.000Z",
+    "result" : {
+      "flows_per_client" : 27.938431402100473,
+      "flows_per_sec_per_client" : 0.003880337694736177,
+      "pps" : 4.510833333333333,
+      "clients" : 9.019833517963864,
+      "bytes_per_client" : 2886757.4937101314,
+      "bps" : 28931.19111111111,
+      "flows" : 252,
+      "bytes" : 26038072,
+      "fps" : 0.035,
+      "bits_per_sec_per_client" : 3207.5083263445904,
+      "pkts" : 32478
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:25:00.000Z",
+    "result" : {
+      "flows_per_client" : 53.64495105077012,
+      "flows_per_sec_per_client" : 0.007450687645940294,
+      "pps" : 6.158194444444445,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 4321912.218213101,
+      "bps" : 38492.22666666667,
+      "flows" : 430,
+      "bytes" : 34643004,
+      "fps" : 0.059722222222222225,
+      "bits_per_sec_per_client" : 4802.124686903446,
+      "pkts" : 44339
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:26:00.000Z",
+    "result" : {
+      "flows_per_client" : 43.04071654073417,
+      "flows_per_sec_per_client" : 0.00597787729732419,
+      "pps" : 4.448333333333333,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 3227523.5288295606,
+      "bps" : 28745.277777777777,
+      "flows" : 345,
+      "bytes" : 25870750,
+      "fps" : 0.04791666666666667,
+      "bits_per_sec_per_client" : 3586.137254255067,
+      "pkts" : 32028
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:27:00.000Z",
+    "result" : {
+      "flows_per_client" : 46.53387614404013,
+      "flows_per_sec_per_client" : 0.006463038353338907,
+      "pps" : 9.150972222222222,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 8843954.286907407,
+      "bps" : 78766.86888888889,
+      "flows" : 373,
+      "bytes" : 70890182,
+      "fps" : 0.051805555555555556,
+      "bits_per_sec_per_client" : 9826.615874341564,
+      "pkts" : 65887
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:28:00.000Z",
+    "result" : {
+      "flows_per_client" : 43.664495041324514,
+      "flows_per_sec_per_client" : 0.00606451320018396,
+      "pps" : 4.499305555555556,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 3207351.6549217696,
+      "bps" : 28565.62111111111,
+      "flows" : 350,
+      "bytes" : 25709059,
+      "fps" : 0.04861111111111111,
+      "bits_per_sec_per_client" : 3563.7240610241884,
+      "pkts" : 32395
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:29:00.000Z",
+    "result" : {
+      "flows_per_client" : 47.65667744510276,
+      "flows_per_sec_per_client" : 0.006618982978486494,
+      "pps" : 5.7380555555555555,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 3998013.2356903595,
+      "bps" : 35607.486666666664,
+      "flows" : 382,
+      "bytes" : 32046738,
+      "fps" : 0.05305555555555556,
+      "bits_per_sec_per_client" : 4442.236928544844,
+      "pkts" : 41314
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:30:00.000Z",
+    "result" : {
+      "flows_per_client" : 42.541693740261884,
+      "flows_per_sec_per_client" : 0.005908568575036373,
+      "pps" : 4.6722222222222225,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 3384161.7956698043,
+      "bps" : 30140.344444444443,
+      "flows" : 341,
+      "bytes" : 27126310,
+      "fps" : 0.04736111111111111,
+      "bits_per_sec_per_client" : 3760.1797729664495,
+      "pkts" : 33640
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:31:00.000Z",
+    "result" : {
+      "flows_per_client" : 43.789250741442586,
+      "flows_per_sec_per_client" : 0.0060818403807559145,
+      "pps" : 4.667222222222223,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 3336362.2729480667,
+      "bps" : 29714.62777777778,
+      "flows" : 351,
+      "bytes" : 26743165,
+      "fps" : 0.04875,
+      "bits_per_sec_per_client" : 3707.0691921645184,
+      "pkts" : 33604
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:32:00.000Z",
+    "result" : {
+      "flows_per_client" : 32.81074913105242,
+      "flows_per_sec_per_client" : 0.004557048490423947,
+      "pps" : 5.045277777777778,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 3818308.6379438853,
+      "bps" : 34006.984444444446,
+      "flows" : 263,
+      "bytes" : 30606286,
+      "fps" : 0.03652777777777778,
+      "bits_per_sec_per_client" : 4242.565153270984,
+      "pkts" : 36326
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:33:00.000Z",
+    "result" : {
+      "flows_per_client" : 34.812172461347416,
+      "flows_per_sec_per_client" : 0.004835023952964919,
+      "pps" : 5.081388888888889,
+      "clients" : 9.019833517963864,
+      "bytes_per_client" : 3263536.288266771,
+      "bps" : 32707.282222222224,
+      "flows" : 314,
+      "bytes" : 29436554,
+      "fps" : 0.043611111111111114,
+      "bits_per_sec_per_client" : 3626.1514314075234,
+      "pkts" : 36586
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:34:00.000Z",
+    "result" : {
+      "flows_per_client" : 34.36870529623471,
+      "flows_per_sec_per_client" : 0.00477343129114371,
+      "pps" : 5.410972222222222,
+      "clients" : 9.019833517963864,
+      "bytes_per_client" : 3099741.4690988106,
+      "bps" : 31065.724444444444,
+      "flows" : 310,
+      "bytes" : 27959152,
+      "fps" : 0.043055555555555555,
+      "bits_per_sec_per_client" : 3444.157187887567,
+      "pkts" : 38959
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:35:00.000Z",
+    "result" : {
+      "flows_per_client" : 35.92964163400417,
+      "flows_per_sec_per_client" : 0.004990228004722801,
+      "pps" : 4.918333333333333,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 3657668.8320223545,
+      "bps" : 32576.27888888889,
+      "flows" : 288,
+      "bytes" : 29318651,
+      "fps" : 0.04,
+      "bits_per_sec_per_client" : 4064.0764800248385,
+      "pkts" : 35412
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:36:00.000Z",
+    "result" : {
+      "flows_per_client" : 30.19087942857295,
+      "flows_per_sec_per_client" : 0.00419317769841291,
+      "pps" : 4.689444444444445,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 3546797.3185261246,
+      "bps" : 31588.824444444443,
+      "flows" : 242,
+      "bytes" : 28429942,
+      "fps" : 0.03361111111111111,
+      "bits_per_sec_per_client" : 3940.885909473471,
+      "pkts" : 33764
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:37:00.000Z",
+    "result" : {
+      "flows_per_client" : 28.81856672727418,
+      "flows_per_sec_per_client" : 0.004002578712121414,
+      "pps" : 4.562083333333334,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 3408721.8265735484,
+      "bps" : 30359.083333333332,
+      "flows" : 231,
+      "bytes" : 27323175,
+      "fps" : 0.03208333333333333,
+      "bits_per_sec_per_client" : 3787.4686961928314,
+      "pkts" : 32847
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:38:00.000Z",
+    "result" : {
+      "flows_per_client" : 27.57100972609348,
+      "flows_per_sec_per_client" : 0.003829306906401872,
+      "pps" : 4.748055555555555,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 3473251.2134368196,
+      "bps" : 30933.801111111112,
+      "flows" : 221,
+      "bytes" : 27840421,
+      "fps" : 0.030694444444444444,
+      "bits_per_sec_per_client" : 3859.1680149297995,
+      "pkts" : 34186
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:39:00.000Z",
+    "result" : {
+      "flows_per_client" : 30.68990222904523,
+      "flows_per_sec_per_client" : 0.004262486420700726,
+      "pps" : 4.478472222222222,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 3345922.3022481143,
+      "bps" : 29799.772222222222,
+      "flows" : 246,
+      "bytes" : 26819795,
+      "fps" : 0.034166666666666665,
+      "bits_per_sec_per_client" : 3717.691446942349,
+      "pkts" : 32245
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:40:00.000Z",
+    "result" : {
+      "flows_per_client" : 30.93941362928137,
+      "flows_per_sec_per_client" : 0.004297140781844635,
+      "pps" : 4.670277777777778,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 3350234.233511295,
+      "bps" : 29838.175555555557,
+      "flows" : 248,
+      "bytes" : 26854358,
+      "fps" : 0.034444444444444444,
+      "bits_per_sec_per_client" : 3722.482481679217,
+      "pkts" : 33626
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:41:00.000Z",
+    "result" : {
+      "flows_per_client" : 30.19087942857295,
+      "flows_per_sec_per_client" : 0.00419317769841291,
+      "pps" : 4.778194444444445,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 3323468.646585164,
+      "bps" : 29599.793333333335,
+      "flows" : 242,
+      "bytes" : 26639814,
+      "fps" : 0.03361111111111111,
+      "bits_per_sec_per_client" : 3692.7429406501824,
+      "pkts" : 34403
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:42:00.000Z",
+    "result" : {
+      "flows_per_client" : 28.56905532703804,
+      "flows_per_sec_per_client" : 0.003967924350977505,
+      "pps" : 4.409722222222222,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 3182434.1989371874,
+      "bps" : 28343.698888888888,
+      "flows" : 229,
+      "bytes" : 25509329,
+      "fps" : 0.03180555555555555,
+      "bits_per_sec_per_client" : 3536.037998819097,
+      "pkts" : 31750
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:43:00.000Z",
+    "result" : {
+      "flows_per_client" : 31.48616872300212,
+      "flows_per_sec_per_client" : 0.00437307898930585,
+      "pps" : 5.2259722222222225,
+      "clients" : 9.019833517963864,
+      "bytes_per_client" : 3204454.820860674,
+      "bps" : 32115.165555555555,
+      "flows" : 284,
+      "bytes" : 28903649,
+      "fps" : 0.03944444444444444,
+      "bits_per_sec_per_client" : 3560.5053565118606,
+      "pkts" : 37627
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:44:00.000Z",
+    "result" : {
+      "flows_per_client" : 33.93355043211505,
+      "flows_per_sec_per_client" : 0.0047129931155715345,
+      "pps" : 4.516388888888889,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 3302912.5251210094,
+      "bps" : 29416.714444444446,
+      "flows" : 272,
+      "bytes" : 26475043,
+      "fps" : 0.03777777777777778,
+      "bits_per_sec_per_client" : 3669.9028056900106,
+      "pkts" : 32518
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:45:00.000Z",
+    "result" : {
+      "flows_per_client" : 30.710101184054885,
+      "flows_per_sec_per_client" : 0.004265291831118734,
+      "pps" : 4.456388888888889,
+      "clients" : 9.019833517963864,
+      "bytes_per_client" : 2843888.8532601814,
+      "bps" : 28501.56,
+      "flows" : 277,
+      "bytes" : 25651404,
+      "fps" : 0.03847222222222222,
+      "bits_per_sec_per_client" : 3159.8765036224236,
+      "pkts" : 32086
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:46:00.000Z",
+    "result" : {
+      "flows_per_client" : 30.56514652892716,
+      "flows_per_sec_per_client" : 0.004245159240128772,
+      "pps" : 4.565833333333333,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 3310511.394815201,
+      "bps" : 29484.39222222222,
+      "flows" : 245,
+      "bytes" : 26535953,
+      "fps" : 0.034027777777777775,
+      "bits_per_sec_per_client" : 3678.3459942391123,
+      "pkts" : 32874
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:47:00.000Z",
+    "result" : {
+      "flows_per_client" : 27.0719869256212,
+      "flows_per_sec_per_client" : 0.0037599981841140552,
+      "pps" : 4.4447222222222225,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 3251613.3554995595,
+      "bps" : 28959.82888888889,
+      "flows" : 217,
+      "bytes" : 26063846,
+      "fps" : 0.03013888888888889,
+      "bits_per_sec_per_client" : 3612.903728332844,
+      "pkts" : 32002
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:48:00.000Z",
+    "result" : {
+      "flows_per_client" : 34.93159603305961,
+      "flows_per_sec_per_client" : 0.004851610560147168,
+      "pps" : 4.428888888888889,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 3199976.0979307895,
+      "bps" : 28499.93222222222,
+      "flows" : 280,
+      "bytes" : 25649939,
+      "fps" : 0.03888888888888889,
+      "bits_per_sec_per_client" : 3555.528997700877,
+      "pkts" : 31888
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:49:00.000Z",
+    "result" : {
+      "flows_per_client" : 29.94136802833681,
+      "flows_per_sec_per_client" : 0.004158523337269002,
+      "pps" : 4.526388888888889,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 3253381.2685259324,
+      "bps" : 28975.574444444443,
+      "flows" : 240,
+      "bytes" : 26078017,
+      "fps" : 0.03333333333333333,
+      "bits_per_sec_per_client" : 3614.8680761399246,
+      "pkts" : 32590
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:50:00.000Z",
+    "result" : {
+      "flows_per_client" : 27.0719869256212,
+      "flows_per_sec_per_client" : 0.0037599981841140552,
+      "pps" : 4.389444444444444,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 3184227.6868820847,
+      "bps" : 28359.672222222223,
+      "flows" : 217,
+      "bytes" : 25523705,
+      "fps" : 0.03013888888888889,
+      "bits_per_sec_per_client" : 3538.030763202317,
+      "pkts" : 31604
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:51:00.000Z",
+    "result" : {
+      "flows_per_client" : 29.06807812751032,
+      "flows_per_sec_per_client" : 0.004037233073265322,
+      "pps" : 4.612777777777778,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 3345945.7563197366,
+      "bps" : 29799.981111111112,
+      "flows" : 233,
+      "bytes" : 26819983,
+      "fps" : 0.03236111111111111,
+      "bits_per_sec_per_client" : 3717.7175070219296,
+      "pkts" : 33212
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:52:00.000Z",
+    "result" : {
+      "flows_per_client" : 28.3195439268019,
+      "flows_per_sec_per_client" : 0.0039332699898335976,
+      "pps" : 4.570972222222222,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 3183161.399913176,
+      "bps" : 28350.175555555557,
+      "flows" : 227,
+      "bytes" : 25515158,
+      "fps" : 0.03152777777777778,
+      "bits_per_sec_per_client" : 3536.845999903529,
+      "pkts" : 32911
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:53:00.000Z",
+    "result" : {
+      "flows_per_client" : 23.503759750973416,
+      "flows_per_sec_per_client" : 0.0032644110765240853,
+      "pps" : 4.2747222222222225,
+      "clients" : 9.019833517963864,
+      "bytes_per_client" : 2753514.9014154454,
+      "bps" : 27595.82888888889,
+      "flows" : 212,
+      "bytes" : 24836246,
+      "fps" : 0.029444444444444443,
+      "bits_per_sec_per_client" : 3059.461001572717,
+      "pkts" : 30778
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:54:00.000Z",
+    "result" : {
+      "flows_per_client" : 26.66860536537467,
+      "flows_per_sec_per_client" : 0.0037039729674131485,
+      "pps" : 4.750972222222222,
+      "clients" : 7.011990219885757,
+      "bytes_per_client" : 4008374.672327756,
+      "bps" : 31229.64888888889,
+      "flows" : 187,
+      "bytes" : 28106684,
+      "fps" : 0.025972222222222223,
+      "bits_per_sec_per_client" : 4453.749635919729,
+      "pkts" : 34207
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:55:00.000Z",
+    "result" : {
+      "flows_per_client" : 24.101573832878714,
+      "flows_per_sec_per_client" : 0.003347440810122043,
+      "pps" : 4.343194444444444,
+      "clients" : 7.011990219885757,
+      "bytes_per_client" : 3617734.224451514,
+      "bps" : 28186.13,
+      "flows" : 169,
+      "bytes" : 25367517,
+      "fps" : 0.02347222222222222,
+      "bits_per_sec_per_client" : 4019.704693835016,
+      "pkts" : 31271
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:56:00.000Z",
+    "result" : {
+      "flows_per_client" : 24.101573832878714,
+      "flows_per_sec_per_client" : 0.003347440810122043,
+      "pps" : 4.225833333333333,
+      "clients" : 7.011990219885757,
+      "bytes_per_client" : 3568890.0319669475,
+      "bps" : 27805.58,
+      "flows" : 169,
+      "bytes" : 25025022,
+      "fps" : 0.02347222222222222,
+      "bits_per_sec_per_client" : 3965.4333688521638,
+      "pkts" : 30426
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:57:00.000Z",
+    "result" : {
+      "flows_per_client" : 22.960670929547174,
+      "flows_per_sec_per_client" : 0.0031889820735482187,
+      "pps" : 4.489722222222222,
+      "clients" : 7.011990219885757,
+      "bytes_per_client" : 3605600.009010269,
+      "bps" : 28091.591111111113,
+      "flows" : 161,
+      "bytes" : 25282432,
+      "fps" : 0.02236111111111111,
+      "bits_per_sec_per_client" : 4006.222232233632,
+      "pkts" : 32326
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:58:00.000Z",
+    "result" : {
+      "flows_per_client" : 19.960912018891207,
+      "flows_per_sec_per_client" : 0.0027723488915126675,
+      "pps" : 5.277777777777778,
+      "clients" : 8.015665809687173,
+      "bytes_per_client" : 3814136.183553437,
+      "bps" : 33969.823333333334,
+      "flows" : 160,
+      "bytes" : 30572841,
+      "fps" : 0.022222222222222223,
+      "bits_per_sec_per_client" : 4237.929092837152,
+      "pkts" : 38000
+    }
+  }, {
+    "timestamp" : "2023-09-21T09:59:00.000Z",
+    "result" : {
+      "flows_per_client" : 22.818058066630734,
+      "flows_per_sec_per_client" : 0.003169174731476491,
+      "pps" : 4.2370833333333335,
+      "clients" : 7.011990219885757,
+      "bytes_per_client" : 3539160.098886208,
+      "bps" : 27573.95111111111,
+      "flows" : 160,
+      "bytes" : 24816556,
+      "fps" : 0.022222222222222223,
+      "bits_per_sec_per_client" : 3932.4001098735644,
+      "pkts" : 30507
+    }
+  } ]

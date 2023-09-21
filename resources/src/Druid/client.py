@@ -30,6 +30,7 @@ class DruidClient:
 
         if response.status_code == 200:
             response_json = response.json()
+            print(response_json)
             return response_json
 
         raise Exception(f"Druid query failed with status code {response.status_code}.")

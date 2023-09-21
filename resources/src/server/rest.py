@@ -47,24 +47,15 @@ class APIServer:
             if request.form.get('query') != None:
                 
                 druid_query = json.loads(base64.b64decode(request.form.get('query')).decode('utf-8'))
-                druid_query['aggregations'] = [
-                        {"type": "longSum", "name": "bytes", "fieldName": "sum_bytes"},
-                        {"type": "longSum", "name": "pkts", "fieldName": "sum_pkts"},
-                        {"type": "hyperUnique", "name": "clients", "fieldName": "clients"},
-                        {"type": "longSum", "name": "flows", "fieldName": "events"}
-                    ]
-                druid_query['postAggregations'] = [
-                        {"type": "arithmetic", "name": "bps", "fn": "/", "fields": [{"type": "arithmetic", "name": "bits", "fn": "*", "fields": [{"type": "fieldAccess", "fieldName": "bytes"}, {"type": "constant", "value": 8}]}, {"type": "constant", "value": 7200}]},
-                        {"type": "arithmetic", "name": "pps", "fn": "/", "fields": [{"type": "fieldAccess", "fieldName": "pkts"}, {"type": "constant", "value": 7200}]},
-                        {"type": "arithmetic", "name": "fps", "fn": "/", "fields": [{"type": "fieldAccess", "name": "flows", "fieldName": "flows"}, {"type": "constant", "value": 7200}]},
-                        {"type": "arithmetic", "name": "bytes_per_client", "fn": "/", "fields": [{"type": "fieldAccess", "name": "bytes", "fieldName": "bytes"}, {"type": "hyperUniqueCardinality", "fieldName": "clients"}]},
-                        {"type": "arithmetic", "name": "bits_per_sec_per_client", "fn": "/", "fields": [{"type": "arithmetic", "name": "bps", "fn": "/", "fields": [{"type": "arithmetic", "name": "bits", "fn": "*", "fields": [{"type": "fieldAccess", "fieldName": "bytes"}, {"type": "constant", "value": 8}]}, {"type": "constant", "value": 7200}]}, {"type": "hyperUniqueCardinality", "fieldName": "clients"}]},
-                        {"type": "arithmetic", "name": "flows_per_client", "fn": "/", "fields": [{"type": "fieldAccess", "name": "flows", "fieldName": "flows"}, {"type": "hyperUniqueCardinality", "fieldName": "clients"}]},
-                        {"type": "arithmetic", "name": "flows_per_sec_per_client", "fn": "/", "fields": [{"type": "arithmetic", "name": "fps", "fn": "/", "fields": [{"type": "fieldAccess", "name": "flows", "fieldName": "flows"}, {"type": "constant", "value": 7200}]}, {"type": "hyperUniqueCardinality", "fieldName": "clients"}]}
-                    ]
+                druid_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "Druid")
+                aggregations_file = os.path.join(druid_dir, "aggregations.json")
+                with open(aggregations_file, "r") as f:
+                    druid_query['aggregations'] = json.load(f)
+                post_aggregations_file = os.path.join(druid_dir, "postAggregations.json")
+                with open(post_aggregations_file, "r") as f:
+                    druid_query['postAggregations'] = json.load(f)
                 data = druid_client.execute_query(druid_query)
                 logger.logger.info("Returning predicted data")
-                print(druid_query)
                 try:
                     return jsonify(outliers.Autoencoder.execute_prediction_model(
                         data,
