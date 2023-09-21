@@ -1,25 +1,56 @@
-# Define variables
-SERVICE_NAME = rb-aioutliers
-VERSION = 1.0
-RELEASE = 1
-SPEC_FILE = $(SERVICE_NAME).spec
-RPM_BUILD_DIR = ~/rpmbuild
-RPM_OUTPUT_DIR = $(RPM_BUILD_DIR)/RPMS/noarch
+PACKAGE_NAME?=	rb-aioutliers
 
-# Build RPM package
-rpm: $(SPEC_FILE)
-	rpmbuild -ba --define "version $(VERSION)" --define "release $(RELEASE)" $(SPEC_FILE)
+VERSION?=	$(shell git describe --abbrev=6 --tags HEAD --always | sed 's/-/_/g')
 
-.PHONY: clean
+BUILD_NUMBER?= 1
+
+MOCK_CONFIG?=default
+
+RESULT_DIR?=pkgs
+
+LATEST?=HEAD
+
+all: rpm
+
+
+SOURCES:
+	mkdir -p SOURCES
+
+archive: SOURCES
+	cd ../../ && \
+	git archive --prefix=$(PACKAGE_NAME)-$(VERSION)/ \
+		-o packaging/rpm/SOURCES/$(PACKAGE_NAME)-$(VERSION).tar.gz $(LATEST)
+
+
+build_prepare: archive
+	mkdir -p $(RESULT_DIR)
+	rm -f $(RESULT_DIR)/$(PACKAGE_NAME)*.rpm
+
+
+srpm: build_prepare
+	/usr/bin/mock \
+		-r $(MOCK_CONFIG) \
+		--define "__version $(VERSION)" \
+		--define "__release $(BUILD_NUMBER)" \
+		--resultdir=$(RESULT_DIR) \
+		--buildsrpm \
+		--spec=${PACKAGE_NAME}.spec \
+		--sources=SOURCES
+	@echo "======= Source RPM now available in $(RESULT_DIR) ======="
+
+rpm: srpm
+	/usr/bin/mock \
+		-r $(MOCK_CONFIG) \
+		--define "__version $(VERSION)"\
+		--define "__release $(BUILD_NUMBER)"\
+		--resultdir=$(RESULT_DIR) \
+		--rebuild $(RESULT_DIR)/$(PACKAGE_NAME)*.src.rpm
+	@echo "======= Binary RPMs now available in $(RESULT_DIR) ======="
+
 clean:
-	rm -rf $(SERVICE_NAME)-$(VERSION)
-	rm -rf $(RPM_BUILD_DIR)
+	rm -rf SOURCES pkgs
 
-.PHONY: install
-install:
-	mkdir -p $(RPM_OUTPUT_DIR)
-	cp $(RPM_OUTPUT_DIR)/$(SERVICE_NAME)-$(VERSION)-$(RELEASE).el7.noarch.rpm .
-	sudo yum install $(SERVICE_NAME)-$(VERSION)-$(RELEASE).el7.noarch.rpm
+distclean: clean
+	rm -f build.log root.log state.log available_pkgs installed_pkgs \
+		*.rpm *.tar.gz
 
-.PHONY: all
-all: rpm install
