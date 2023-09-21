@@ -74,7 +74,7 @@ class APIServer:
         try:
             self.app.run(debug=False, host="0.0.0.0", port=config.get("OutliersServer", "outliers_server_port"))
         except Exception as e:
-            print(f"Exception in server thread: {e}")
+            logger.logger.error(f"Exception in server thread: {e}")
             self.exit_code = 1
 
     def start_server(self, test):
