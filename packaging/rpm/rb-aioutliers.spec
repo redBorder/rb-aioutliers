@@ -1,8 +1,11 @@
 Name: rb-aioutliers
-Version: 1.0
-Release: 1%{?dist}
+Version: %{__version}
+Release: %{__release}%{?dist}
+BuildArch: noarch
 Summary: RedBorder Python AI Outliers Detection Service
+
 License: AGPL-3.0
+URL: https://github.com/redBorder/rb-aioutliers
 Source0: %{name}-%{version}.tar.gz
 
 Requires: rh-python38
@@ -13,10 +16,10 @@ This package provides the RedBorder Python AI Outliers Detection Service.
 %exclude /opt/rb-aioutliers/.git
 
 %prep
-%setup -q -n %{name}
+%setup -qn %{name}-%{version}
 
 %build
-cd %{_builddir}/%{name}
+cd %{_builddir}/%{name}-%{version}
 
 %define __python %{_python_override}/python
 %define _unpackaged_files_terminate_build 0
