@@ -205,11 +205,8 @@ class Autoencoder:
         """
         prep_data = self.slice(self.rescale(data)) 
         predicted = self.model.predict(prep_data)
-        print(predicted.shape, self.model_loss(prep_data, predicted, single_value = False).numpy().shape)
         loss = self.flatten(self.model_loss(prep_data, predicted, single_value = False).numpy())
         predicted = self.descale(self.flatten(predicted))
-        print(predicted.shape)
-        print(loss.shape)
         return predicted, loss
 
     def compute_json(self, metric, raw_json):
@@ -229,12 +226,8 @@ class Autoencoder:
         threshold = self.AVG_LOSS+5*self.STD_LOSS
         data, timestamps = self.input_json(raw_json)
         predicted, loss = self.calculate_predictions(data)
-        print(predicted.shape)
-        print(loss.shape)
         predicted = pd.DataFrame(predicted, columns=self.COLUMNS)
         predicted['timestamp'] = timestamps
-        print(predicted.shape)
-        print(loss.shape)
         anomalies = predicted[loss>threshold]
         return self.output_json(metric, anomalies, predicted)
     
