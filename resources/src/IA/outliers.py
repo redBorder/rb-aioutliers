@@ -20,136 +20,292 @@ import os
 import pytz
 import json
 import random
+import logging
 import datetime
 import numpy as np
+import configparser
 import pandas as pd
 import tensorflow as tf
 from datetime import datetime
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler, StandardScaler 
 
-class KerasModel:
-    def __init__(self, data_file, metric, model_file):
-        self.data_file = data_file
-        self.model_file = model_file
-        self.metric = metric
+class Autoencoder:
+    """
+    Autoencoder class for anomaly detection.
 
-    def standard_scale(self,dataframe):
-        scaled = dataframe[self.standard_cols].copy()
-        params = {}
-        for col in self.standard_cols:
-            if col != "clients":
-                scaled[col]=np.log10(scaled[col])
-            params[col]={ "mean":scaled[col].mean(), "std":scaled[col].std()}
-        scaled=StandardScaler().fit_transform(scaled)
-        return scaled, params
+    Args:
+        model_file (str): Path to model .keras file.
+        model_config (dict): Model parameters (metrics, timestamps, granularities, etc...)
+    """
+    def __init__(self, model_file, model_config_file):
+        """
+        Initializes the Autoencoder model and defines constants.
 
-    def minmax_scale(self,dataframe):
-        scaled = dataframe[self.minmax_cols].copy()
-        params = {}
-        for col in self.minmax_cols:
-            params[col]={ "min":scaled[col].min(), "max":scaled[col].max()}
-        scaled=MinMaxScaler().fit_transform(scaled)
-        return scaled, params
+        Args:
+            model_file (str): Path to model .keras file.
+            model_config_file (str): Path to the model config, including:
+                METRICS (list): Names of the metrics used by the module.
+                TIMESTAMP (list): Names of the timestamp columns used by the module.
+                GRANULARITIES (list): Possible granularities.
+                AVG_LOSS (float): Average loss of the model.
+                STD_LOSS (float): Standard deviation of the loss of the model.
+                WINDOW_SIZE (int): Number of entries the model will put together in a 'window'.
+                NUM_WINDOWS (int): Number of windows the model will put together in each slice.
+                LOSS_MULT_1 (float): Extra penalty in the loss function for guessing wrong metrics.
+                LOSS_MULT_2 (float): Extra penalty in the loss function for guessing wrong 'minute' field.
+        """
+        model_config = configparser.ConfigParser()
+        model_config.read(model_config_file)
+        columns_section = model_config['Columns']
+        self.METRICS = columns_section.get('METRICS', '').split(', ')
+        self.TIMESTAMP = columns_section.get('TIMESTAMP', '').split(', ')
+        self.GRANULARITIES = columns_section.get('GRANULARITIES', '').split(', ')
+        self.COLUMNS = self.METRICS + self.TIMESTAMP + self.GRANULARITIES
+        general_section = model_config['General']
+        self.AVG_LOSS = float(general_section.get('AVG_LOSS', 0.0))
+        self.STD_LOSS = float(general_section.get('STD_LOSS', 0.0))
+        self.WINDOW_SIZE = int(general_section.get('WINDOW_SIZE', 0))
+        self.NUM_WINDOWS = int(general_section.get('NUM_WINDOWS', 0))
+        self.LOSS_MULT_1 = float(general_section.get('LOSS_MULT_1', 0))
+        self.LOSS_MULT_2 = float(general_section.get('LOSS_MULT_2', 0))
+        # Creates the model loss function used by the model, which is the metric used by
+        # the model to know how accurate are its predictions
+        try:
+            self.model = tf.keras.models.load_model(
+                model_file,
+                custom_objects={'weighted_loss': self.model_loss}
+            )
+        except FileNotFoundError:
+            print(f"Error: Model file '{model_file}' not found.")
+        except (OSError, ValueError) as e:
+            print(f"Error loading the model: {e}")
 
-    def rescale(self, dataframe):
-        standard_data, standard_params = self.standard_scale(dataframe)
-        minmax_data, minmax_params = self.minmax_scale(dataframe)
-        rescaled_data=np.concatenate( [standard_data, minmax_data], axis=1 )
-        self.standard_params = standard_params
-        self.minmax_params = minmax_params
-        return rescaled_data
+    def rescale(self, data):
+        """
+        Rescale data between 0-1.
+        For a metric x, the rescaling function is tanh(ln(x+1)/32).
+        For the minute field, it is rescaled by dividing the number between 1440.
 
-    def standard_inverse_scale(self,dataframe):
-        scaled=dataframe[self.standard_cols].copy()
-        for col in self.standard_cols:
-            scaled[col]=scaled[col]*self.standard_params[col]["std"]+self.standard_params[col]["mean"]
-            if col!= "clients":
-                scaled[col]= 10** scaled[col]
-        return scaled
+        Args:
+            data (numpy.ndarray): Input data as a numpy array.
 
-    def minmax_inverse_scale(self,dataframe):
-        scaled=dataframe[self.minmax_cols].copy()
-        for col in self.minmax_cols:
-            scaled[col]=scaled[col]*(self.minmax_params[col]["max"]-self.minmax_params[col]["min"])+self.minmax_params[col]["min"] 
-            if col!= "clients":
-                scaled[col]= 10** scaled[col]
-        return scaled
+        Returns:
+            numpy.ndarray: Rescaled data as a numpy array.
+        """
+        num_metrics = len(self.METRICS)
+        rescaled=data.copy()
+        rescaled[..., 0:num_metrics]=np.tanh(np.log1p(rescaled[..., 0:num_metrics])/32)
+        rescaled[..., num_metrics]=rescaled[..., num_metrics]/1440
+        return rescaled
     
-    def descale(self,dataframe):
-        standard_data= self.standard_inverse_scale(dataframe)
-        minmax_data = self.minmax_inverse_scale(dataframe)
-        descaled_data=pd.concat( [standard_data, minmax_data], axis=1 )
-        return descaled_data
+    def descale(self, data):
+        """
+        Descale data to original scale.
 
-    def extract_anomalies(self,data, predicted):
-        loss = (data-predicted)**2
-        loss = loss.mean(axis=(1,2))
-        threshold = np.percentile(loss, self.percentile)
-        anomalies = (loss > threshold)
-        data_anomalies= pd.DataFrame(data[:,0]).loc[anomalies]
-        predicted_anomalies = pd.DataFrame(predicted[:,0]).loc[anomalies]
-        return data_anomalies, predicted_anomalies
-    
-    def output_formatting(self, anomalies, predicted, timestamp):
-        predicted=pd.DataFrame(predicted[:,0])
-        predicted.columns= self.data_columns
-        predicted=self.descale(predicted)
-        predicted= predicted.join(timestamp)
-        predicted.rename(columns={self.metric:"forecast"},inplace=True)
-        predicted=predicted[["forecast",'timestamp']].to_dict(orient="records")
-        anomalies.columns = self.data_columns
-        anomalies=self.descale(anomalies)
-        anomalies=anomalies.join(timestamp)
-        anomalies.rename(columns={self.metric:"expected"},inplace=True)
-        anomalies=anomalies[["expected",'timestamp']].to_dict(orient="records")
-        return  anomalies, predicted
-    
-    def calculate_predictions(self):
-        data_file = self.data_file
-        model_file = self.model_file
-        self.standard_cols= ["clients", "flows", "bytes", "pkts"]
-        self.minmax_cols=["minute", "weekday_0","weekday_1","weekday_2","weekday_3","weekday_4","weekday_5","weekday_6"]
-        self.percentile=99.9
-        temp_data = pd.json_normalize(data_file)
-        temp_data=temp_data.rename(columns={"result.bytes":"bytes","result.pkts":"pkts","result.clients":"clients","result.flows":"flows"})
-        data=temp_data
-        timestamp = data['timestamp']
-        data['minute']= pd.to_datetime(temp_data['timestamp']).dt.minute+60*pd.to_datetime(temp_data['timestamp']).dt.hour
-        data['weekday'] = pd.to_datetime(temp_data['timestamp']).dt.weekday
-        one_hot = pd.get_dummies(data['weekday'], prefix='weekday', prefix_sep='_')
-        data = data.drop('weekday',axis = 1)
-        data = data.join(one_hot)
-        data.set_index("timestamp")
-        data=data[data.columns.drop(["timestamp"])]
-        for col in self.minmax_cols:
-            if col not in data.columns:
-                data[col]= 0
-        self.data_columns= data.columns
-        data = data.dropna()
-        data=self.rescale(data)
-        Xs = []
-        for i in range(5, data.shape[0] ):
-            Xs.append(data[i-5:i])
-        data=np.array(Xs)
-        model=tf.keras.models.load_model(model_file)
-        predicted=model.predict(data)
-        data_anomalies, predicted_anomalies = self.extract_anomalies(data, predicted)
-        anomalies=predicted_anomalies
-        anomalies, predicted = self.output_formatting(anomalies, predicted, timestamp)
-        return  anomalies, predicted
+        Args:
+            data (numpy.ndarray): Input data as a numpy array.
+
+        Returns:
+            numpy.ndarray: Descaled data as a numpy array.
+        """
+        num_metrics = len(self.METRICS)
+        descaled = data.copy()
+        descaled = np.where(descaled > 1.0, 1.0, np.where(descaled < -1.0, -1.0, descaled))
+        descaled[..., 0:num_metrics] = np.expm1(32*np.arctanh(descaled[..., 0:num_metrics]))
+        descaled[..., num_metrics]=descaled[..., num_metrics]*1440
+        return descaled
         
-class OutliersModel:
-    @staticmethod
-    def execute_prediction_model(data, metric, model_file):
-        keras = KerasModel(data, metric, model_file)
-        predictions = keras.calculate_predictions()
-        return {
-            "anomalies":predictions[0],
-            "predicted":predictions[1],
+    
+    def model_loss(self, y_true, y_pred, single_value=True):
+        """
+        Calculate the weighted loss for the model.
+        Compares the input with boolean-valued tensors IS_METRIC and IS_MINUTE.
+        Where IS_METRIC is true, the value of the input is multiplied by mult1,
+        where IS_MINUTE is true, the value of the input is multiplied by mult2,
+        otherwise, the value is left unchanged.
+        Then, the difference between both tensors is evaluated and a log_cosh loss
+        is applied.
+        
+        Args:
+            y_true (tf.Tensor): True target values.
+            y_pred (tf.Tensor): Predicted values.
+            single_value (bool): Set to False to return a 3D array with the loss on each timestamp.
+
+        Returns:
+            tf.Tensor: Weighted loss value or a 3D loss array.
+        """
+        y_true = tf.cast(y_true, tf.float16)
+        y_pred = tf.cast(y_pred, tf.float16)
+        num_metrics = len(self.METRICS)
+        num_features = len(self.COLUMNS)
+        IS_METRIC = (tf.range(num_features) < num_metrics)
+        IS_MINUTE = (tf.range(num_features) == num_metrics)
+        mult_true = tf.where(IS_METRIC, self.LOSS_MULT_1 * y_true, tf.where(IS_MINUTE, self.LOSS_MULT_2 * y_true, y_true))
+        mult_pred = tf.where(IS_METRIC, self.LOSS_MULT_1 * y_pred, tf.where(IS_MINUTE, self.LOSS_MULT_2 * y_pred, y_pred))
+        standard_loss = tf.math.log(tf.cosh((mult_true - mult_pred)))
+
+        if single_value:
+            standard_loss = tf.reduce_mean(standard_loss)
+        return standard_loss
+
+    
+    def slice(self, data, index = []):
+        #TODO add a graph to doc to explain this 
+        """
+        Transform a 2D numpy array into a 3D array readable by the model.
+        
+        Args:
+            data (numpy.ndarray): 2D numpy array with the data to prepare.
+            index (list): Index in case you want only some of the slices returned.
+        
+        Returns:
+            numpy.ndarray: 3D numpy array that can be processed by the model.
+        """
+        _l = len(data)  
+        Xs = []
+        slice_length = self.WINDOW_SIZE * self.NUM_WINDOWS
+        if len(index) == 0:
+            index = np.arange(0, _l-slice_length+1 , self.WINDOW_SIZE)
+        for i in index:
+            Xs.append(data[i:i+slice_length])
+        return np.array(Xs)
+    
+    def flatten(self, data):
+        """
+        Flatten a 3D numpy array used by the model into a human-readable 2D numpy array.
+        Args:
+            data (numpy.ndarray): 3D numpy array.
+        Returns:
+            numpy.ndarray: 2D numpy array with the natural format of the data.
+        """
+        tsr = data.copy()
+        num_slices, slice_len, features = tsr.shape
+        flattened_len = (num_slices-1)*self.WINDOW_SIZE + slice_len
+        flattened_tensor = np.zeros([flattened_len, features])
+        scaling = np.zeros(flattened_len)
+        for i in range(num_slices):
+            left_pad = i*self.WINDOW_SIZE
+            right_pad = left_pad+slice_len
+            flattened_tensor[left_pad:right_pad] += tsr[i]
+            scaling[left_pad:right_pad] +=1
+        flattened_tensor = flattened_tensor / scaling[:, np.newaxis]
+        return flattened_tensor
+
+    def calculate_predictions(self, data):
+        """
+        Proccesses the data, calculates the prediction and its loss.
+
+        Args:
+            data (numpy.ndarray): 2D numpy array with the relevant data.
+        Returns:
+            predicted (numpy.ndarray): predicted data
+            anomalies (numpy.ndarray): anomalies detected
+            loss (numpy.ndarray): loss function for each entry
+        """
+        prep_data = self.slice(self.rescale(data)) 
+        predicted = self.model.predict(prep_data)
+        loss = self.flatten(self.model_loss(prep_data, predicted, single_value = False).numpy())
+        predicted = self.descale(self.flatten(predicted))
+        return predicted, loss
+
+    def compute_json(self, metric, raw_json):
+        """
+        Main method used for anomaly detection.
+        
+        Make the model process Json data and output to RedBorder prediction Json format.
+        It includes the prediction for each timestamp and the anomalies detected.
+
+        Args:
+            metric (string): the name of field being analyzed.
+            raw_json (Json): druid Json response with the data.
+        
+        Returns:
+            (Json): Json with the anomalies and predictions for the data with RedBorder prediction Json format.
+        """
+        threshold = self.AVG_LOSS+5*self.STD_LOSS
+        data, timestamps = self.input_json(raw_json)
+        predicted, loss = self.calculate_predictions(data)
+        predicted = pd.DataFrame(predicted, columns=self.COLUMNS)
+        predicted['timestamp'] = timestamps
+        anomalies = predicted[loss>threshold]
+        return self.output_json(metric, anomalies, predicted)
+    
+
+    def granularity_from_dataframe(self, dataframe):
+        """
+        Extract the granularity from a dataframe
+
+        Args:
+            dataframe (pd.DataFrame): Dataframe with timestamp column
+        
+        Returns:
+            (int): Estimated Granularity of the dataframe.
+        """
+        stripped_granularities = [int(interval.split('_')[1].rstrip('m')) for interval in self.GRANULARITIES]
+        time_diffs = pd.to_datetime(dataframe["timestamp"]).diff().dt.total_seconds() / 60
+        average_gap = time_diffs.mean()
+        return min(stripped_granularities, key=lambda x: abs(x - average_gap))
+
+
+    def input_json(self, raw_json):
+        """
+        Transform Json data into numpy.ndarray readable by the model.
+        Also returns the timestamps for each entry.
+
+        Args:
+            raw_json (Json): druid Json response with the data.
+        
+        Returns:
+            data (numpy.ndarray): transformed data.
+            timestamps (pd.Series): pandas series with the timestamp of each entry. 
+        """
+        data = pd.json_normalize(raw_json)
+        gran_num = self.granularity_from_dataframe(data)
+        gran = f"gran_{gran_num}m"
+        data[self.GRANULARITIES] = (pd.Series(self.GRANULARITIES) == gran).astype(int)
+        metrics_dict = {f"result.{metric}": metric for metric in self.METRICS}
+        data.rename(columns=metrics_dict, inplace=True)
+        timestamps = data['timestamp'].copy()
+        data['timestamp'] = pd.to_datetime(data['timestamp'])
+        data['minute'] = data['timestamp'].dt.minute + 60 * data['timestamp'].dt.hour
+        data = pd.get_dummies(data, columns=['timestamp'], prefix=['weekday'], prefix_sep='_', drop_first=True)
+        missing_columns = set(self.COLUMNS) - set(data.columns)
+        data[list(missing_columns)] = 0
+        data = data[self.COLUMNS].dropna()
+        data_array = data.values
+        return data_array, timestamps
+
+    def output_json(self, metric, anomalies, predicted):
+        #TODO think if return should be Json or Json array
+        """
+        Transform Json data into numpy.ndarray readable by the model.
+        Also returns the timestamps for each entry.
+
+        Args:
+            metric (string): the name of field being analyzed.
+            anomalies (numpy.ndarray): anomalies detected by the model.
+            predicted (numpy.ndarray): predictions made by the model.
+        
+        Returns:
+            (Json): Json with the anomalies and predictions for the data with RedBorder prediction Json format.
+        """
+        predicted = predicted.copy()
+        anomalies = anomalies.copy()
+        predicted.rename(columns={metric:"forecast"},inplace=True)
+        predicted = predicted[["forecast",'timestamp']].to_dict(orient="records")
+        anomalies.rename(columns={metric:"expected"},inplace=True)
+        anomalies = anomalies[["expected",'timestamp']].to_dict(orient="records")
+        return  {
+            "anomalies":anomalies,
+            "predicted":predicted,
             "status": "success"
         }
+    
+    @staticmethod
+    def execute_prediction_model(data, metric, model_file, model_config):
+        autoencoder = Autoencoder(model_file, model_config)
+        return autoencoder.compute_json(metric, data)
     @staticmethod
     def return_error(error="error"):
         return { "status": "error", "msg":error }
-    
