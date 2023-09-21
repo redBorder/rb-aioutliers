@@ -51,4 +51,6 @@ source /opt/rh/rh-python38/enable
 pip install -r /opt/rb-aioutliers/resources/src/requirements.txt
 
 %changelog
-# Change log entries (optional)
+* Thu Sep 21 2023 Miguel Negrón <manegron@redborder.com> - 0.0.1-1
+- First spec version
+
