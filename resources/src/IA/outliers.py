@@ -30,7 +30,6 @@ from datetime import datetime
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler, StandardScaler 
 
-logging.getLogger('tensorflow').setLevel(logging.ERROR)
 class Autoencoder:
     """
     Autoencoder class for anomaly detection.
@@ -311,9 +310,9 @@ class Autoencoder:
         }
     
     @staticmethod
-    def execute_prediction_model(data, metric, model_file):
+    def execute_prediction_model(data, metric, model_file, model_config):
         autoencoder = Autoencoder(model_file, model_config)
-        return = autoencoder.compute_json(metric, data)
+        return autoencoder.compute_json(metric, data)
     @staticmethod
     def return_error(error="error"):
         return { "status": "error", "msg":error }
