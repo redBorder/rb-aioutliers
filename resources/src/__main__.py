@@ -23,7 +23,7 @@ from server.rest import APIServer
 
 class Outliers:
     def __init__(self) -> None:
-        logger.info("Starting Outliersss API REST")
+        logger.info("Starting Outliers API REST")
         self.api = APIServer()
         logger.info("Starting Outliers Server")
         if len(sys.argv) > 1:
