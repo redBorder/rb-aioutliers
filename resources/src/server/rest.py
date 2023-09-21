@@ -69,7 +69,7 @@ class APIServer:
                     return jsonify(outliers.OutliersModel.execute_prediction_model(
                         data,
                         config.get("OutliersServer", "metric"),
-                        os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "IA", "traffic.keras")
+                        os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "IA", "traffic.keras"),
                         os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "IA", "traffic.ini")
                     ))	
                 except Exception as e:
