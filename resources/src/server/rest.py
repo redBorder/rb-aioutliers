@@ -66,7 +66,7 @@ class APIServer:
                 logger.logger.info("Returning predicted data")
                 print(druid_query)
                 try:
-                    return jsonify(outliers.OutliersModel.execute_prediction_model(
+                    return jsonify(outliers.Autoencoder.execute_prediction_model(
                         data,
                         config.get("OutliersServer", "metric"),
                         os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "IA", "traffic.keras"),
@@ -74,10 +74,10 @@ class APIServer:
                     ))	
                 except Exception as e:
                     logger.logger.error("Error while calculating prediction model -> " + str(e))
-                    return jsonify(outliers.OutliersModel.return_error(error=str(e)))
+                    return jsonify(outliers.Autoencoder.return_error(error=str(e)))
             else:
                 logger.logger.error("Error while proccessing, Druid query is empty")
-                return jsonify(outliers.OutliersModel.return_error())
+                return jsonify(outliers.Autoencoder.return_error())
     
     def run_app(self):
         try:
