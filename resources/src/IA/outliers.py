@@ -28,7 +28,7 @@ import pandas as pd
 import tensorflow as tf
 from datetime import datetime
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import MinMaxScaler, StandardScaler 
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 class Autoencoder:
     """
@@ -105,7 +105,7 @@ class Autoencoder:
         rescaled[..., 0:num_metrics]=np.tanh(np.log1p(rescaled[..., 0:num_metrics])/32)
         rescaled[..., num_metrics]=rescaled[..., num_metrics]/1440
         return rescaled
-    
+
     def descale(self, data):
         """
         Descale data to original scale.
@@ -156,7 +156,7 @@ class Autoencoder:
         return standard_loss
 
     def slice(self, data, index = []):
-        #TODO add a graph to doc to explain this 
+        #TODO add a graph to doc to explain this
         """
         Transform a 2D numpy array into a 3D array readable by the model.
 
