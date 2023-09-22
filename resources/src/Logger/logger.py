@@ -35,16 +35,13 @@ class Logger:
     def __init__(self, log_level=logging.INFO, log_file=None):  # Accept log_file as an argument with a default value
         if log_file is None:
             log_file = './outliers.log'
-        
         try:
             from Config import configmanager
             config = configmanager.ConfigManager(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "config.ini"))
             log_file = config.get('Logger', 'log_file')
         except Exception as e:
             print("Could not resolve ConfigManager, default set to ./outliers.log")
-            
         self.logger = PyLogrus(name="OutliersLogger")
-
         log_dir = os.path.dirname(log_file)
         if not os.path.isdir(log_dir):
             os.makedirs(log_dir)

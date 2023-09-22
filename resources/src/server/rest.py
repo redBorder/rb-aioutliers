@@ -45,7 +45,6 @@ class APIServer:
         def calculate():
             logger.logger.info("Calculating predictions with Keras model")
             if request.form.get('query') != None:
-                
                 druid_query = json.loads(base64.b64decode(request.form.get('query')).decode('utf-8'))
                 druid_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "Druid")
                 aggregations_file = os.path.join(druid_dir, "aggregations.json")
@@ -62,14 +61,14 @@ class APIServer:
                         config.get("OutliersServer", "metric"),
                         os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "IA", "traffic.keras"),
                         os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "IA", "traffic.ini")
-                    ))	
+                    ))
                 except Exception as e:
                     logger.logger.error("Error while calculating prediction model -> " + str(e))
                     return jsonify(outliers.Autoencoder.return_error(error=str(e)))
             else:
                 logger.logger.error("Error while proccessing, Druid query is empty")
                 return jsonify(outliers.Autoencoder.return_error())
-    
+
     def run_app(self):
         try:
             self.app.run(debug=False, host="0.0.0.0", port=config.get("OutliersServer", "outliers_server_port"))
@@ -80,7 +79,7 @@ class APIServer:
     def start_server(self, test):
         if test:
             self.server_thread = threading.Thread(target=self.run_app)
-            self.server_thread.daemon = True 
+            self.server_thread.daemon = True
             self.server_thread.start()
             time.sleep(30)
             sys.exit(self.exit_code)

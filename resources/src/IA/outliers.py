@@ -28,7 +28,7 @@ import pandas as pd
 import tensorflow as tf
 from datetime import datetime
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import MinMaxScaler, StandardScaler 
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 class Autoencoder:
     """
@@ -98,7 +98,7 @@ class Autoencoder:
         rescaled[..., 0:num_metrics]=np.tanh(np.log1p(rescaled[..., 0:num_metrics])/32)
         rescaled[..., num_metrics]=rescaled[..., num_metrics]/1440
         return rescaled
-    
+
     def descale(self, data):
         """
         Descale data to original scale.
@@ -115,8 +115,7 @@ class Autoencoder:
         descaled[..., 0:num_metrics] = np.expm1(32*np.arctanh(descaled[..., 0:num_metrics]))
         descaled[..., num_metrics]=descaled[..., num_metrics]*1440
         return descaled
-        
-    
+
     def model_loss(self, y_true, y_pred, single_value=True):
         """
         Calculate the weighted loss for the model.
@@ -149,28 +148,25 @@ class Autoencoder:
             standard_loss = tf.reduce_mean(standard_loss)
         return standard_loss
 
-    
     def slice(self, data, index = []):
-        #TODO add a graph to doc to explain this 
+        #TODO add a graph to doc to explain this
         """
         Transform a 2D numpy array into a 3D array readable by the model.
-        
         Args:
             data (numpy.ndarray): 2D numpy array with the data to prepare.
             index (list): Index in case you want only some of the slices returned.
-        
         Returns:
             numpy.ndarray: 3D numpy array that can be processed by the model.
         """
-        _l = len(data)  
+        _l = len(data)
         Xs = []
         slice_length = self.WINDOW_SIZE * self.NUM_WINDOWS
         if len(index) == 0:
-            index = np.arange(0, _l-slice_length+1 , self.WINDOW_SIZE)
+            index = np.arange(0, _l-slice_length+1, self.WINDOW_SIZE)
         for i in index:
             Xs.append(data[i:i+slice_length])
         return np.array(Xs)
-    
+
     def flatten(self, data):
         """
         Flatten a 3D numpy array used by the model into a human-readable 2D numpy array.
@@ -203,7 +199,7 @@ class Autoencoder:
             anomalies (numpy.ndarray): anomalies detected
             loss (numpy.ndarray): loss function for each entry
         """
-        prep_data = self.slice(self.rescale(data)) 
+        prep_data = self.slice(self.rescale(data))
         predicted = self.model.predict(prep_data)
         loss = self.flatten(self.model_loss(prep_data, predicted, single_value = False).numpy())
         predicted = self.descale(self.flatten(predicted))
@@ -212,7 +208,7 @@ class Autoencoder:
     def compute_json(self, metric, raw_json):
         """
         Main method used for anomaly detection.
-        
+    
         Make the model process Json data and output to RedBorder prediction Json format.
         It includes the prediction for each timestamp and the anomalies detected.
 
@@ -230,7 +226,7 @@ class Autoencoder:
         predicted['timestamp'] = timestamps
         anomalies = predicted[loss>threshold]
         return self.output_json(metric, anomalies, predicted)
-    
+
 
     def granularity_from_dataframe(self, dataframe):
         """
@@ -301,7 +297,7 @@ class Autoencoder:
             "predicted":predicted,
             "status": "success"
         }
-    
+
     @staticmethod
     def execute_prediction_model(data, metric, model_file, model_config):
         autoencoder = Autoencoder(model_file, model_config)
