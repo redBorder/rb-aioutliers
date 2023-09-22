@@ -26,7 +26,6 @@ import numpy as np
 import configparser
 import pandas as pd
 import tensorflow as tf
-from Logger import logger
 from datetime import datetime
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler, StandardScaler 
@@ -56,7 +55,7 @@ class Autoencoder:
                 LOSS_MULT_1 (float): Extra penalty in the loss function for guessing wrong metrics.
                 LOSS_MULT_2 (float): Extra penalty in the loss function for guessing wrong 'minute' field.
         """
-        try: 
+        try:
             model_config = configparser.ConfigParser()
             model_config.read(model_config_file)
             columns_section = model_config['Columns']
@@ -72,9 +71,9 @@ class Autoencoder:
             self.LOSS_MULT_1 = float(general_section.get('LOSS_MULT_1', 0))
             self.LOSS_MULT_2 = float(general_section.get('LOSS_MULT_2', 0))
         except FileNotFoundError:
-            logger.logger.error(f"Error: Model file '{model_config_file}' not found.")
+            print(f"Error: Model file '{model_config_file}' not found.")
         except (OSError, ValueError) as e:
-            logger.logger.error(f"Error loading model conif: {e}")
+            print(f"Error loading model conif: {e}")
 
         try:
             self.model = tf.keras.models.load_model(
@@ -85,9 +84,9 @@ class Autoencoder:
             self.model.loss = self.model_loss
             self.model.compile()
         except FileNotFoundError:
-            logger.logger.error(f"Error: Model file '{model_file}' not found.")
+            print(f"Error: Model file '{model_file}' not found.")
         except (OSError, ValueError) as e:
-            logger.logger.error(f"Error loading the model: {e}")
+            print(f"Error loading the model: {e}")
 
     def rescale(self, data):
         """
@@ -123,8 +122,7 @@ class Autoencoder:
         descaled[..., 0:num_metrics] = np.expm1(32*np.arctanh(descaled[..., 0:num_metrics]))
         descaled[..., num_metrics]=descaled[..., num_metrics]*1440
         return descaled
-        
-    
+
     def model_loss(self, y_true, y_pred, single_value=True):
         """
         Calculate the weighted loss for the model.
@@ -157,20 +155,19 @@ class Autoencoder:
             standard_loss = tf.reduce_mean(standard_loss)
         return standard_loss
 
-    
     def slice(self, data, index = []):
         #TODO add a graph to doc to explain this 
         """
         Transform a 2D numpy array into a 3D array readable by the model.
-        
+
         Args:
             data (numpy.ndarray): 2D numpy array with the data to prepare.
             index (list): Index in case you want only some of the slices returned.
-        
+
         Returns:
             numpy.ndarray: 3D numpy array that can be processed by the model.
         """
-        _l = len(data)  
+        _l = len(data)
         Xs = []
         slice_length = self.WINDOW_SIZE * self.NUM_WINDOWS
         if len(index) == 0:
@@ -178,7 +175,7 @@ class Autoencoder:
         for i in index:
             Xs.append(data[i:i+slice_length])
         return np.array(Xs)
-    
+
     def flatten(self, data):
         """
         Flatten a 3D numpy array used by the model into a human-readable 2D numpy array.
@@ -211,7 +208,7 @@ class Autoencoder:
             anomalies (numpy.ndarray): anomalies detected
             loss (numpy.ndarray): loss function for each entry
         """
-        prep_data = self.slice(self.rescale(data)) 
+        prep_data = self.slice(self.rescale(data))
         predicted = self.model.predict(prep_data)
         loss = self.flatten(self.model_loss(prep_data, predicted, single_value = False).numpy())
         predicted = self.descale(self.flatten(predicted))
@@ -220,14 +217,14 @@ class Autoencoder:
     def compute_json(self, metric, raw_json):
         """
         Main method used for anomaly detection.
-        
+
         Make the model process Json data and output to RedBorder prediction Json format.
         It includes the prediction for each timestamp and the anomalies detected.
 
         Args:
             metric (string): the name of field being analyzed.
             raw_json (Json): druid Json response with the data.
-        
+
         Returns:
             (Json): Json with the anomalies and predictions for the data with RedBorder prediction Json format.
         """
@@ -238,7 +235,6 @@ class Autoencoder:
         predicted['timestamp'] = timestamps
         anomalies = predicted[loss>threshold]
         return self.output_json(metric, anomalies, predicted)
-    
 
     def granularity_from_dataframe(self, dataframe):
         """
@@ -254,7 +250,6 @@ class Autoencoder:
         time_diffs = pd.to_datetime(dataframe["timestamp"]).diff().dt.total_seconds() / 60
         average_gap = time_diffs.mean()
         return min(stripped_granularities, key=lambda x: abs(x - average_gap))
-
 
     def input_json(self, raw_json):
         """
@@ -294,7 +289,7 @@ class Autoencoder:
             metric (string): the name of field being analyzed.
             anomalies (numpy.ndarray): anomalies detected by the model.
             predicted (numpy.ndarray): predictions made by the model.
-        
+
         Returns:
             (Json): Json with the anomalies and predictions for the data with RedBorder prediction Json format.
         """
@@ -309,7 +304,7 @@ class Autoencoder:
             "predicted":predicted,
             "status": "success"
         }
-    
+
     @staticmethod
     def execute_prediction_model(data, metric, model_file, model_config):
         autoencoder = Autoencoder(model_file, model_config)
