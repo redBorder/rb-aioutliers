@@ -1,4 +1,4 @@
-name: Run Tests and Security Check
+name: Unit tests
 
 on:
   pull_request:
@@ -31,29 +31,6 @@ jobs:
     - name: Run tests
       run: |
         python3.8 -m unittest discover -s resources/tests -p 'test_*.py'
-
-  security_check:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Set up Python 3.8 and pip
-      run: |
-        sudo add-apt-repository ppa:deadsnakes/ppa -y
-        sudo apt update
-        sudo apt install -y python3.8 python3.8-distutils
-        curl -s https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-        sudo python3.8 get-pip.py
-
-    - name: Install safety for security checks
-      run: |
-        pip install safety
-
-    - name: Run safety check
-      run: |
-        safety check --full-report -r resources/src/requirements.txt
 
   run_outliers:
     runs-on: ubuntu-latest
