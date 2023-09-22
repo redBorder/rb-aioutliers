@@ -1,4 +1,4 @@
-name: Run Tests and Security Check
+name: Unit tests
 
 on:
   pull_request:
