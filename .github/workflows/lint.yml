@@ -24,10 +24,10 @@ jobs:
         curl -s https://bootstrap.pypa.io/get-pip.py -o get-pip.py
         sudo python3.8 get-pip.py
 
-    - name: Install pyliny
+    - name: Install pylint
       run: |
         pip install pylint
 
     - name: Run tests
       run: |
-        python -m pylint --disable=all -e W0311 -e C0303 --jobs=0 --indent-string='    ' **/*.py
+        pylint --disable=all -e W0311 -e C0303 --jobs=0 --indent-string='    ' **/*.py
