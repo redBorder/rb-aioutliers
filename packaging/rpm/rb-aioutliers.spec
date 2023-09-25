@@ -53,4 +53,6 @@ pip install -r /opt/rb-aioutliers/resources/src/requirements.txt
 %changelog
 * Thu Sep 21 2023 Miguel Negrón <manegron@redborder.com> - 0.0.1-1
 - First spec version
+* Mon Sep 25 2023 Miguel Álvarez <malvarez@redborder.com> - 0.0.2-1
+- Update AI model, create query builder and clean code
 
