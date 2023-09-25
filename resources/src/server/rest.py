@@ -35,6 +35,10 @@ Init local variables
 
 config = configmanager.ConfigManager(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "config.ini"))
 druid_client = client.DruidClient(config.get("Druid", "druid_endpoint"))
+query_modifier = query_builder.QueryBuilder(
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "Druid", "aggregations.json"),
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "Druid", "postAggregations.json")
+)
 
 class APIServer:
     def __init__(self):
@@ -47,7 +51,7 @@ class APIServer:
             if request.form.get('query') != None:
                 druid_query = json.loads(base64.b64decode(request.form.get('query')).decode('utf-8'))
                 logger.logger.info(f"original query -> {druid_query}")
-                druid_query = query_builder.modify_aggregations(druid_query)
+                druid_query = query_modifier.modify_aggregations(druid_query)
                 data = druid_client.execute_query(druid_query)
                 logger.logger.info(f"modified query -> {druid_query}")
                 logger.logger.info("Returning predicted data")

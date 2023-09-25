@@ -17,6 +17,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+'''
+Start of important OS Variables
+'''
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
+'''
+End of important OS Variables
+'''
 import pytz
 import json
 import time
@@ -55,6 +62,7 @@ class Autoencoder:
                 LOSS_MULT_1 (float): Extra penalty in the loss function for guessing wrong metrics.
                 LOSS_MULT_2 (float): Extra penalty in the loss function for guessing wrong 'minute' field.
         """
+
         try:
             model_config = configparser.ConfigParser()
             model_config.read(model_config_file)

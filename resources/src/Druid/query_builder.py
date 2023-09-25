@@ -1,73 +1,99 @@
-# query_builder.py
+# Copyright (C) 2023 Eneo Tecnologia S.L.
+#
+# Authors :
+# Miguel Álvarez Adsuara <malvarez@redborder.com>
+# Pablo Rodriguez Flores <prodriguez@redborder.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-def granularity_to_seconds(granularity):
-    """
-    Get the number of seconds for each possible druid
-    granularity. For example, "pt2m" would return 120
-    and "thirty_minute" would return 1800.
+"""
+Module to modify the druid queries so they can be
+processed by the model.
+"""
 
-    Args:
-        -granularity (string): druid granularity.
-    Returns:
-        - (int): number of seconds in the granularity.
+import json
+class QueryBuilder:
     """
-    base_granularities = {
-        "minute": 60, "hour": 3600, "day": 86400,
-        "fifteen_minute": 900, "thirty_minute": 1800,
-        "m": 60, "h": 3600, "d": 86400
-    }
-    granularity = granularity.lower()
-    if granularity in base_granularities.keys():
-        return base_granularities[granularity]
-    else:
+    Class used to modify the manager usual query to exctract data about
+    more fields from a module.
+    """
+    def __init__(self, aggregations, post_aggregations):
+        """
+        Initializer of the class
+        
+        Args:
+            aggregations (string): path to json file with the 'aggregations'
+              value of the druid query.
+            post_aggregations (string): path to json file with the 'postAggregations'
+              value of the druid query.
+        """
+        try:
+            with open(aggregations, encoding="utf-8") as agr:
+                self.aggregations = json.load(agr)
+            with open(post_aggregations, encoding="utf-8") as pagr:
+                self.post_aggregations = json.load(pagr)
+        except FileNotFoundError as exc:
+            raise FileNotFoundError("One or both files not found.") from exc
+        except json.JSONDecodeError as exc:
+            raise ValueError("JSON decoding failed. Check the JSON format.") from exc
+
+    def granularity_to_seconds(self, granularity):
+        """
+        Get the number of seconds for each possible druid
+        granularity. For example, "pt2m" would return 120
+        and "thirty_minute" would return 1800.
+
+        Args:
+            -granularity (string): druid granularity.
+        Returns:
+            - (int): number of seconds in the granularity.
+        """
+        if not isinstance(granularity, str):
+            raise ValueError("Granularity must be a string")
+        if len(granularity)==0:
+            raise ValueError("Granularity must be a non-empty string")
+        base_granularities = {
+            "minute": 60, "hour": 3600, "day": 86400,
+            "fifteen_minute": 900, "thirty_minute": 1800,
+            "m": 60, "h": 3600, "d": 86400
+        }
+        granularity = granularity.lower()
+        if granularity in base_granularities:
+            return base_granularities[granularity]
+        try:
+            multiplier = base_granularities[granularity[-1]]
+        except Exception as exc:
+            raise Exception('Invalid granularity') from exc
         numbers = int(''.join(filter(str.isdigit, granularity)))
-    return numbers * base_granularities[granularity[-1]]
+        return numbers * multiplier
 
-def modify_aggregations(query):
-    """
-    Modify a druid query to add every field the traffic module uses.
-    Those are: "bytes", "pkts", "clients", "flows", "bps", "pps", "fps",
-    "bytes_per_client" , "bytes_per_sec_per_client", "flows_per_client" 
-    and "flows_per_sec_per_client".
-    
-    Args:
-        -query: dicitionary with the druid query.
-    Returns:
-        -query: the modified query.
-    """
-    granularity = query.get("granularity", {}).get("period", "minute")
-    spg = granularity_to_seconds(granularity)
-    query["aggregations"] = [
-        {"type": "longSum", "name": "bytes", "fieldName": "sum_bytes"},
-        {"type": "longSum", "name": "pkts", "fieldName": "sum_pkts"},
-        {"type": "hyperUnique", "name": "clients", "fieldName": "clients"},
-        {"type": "longSum", "name": "flows", "fieldName": "events"}
-    ]
-    query["postAggregations"] = [
-        {"type": "arithmetic", "name": "bps", "fn": "/",
-         "fields": [{"type": "arithmetic", "name": "bits", "fn": "*",
-                     "fields": [{"type": "fieldAccess", "fieldName": "bytes"}, {"type": "constant", "value": 8}]},
-                    {"type": "constant", "value": spg}]},
-        {"type": "arithmetic", "name": "pps", "fn": "/",
-         "fields": [{"type": "fieldAccess", "fieldName": "pkts"}, {"type": "constant", "value": spg}]},
-        {"type": "arithmetic", "name": "fps", "fn": "/",
-         "fields": [{"type": "fieldAccess", "name": "flows", "fieldName": "flows"}, {"type": "constant", "value": spg}]},
-        {"type": "arithmetic", "name": "bytes_per_client", "fn": "/",
-         "fields": [{"type": "fieldAccess", "name": "bytes", "fieldName": "bytes"},
-                    {"type": "hyperUniqueCardinality", "fieldName": "clients"}]},
-        {"type": "arithmetic", "name": "bits_per_sec_per_client", "fn": "/",
-         "fields": [{"type": "arithmetic", "name": "bps", "fn": "/",
-                     "fields": [{"type": "arithmetic", "name": "bits", "fn": "*",
-                                 "fields": [{"type": "fieldAccess", "fieldName": "bytes"}, {"type": "constant", "value": 8}]},
-                                {"type": "constant", "value": spg}]},
-                    {"type": "hyperUniqueCardinality", "fieldName": "clients"}]},
-        {"type": "arithmetic", "name": "flows_per_client", "fn": "/",
-         "fields": [{"type": "fieldAccess", "name": "flows", "fieldName": "flows"},
-                    {"type": "hyperUniqueCardinality", "fieldName": "clients"}]},
-        {"type": "arithmetic", "name": "flows_per_sec_per_client", "fn": "/",
-         "fields": [{"type": "arithmetic", "name": "fps", "fn": "/",
-                     "fields": [{"type": "fieldAccess", "name": "flows", "fieldName": "flows"},
-                                {"type": "constant", "value": spg}]},
-                    {"type": "hyperUniqueCardinality", "fieldName": "clients"}]}
-    ]
-    return query
+    def modify_aggregations(self, query):
+        """
+        Modify a druid query to add every field the traffic module uses.
+        Those are: "bytes", "pkts", "clients", "flows", "bps", "pps", "fps",
+        "bytes_per_client" , "bytes_per_sec_per_client", "flows_per_client" 
+        and "flows_per_sec_per_client".
+        
+        Args:
+            -query: dicitionary with the druid query.
+        Returns:
+            -query: the modified query.
+        """
+        query["aggregations"] = self.aggregations
+        granularity = query.get("granularity", {}).get("period", "minute")
+        spg = self.granularity_to_seconds(granularity)
+        post_aggregations = json.dumps(self.post_aggregations)
+        post_aggregations = post_aggregations.replace('"seconds_per_granularity"', str(spg))
+        query["postAggregations"] = json.loads(post_aggregations)
+        return query
