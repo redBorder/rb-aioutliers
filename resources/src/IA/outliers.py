@@ -17,10 +17,17 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+'''
+Start of important OS Variables
+'''
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
+'''
+End of important OS Variables
+'''
 import pytz
 import json
+import time
 import random
-import logging
 import datetime
 import numpy as np
 import configparser
@@ -55,27 +62,35 @@ class Autoencoder:
                 LOSS_MULT_1 (float): Extra penalty in the loss function for guessing wrong metrics.
                 LOSS_MULT_2 (float): Extra penalty in the loss function for guessing wrong 'minute' field.
         """
-        model_config = configparser.ConfigParser()
-        model_config.read(model_config_file)
-        columns_section = model_config['Columns']
-        self.METRICS = columns_section.get('METRICS', '').split(', ')
-        self.TIMESTAMP = columns_section.get('TIMESTAMP', '').split(', ')
-        self.GRANULARITIES = columns_section.get('GRANULARITIES', '').split(', ')
-        self.COLUMNS = self.METRICS + self.TIMESTAMP + self.GRANULARITIES
-        general_section = model_config['General']
-        self.AVG_LOSS = float(general_section.get('AVG_LOSS', 0.0))
-        self.STD_LOSS = float(general_section.get('STD_LOSS', 0.0))
-        self.WINDOW_SIZE = int(general_section.get('WINDOW_SIZE', 0))
-        self.NUM_WINDOWS = int(general_section.get('NUM_WINDOWS', 0))
-        self.LOSS_MULT_1 = float(general_section.get('LOSS_MULT_1', 0))
-        self.LOSS_MULT_2 = float(general_section.get('LOSS_MULT_2', 0))
-        # Creates the model loss function used by the model, which is the metric used by
-        # the model to know how accurate are its predictions
+
+        try:
+            model_config = configparser.ConfigParser()
+            model_config.read(model_config_file)
+            columns_section = model_config['Columns']
+            self.METRICS = columns_section.get('METRICS', '').split(', ')
+            self.TIMESTAMP = columns_section.get('TIMESTAMP', '').split(', ')
+            self.GRANULARITIES = columns_section.get('GRANULARITIES', '').split(', ')
+            self.COLUMNS = self.METRICS + self.TIMESTAMP + self.GRANULARITIES
+            general_section = model_config['General']
+            self.AVG_LOSS = float(general_section.get('AVG_LOSS', 0.0))
+            self.STD_LOSS = float(general_section.get('STD_LOSS', 0.0))
+            self.WINDOW_SIZE = int(general_section.get('WINDOW_SIZE', 0))
+            self.NUM_WINDOWS = int(general_section.get('NUM_WINDOWS', 0))
+            self.LOSS_MULT_1 = float(general_section.get('LOSS_MULT_1', 0))
+            self.LOSS_MULT_2 = float(general_section.get('LOSS_MULT_2', 0))
+        except FileNotFoundError:
+            print(f"Error: Model file '{model_config_file}' not found.")
+        except (OSError, ValueError) as e:
+            print(f"Error loading model conif: {e}")
+
         try:
             self.model = tf.keras.models.load_model(
                 model_file,
-                custom_objects={'weighted_loss': self.model_loss}
+                compile=False
+                #custom_objects={'weighted_loss': self.model_loss}
             )
+            self.model.loss = self.model_loss
+            self.model.compile()
         except FileNotFoundError:
             print(f"Error: Model file '{model_file}' not found.")
         except (OSError, ValueError) as e:
@@ -152,9 +167,11 @@ class Autoencoder:
         #TODO add a graph to doc to explain this
         """
         Transform a 2D numpy array into a 3D array readable by the model.
+
         Args:
             data (numpy.ndarray): 2D numpy array with the data to prepare.
             index (list): Index in case you want only some of the slices returned.
+
         Returns:
             numpy.ndarray: 3D numpy array that can be processed by the model.
         """
@@ -162,7 +179,7 @@ class Autoencoder:
         Xs = []
         slice_length = self.WINDOW_SIZE * self.NUM_WINDOWS
         if len(index) == 0:
-            index = np.arange(0, _l-slice_length+1, self.WINDOW_SIZE)
+            index = np.arange(0, _l-slice_length+1 , self.WINDOW_SIZE)
         for i in index:
             Xs.append(data[i:i+slice_length])
         return np.array(Xs)
@@ -208,14 +225,14 @@ class Autoencoder:
     def compute_json(self, metric, raw_json):
         """
         Main method used for anomaly detection.
-    
+
         Make the model process Json data and output to RedBorder prediction Json format.
         It includes the prediction for each timestamp and the anomalies detected.
 
         Args:
             metric (string): the name of field being analyzed.
             raw_json (Json): druid Json response with the data.
-        
+
         Returns:
             (Json): Json with the anomalies and predictions for the data with RedBorder prediction Json format.
         """
@@ -226,7 +243,6 @@ class Autoencoder:
         predicted['timestamp'] = timestamps
         anomalies = predicted[loss>threshold]
         return self.output_json(metric, anomalies, predicted)
-
 
     def granularity_from_dataframe(self, dataframe):
         """
@@ -242,7 +258,6 @@ class Autoencoder:
         time_diffs = pd.to_datetime(dataframe["timestamp"]).diff().dt.total_seconds() / 60
         average_gap = time_diffs.mean()
         return min(stripped_granularities, key=lambda x: abs(x - average_gap))
-
 
     def input_json(self, raw_json):
         """
@@ -282,7 +297,7 @@ class Autoencoder:
             metric (string): the name of field being analyzed.
             anomalies (numpy.ndarray): anomalies detected by the model.
             predicted (numpy.ndarray): predictions made by the model.
-        
+
         Returns:
             (Json): Json with the anomalies and predictions for the data with RedBorder prediction Json format.
         """
@@ -301,7 +316,8 @@ class Autoencoder:
     @staticmethod
     def execute_prediction_model(data, metric, model_file, model_config):
         autoencoder = Autoencoder(model_file, model_config)
-        return autoencoder.compute_json(metric, data)
+        result = autoencoder.compute_json(metric, data)
+        return result
     @staticmethod
     def return_error(error="error"):
         return { "status": "error", "msg":error }

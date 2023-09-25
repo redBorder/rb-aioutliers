@@ -24,7 +24,7 @@ import time
 import base64
 import threading
 from IA import outliers
-from Druid import client
+from Druid import client, query_builder
 from Logger import logger
 from Config import configmanager
 from flask import Flask, jsonify, request
@@ -35,6 +35,10 @@ Init local variables
 
 config = configmanager.ConfigManager(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "config.ini"))
 druid_client = client.DruidClient(config.get("Druid", "druid_endpoint"))
+query_modifier = query_builder.QueryBuilder(
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "Druid", "aggregations.json"),
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "Druid", "postAggregations.json")
+)
 
 class APIServer:
     def __init__(self):
@@ -46,14 +50,10 @@ class APIServer:
             logger.logger.info("Calculating predictions with Keras model")
             if request.form.get('query') != None:
                 druid_query = json.loads(base64.b64decode(request.form.get('query')).decode('utf-8'))
-                druid_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "Druid")
-                aggregations_file = os.path.join(druid_dir, "aggregations.json")
-                with open(aggregations_file, "r") as f:
-                    druid_query['aggregations'] = json.load(f)
-                post_aggregations_file = os.path.join(druid_dir, "postAggregations.json")
-                with open(post_aggregations_file, "r") as f:
-                    druid_query['postAggregations'] = json.load(f)
+                logger.logger.info(f"original query -> {druid_query}")
+                druid_query = query_modifier.modify_aggregations(druid_query)
                 data = druid_client.execute_query(druid_query)
+                logger.logger.info(f"modified query -> {druid_query}")
                 logger.logger.info("Returning predicted data")
                 try:
                     return jsonify(outliers.Autoencoder.execute_prediction_model(

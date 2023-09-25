@@ -1,6 +1,4 @@
-[
-    {"type": "longSum", "name": "bytes", "fieldName": "sum_bytes"},
-    {"type": "longSum", "name": "pkts", "fieldName": "sum_pkts"},
-    {"type": "hyperUnique", "name": "clients", "fieldName": "clients"},
-    {"type": "longSum", "name": "flows", "fieldName": "events"}
-]
+[{"type": "longSum", "name": "bytes", "fieldName": "sum_bytes"},
+{"type": "longSum", "name": "pkts", "fieldName": "sum_pkts"},
+{"type": "hyperUnique", "name": "clients", "fieldName": "clients"},
+{"type": "longSum", "name": "flows", "fieldName": "events"}]
