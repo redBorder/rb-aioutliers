@@ -39,16 +39,13 @@ class Outliers:
 
     def run_production_server(self):
         logger.info("Starting Outliers API REST")
-        
         __binding_host__ = config.get("OutliersServerProduction", "outliers_binding_address")
         __binding_port__ = config.get("OutliersServerProduction", "outliers_server_port")
         gunicorn_workers = config.get("OutliersServerProduction", "outliers_server_workers")
-        
         options = {
             'bind': f"{__binding_host__}:{__binding_port__}",
             'workers': gunicorn_workers
         }
-
         server = APIServer()
         app = GunicornApp(server, options)
         app.run()
