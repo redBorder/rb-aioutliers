@@ -58,7 +58,7 @@ class APIServer:
                 try:
                     return jsonify(outliers.Autoencoder.execute_prediction_model(
                         data,
-                        config.get("OutliersServer", "metric"),
+                        config.get("Outliers", "metric"),
                         os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "IA", "traffic.keras"),
                         os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "IA", "traffic.ini")
                     ))
@@ -69,19 +69,12 @@ class APIServer:
                 logger.logger.error("Error while proccessing, Druid query is empty")
                 return jsonify(outliers.Autoencoder.return_error())
 
-    def run_app(self):
-        try:
-            self.app.run(debug=False, host="0.0.0.0", port=config.get("OutliersServer", "outliers_server_port"))
-        except Exception as e:
-            logger.logger.error(f"Exception in server thread: {e}")
-            self.exit_code = 1
+    def run_test_app(self):
+        self.app.run(debug=False, host=config.get("OutliersServerTesting", "outliers_binding_address"), port=config.get("OutliersServerTesting", "outliers_server_port"))
 
-    def start_server(self, test):
-        if test:
-            self.server_thread = threading.Thread(target=self.run_app)
-            self.server_thread.daemon = True
-            self.server_thread.start()
-            time.sleep(30)
-            sys.exit(self.exit_code)
-        else:
-            self.run_app()
+    def start_test_server(self):
+        self.server_thread = threading.Thread(target=self.run_test_app)
+        self.server_thread.daemon = True
+        self.server_thread.start()
+        time.sleep(30)
+        sys.exit(self.exit_code)
