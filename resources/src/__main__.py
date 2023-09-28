@@ -17,26 +17,29 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys
+import os
 from Logger.logger import logger
 from server.rest import APIServer, config
 from server.production import GunicornApp
 
 class Outliers:
     def __init__(self) -> None:
+        self.environment = os.environ.get("ENVIRONMENT", "development")
         self.server = None
         self.app = None
         self.run()
 
     def run(self):
-        if "--prod" in sys.argv:
+        if "production" in self.environment:
             self.run_production_server()
-        else:
-            self.run_test_server()
+        if "development" in self.environment:
+            self.run_test_server(False)
+        if "test" in self.environment:
+            self.run_test_server(True)
 
-    def run_test_server(self):
+    def run_test_server(self, test_run_github_action):
         self.api = APIServer()
-        self.api.start_test_server()
+        self.api.start_test_server(test_run_github_action)
 
     def run_production_server(self):
         logger.info("Starting Outliers API REST")
