@@ -48,7 +48,7 @@ class Outliers:
             'workers': gunicorn_workers
         }
         self.server = APIServer()
-        self.app = GunicornApp(server, options)
+        self.app = GunicornApp(self.server, options)
         self.app.run()
 
 _Outliers = Outliers()
