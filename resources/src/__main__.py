@@ -25,6 +25,7 @@ from server.production import GunicornApp
 class Outliers:
     def __init__(self) -> None:
         self.server = None
+        self.app = None
         self.run()
 
     def run(self):
@@ -46,8 +47,8 @@ class Outliers:
             'bind': f"{__binding_host__}:{__binding_port__}",
             'workers': gunicorn_workers
         }
-        server = APIServer()
-        app = GunicornApp(server, options)
-        app.run()
+        self.server = APIServer()
+        self.app = GunicornApp(server, options)
+        self.app.run()
 
 _Outliers = Outliers()
