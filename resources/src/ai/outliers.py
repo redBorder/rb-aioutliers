@@ -1,6 +1,7 @@
 # Copyright (C) 2023 Eneo Tecnologia S.L.
 #
 # Authors :
+# Miguel Álvarez Adsuara <malvarez@redborder.com>
 # Pablo Rodriguez Flores <prodriguez@redborder.com>
 #
 # This program is free software: you can redistribute it and/or modify

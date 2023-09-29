@@ -17,15 +17,14 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import unittest
 import os
 import sys
 import logging
-from unittest.mock import patch
+import unittest
 from io import StringIO
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from src.Logger.logger import Logger
+from src.logger.logger import Logger
 
 class TestLogger(unittest.TestCase):
     def setUp(self):

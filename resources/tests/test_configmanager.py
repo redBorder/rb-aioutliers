@@ -24,7 +24,7 @@ import tempfile
 import configparser
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from src.Config.configmanager import ConfigManager
+from src.config.configmanager import ConfigManager
 
 class TestConfigManager(unittest.TestCase):
     def setUp(self):

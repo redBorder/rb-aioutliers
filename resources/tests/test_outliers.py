@@ -23,10 +23,8 @@ import sys
 import logging
 import json
 
-from unittest.mock import patch
-
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from src.IA.outliers import Autoencoder
+from src.ai.outliers import Autoencoder
 
 class TestAutoencoder(unittest.TestCase):
     def setUp(self):
@@ -41,15 +39,15 @@ class TestAutoencoder(unittest.TestCase):
             Autoencoder.execute_prediction_model(
                 {},
                 "bytes",
-                os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "IA", "traffic.keras"),
-                os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "IA", "traffic.ini")
+                os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "ai", "traffic.keras"),
+                os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "ai", "traffic.ini")
             )
     def test_model_execution_with_sample_data(self):
         Autoencoder.execute_prediction_model(
             self.sample_data,
             "bytes",
-            os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "IA", "traffic.keras"),
-            os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "IA", "traffic.ini")
+            os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "ai", "traffic.keras"),
+            os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "ai", "traffic.ini")
         )
 
 if __name__ == '__main__':

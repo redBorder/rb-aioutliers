@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-from Logger.logger import logger
+from logger.logger import logger
 from server.rest import APIServer, config
 from server.production import GunicornApp
 

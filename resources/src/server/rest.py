@@ -23,10 +23,10 @@ import json
 import time
 import base64
 import threading
-from IA import outliers
-from Druid import client, query_builder
-from Logger import logger
-from Config import configmanager
+from ai import outliers
+from druid import client, query_builder
+from logger import logger
+from config import configmanager
 from flask import Flask, jsonify, request
 
 '''
@@ -36,8 +36,8 @@ Init local variables
 config = configmanager.ConfigManager(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "config.ini"))
 druid_client = client.DruidClient(config.get("Druid", "druid_endpoint"))
 query_modifier = query_builder.QueryBuilder(
-    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "Druid", "aggregations.json"),
-    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "Druid", "postAggregations.json")
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "druid", "aggregations.json"),
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "druid", "postAggregations.json")
 )
 
 class APIServer:
@@ -59,8 +59,8 @@ class APIServer:
                     return jsonify(outliers.Autoencoder.execute_prediction_model(
                         data,
                         config.get("Outliers", "metric"),
-                        os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "IA", "traffic.keras"),
-                        os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "IA", "traffic.ini")
+                        os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "ai", "traffic.keras"),
+                        os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "ai", "traffic.ini")
                     ))
                 except Exception as e:
                     logger.logger.error("Error while calculating prediction model -> " + str(e))
