@@ -53,7 +53,7 @@ jobs:
 
     - name: Run outliers
       run: |
-        python3.8 resources/src/__main__.py --test
+        ENVIRONMENT=test python3.8 resources/src/__main__.py
       
 
         

@@ -15,7 +15,7 @@ Group=root
 KillSignal=SIGTERM  # Use SIGTERM for graceful termination
 Type=simple
 
-ExecStart=/usr/bin/scl enable rh-python38 -- python3 /opt/rb-aioutliers/resources/src/__main__.py
+ExecStart=/usr/bin/scl enable rh-python38 -- ENVIRONMENT=production python3 /opt/rb-aioutliers/resources/src/__main__.py
 
 TimeoutStopSec=60
 

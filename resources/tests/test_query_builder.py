@@ -18,17 +18,17 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import unittest
-from unittest.mock import MagicMock, patch
 import sys
 import os
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from src.Druid import query_builder
+from src.druid import query_builder
+
 class TestQueryBuilder(unittest.TestCase):
     def setUp(self) -> None:
-        aggregations_file = os.path.join(os.getcwd(),"resources", "src", "Druid", "aggregations.json")
-        post_aggregations_file = os.path.join(os.getcwd(),"resources",  "src", "Druid", "postAggregations.json")
+        aggregations_file = os.path.join(os.getcwd(),"resources", "src", "druid", "aggregations.json")
+        post_aggregations_file = os.path.join(os.getcwd(),"resources",  "src", "druid", "postAggregations.json")
         self.builder = query_builder.QueryBuilder(aggregations_file, post_aggregations_file)
 
     def test_known_granularities_granularities_to_seconds(self):

@@ -23,6 +23,7 @@ processed by the model.
 """
 
 import json
+
 class QueryBuilder:
     """
     Class used to modify the manager usual query to exctract data about

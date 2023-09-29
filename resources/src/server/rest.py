@@ -23,10 +23,10 @@ import json
 import time
 import base64
 import threading
-from IA import outliers
-from Druid import client, query_builder
-from Logger import logger
-from Config import configmanager
+from ai import outliers
+from druid import client, query_builder
+from logger import logger
+from config import configmanager
 from flask import Flask, jsonify, request
 
 '''
@@ -36,8 +36,8 @@ Init local variables
 config = configmanager.ConfigManager(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "config.ini"))
 druid_client = client.DruidClient(config.get("Druid", "druid_endpoint"))
 query_modifier = query_builder.QueryBuilder(
-    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "Druid", "aggregations.json"),
-    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "Druid", "postAggregations.json")
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "druid", "aggregations.json"),
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "druid", "postAggregations.json")
 )
 
 class APIServer:
@@ -58,9 +58,9 @@ class APIServer:
                 try:
                     return jsonify(outliers.Autoencoder.execute_prediction_model(
                         data,
-                        config.get("OutliersServer", "metric"),
-                        os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "IA", "traffic.keras"),
-                        os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "IA", "traffic.ini")
+                        config.get("Outliers", "metric"),
+                        os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "ai", "traffic.keras"),
+                        os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "ai", "traffic.ini")
                     ))
                 except Exception as e:
                     logger.logger.error("Error while calculating prediction model -> " + str(e))
@@ -69,19 +69,19 @@ class APIServer:
                 logger.logger.error("Error while proccessing, Druid query is empty")
                 return jsonify(outliers.Autoencoder.return_error())
 
-    def run_app(self):
+    def run_test_app(self):
         try:
-            self.app.run(debug=False, host="0.0.0.0", port=config.get("OutliersServer", "outliers_server_port"))
+            self.app.run(debug=False, host=config.get("OutliersServerTesting", "outliers_binding_address"), port=config.get("OutliersServerTesting", "outliers_server_port"))
         except Exception as e:
             logger.logger.error(f"Exception in server thread: {e}")
             self.exit_code = 1
 
-    def start_server(self, test):
-        if test:
-            self.server_thread = threading.Thread(target=self.run_app)
+    def start_test_server(self, test_run_github_action):
+        if test_run_github_action:
+            self.server_thread = threading.Thread(target=self.run_test_app)
             self.server_thread.daemon = True
             self.server_thread.start()
             time.sleep(30)
             sys.exit(self.exit_code)
         else:
-            self.run_app()
+            self.run_test_app()

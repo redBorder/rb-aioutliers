@@ -17,18 +17,41 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys
-from Logger.logger import logger
-from server.rest import APIServer
+import os
+from logger.logger import logger
+from server.rest import APIServer, config
+from server.production import GunicornApp
 
 class Outliers:
     def __init__(self) -> None:
-        logger.info("Starting Outliers API REST")
-        self.api = APIServer()
-        logger.info("Starting Outliers Server")
-        if len(sys.argv) > 1:
-            self.api.start_server(True)
-        else:
-            self.api.start_server(False)
+        self.environment = os.environ.get("ENVIRONMENT", "development")
+        self.server = None
+        self.app = None
+        self.run()
 
-Outliers_ = Outliers()
+    def run(self):
+        if "production" in self.environment:
+            self.run_production_server()
+        if "development" in self.environment:
+            self.run_test_server(False)
+        if "test" in self.environment:
+            self.run_test_server(True)
+
+    def run_test_server(self, test_run_github_action):
+        self.api = APIServer()
+        self.api.start_test_server(test_run_github_action)
+
+    def run_production_server(self):
+        logger.info("Starting Outliers API REST")
+        __binding_host__ = config.get("OutliersServerProduction", "outliers_binding_address")
+        __binding_port__ = config.get("OutliersServerProduction", "outliers_server_port")
+        gunicorn_workers = config.get("OutliersServerProduction", "outliers_server_workers")
+        options = {
+            'bind': f"{__binding_host__}:{__binding_port__}",
+            'workers': gunicorn_workers
+        }
+        self.server = APIServer()
+        self.app = GunicornApp(self.server, options)
+        self.app.run()
+
+_Outliers = Outliers()
