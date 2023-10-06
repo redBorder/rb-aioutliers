@@ -116,7 +116,7 @@ class Trainer(Autoencoder):
         else:
             prep_data = self.slice(prep_data)
         return prep_data
-    
+
     def train(self, raw_data, epochs=20, batch_size=32, backup_path=None):
         """
         Given a druid query response, it is fed to the model for training.
