@@ -29,8 +29,11 @@ import datetime
 import configparser
 from datetime import datetime
 from src.ai.outliers import Autoencoder
-from tensorflow import keras
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+"""
+This module extends the Autoencoder class to allow further training of the model.
+"""
 
 class Trainer(Autoencoder):
     """
