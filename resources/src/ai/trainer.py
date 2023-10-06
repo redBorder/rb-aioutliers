@@ -29,7 +29,7 @@ import datetime
 import configparser
 from datetime import datetime
 from src.ai.outliers import Autoencoder
-
+from tensorflow import keras
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 class Trainer(Autoencoder):
@@ -67,7 +67,6 @@ class Trainer(Autoencoder):
         if os.path.exists(save_config_file):
             if not os.access(save_config_file, os.W_OK):
                 raise PermissionError(f"Permission denied: Cannot overwrite '{save_config_file}'")
-
         self.model.save(save_model_file)
         new_model_config = configparser.ConfigParser()
         new_model_config.add_section('Columns')
@@ -131,7 +130,7 @@ class Trainer(Autoencoder):
         """
         if backup_path is None:
             backup_path = "./backups/"
-        date = datetime.now().strftime("%y-%m-%dT%H%M")
+        date = datetime.now().strftime("%y-%m-%dT%H:%M")
         self.save_model(f"{backup_path}{date}.keras",f"{backup_path}{date}.ini")
         data = self.input_json(raw_data)[0]
         prep_data = self.prepare_data_for_training(data)
