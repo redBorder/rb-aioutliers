@@ -1,0 +1,31 @@
+name: Validate PR Format
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  validate-pr-format:
+    name: Validate PR Format
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check PR title format
+        run: |
+          PR_TITLE_REGEX="^PR-[0-9]+: .+"
+          if [[ ! "${{ github.event.pull_request.title }}" =~ $PR_TITLE_REGEX ]]; then
+            echo "error: Invalid PR title format. Please use 'PR-XXX: Your title'."
+            exit 1
+          fi
+        continue-on-error: true
+
+      - name: Check PR description format
+        run: |
+          PR_DESCRIPTION_REGEX="^This is a description of the PR contents."
+          if [[ ! "${{ github.event.pull_request.body }}" =~ $PR_DESCRIPTION_REGEX ]]; then
+            echo "error: Invalid PR description format. Please provide a valid description."
+            exit 1
+          fi
+        continue-on-error: true
