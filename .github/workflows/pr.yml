@@ -19,7 +19,6 @@ jobs:
             echo "error: Invalid PR title format. Please use 'PR-XXX: Your title'."
             exit 1
           fi
-        continue-on-error: true
 
       - name: Check PR description format
         run: |
@@ -28,4 +27,3 @@ jobs:
             echo "error: Invalid PR description format. Please provide a valid description."
             exit 1
           fi
-        continue-on-error: true
