@@ -5,6 +5,8 @@ on:
     types:
       - opened
       - synchronize
+      - edited
+      - reopened
 
 jobs:
   validate-pr-format:
