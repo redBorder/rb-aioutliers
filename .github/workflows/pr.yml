@@ -10,10 +10,17 @@ on:
 
 jobs:
   validate-pr-format:
-    name: Validate PR Title and Description
+    name: Title and description
     runs-on: ubuntu-latest
 
     steps:
+      - name: Check if it's a Dependabot PR
+        run: |
+          if [[ "${{ github.event.pull_request.user.login }}" == "dependabot[bot]" ]]; then
+            echo "info: Skipping validation for Dependabot PR."
+            exit 0  # Exit with success, skipping the validation
+          fi
+
       - name: Check PR title format
         run: |
           PR_TITLE_REGEX="^PR-[0-9]+: .+"
