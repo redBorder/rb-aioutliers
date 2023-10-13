@@ -1,0 +1,18 @@
+version: '3'
+services:
+  rb_aioutliers_rest:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "39091:39091"
+    networks:
+      - rbaioutliers
+    restart: always
+
+networks:
+  rbaioutliers:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: rbbridge
+
