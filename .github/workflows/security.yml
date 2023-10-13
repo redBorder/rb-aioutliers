@@ -1,9 +1,6 @@
 name: Security check
 
 on:
-  pull_request:
-    branches:
-      - '*'
   push:
     branches:
       - '*'
