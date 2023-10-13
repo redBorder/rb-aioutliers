@@ -1,0 +1,31 @@
+name: Check PR Reviewers and Assignments
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - edited
+      - reopened
+
+jobs:
+  check_pr:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check for Reviewers
+        run: |
+          reviewers=$(jq -r '.review_requests | length' "$GITHUB_EVENT_PATH")
+          if [[ $reviewers -eq 0 ]]; then
+            echo "Error: The PR has no reviewers."
+            exit 1
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check for Assignees
+        run: |
+          assignees=$(jq -r '.pull_request.assignees | length' "$GITHUB_EVENT_PATH")
+          if [[ $assignees -eq 0 ]]; then
+            echo "Error: The PR has no assignees."
+            exit 1
+          fi
