@@ -20,6 +20,7 @@ jobs:
           if [[ $reviewers -eq 0 ]]; then
             echo "Error: The PR has no reviewers."
             echo "::set-output name=has_reviewers::false"
+            exit 1
           else
             echo "::set-output name=has_reviewers::true"
           fi
