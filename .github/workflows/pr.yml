@@ -1,4 +1,4 @@
-name: Validate PR Format
+me: Validate PR Title and Description
 
 on:
   pull_request:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   validate-pr-format:
-    name: Validate PR Format
+    name: Validate PR Title and Description
     runs-on: ubuntu-latest
 
     steps:
@@ -22,8 +22,14 @@ jobs:
 
       - name: Check PR description format
         run: |
-          PR_DESCRIPTION_REGEX="^This is a description of the PR contents."
+          PR_DESCRIPTION_REGEX="^This is a description of the PR contents"
           if [[ ! "${{ github.event.pull_request.body }}" =~ $PR_DESCRIPTION_REGEX ]]; then
             echo "error: Invalid PR description format. Please provide a valid description."
+            exit 1
+          fi
+          
+          # Check if the description contains a list of changes (e.g., using '* ' to indicate list items)
+          if ! grep -q '^\s*\*\s' <<< "${{ github.event.pull_request.body }}"; then
+            echo "error: PR description should contain a list of changes."
             exit 1
           fi
