@@ -13,11 +13,15 @@ jobs:
 
     steps:
       - name: Check for Reviewers
+        id: reviewers
         run: |
-          reviewers=$(jq -r '.review_requests | length' "$GITHUB_EVENT_PATH")
+          reviewers=$(jq -r '.pull_request.requested_reviewers | length' "$GITHUB_EVENT_PATH")
+          echo "Reviewers: $reviewers"
           if [[ $reviewers -eq 0 ]]; then
             echo "Error: The PR has no reviewers."
-            exit 1
+            echo "::set-output name=has_reviewers::false"
+          else
+            echo "::set-output name=has_reviewers::true"
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
