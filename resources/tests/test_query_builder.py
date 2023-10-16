@@ -68,7 +68,7 @@ class TestQueryBuilder(unittest.TestCase):
         self.assertTrue("postAggregations" in modified_query)
         self.assertEqual(modified_query["granularity"]["period"], "pt5m")
         self.assertEqual(modified_query["postAggregations"][0]["fields"][1]["value"] , 300)
-        
+
     def test_modify_flow_sensor(self):
         query = {"filter": {"type": "selector", "dimension": "sensor_name", "value": "FlowSensor1"}}
         sensor = "FlowSensor2"
