@@ -1,0 +1,26 @@
+{
+    "dataSource": "rb_flow",
+    "granularity": {
+        "type": "period",
+        "period": "pt5m",
+        "origin": ""
+    },
+    "intervals": [
+        ""
+    ],
+    "filter": {
+        "type": "selector",
+        "dimension": "sensor_name",
+        "value": ""
+    },
+    "queryType": "timeseries",
+    "context": {
+        "timeout": 90000,
+        "skipEmptyBuckets": "true"
+    },
+    "limitSpec": {
+        "type": "default",
+        "limit": 100,
+        "columns": {}
+    }
+}

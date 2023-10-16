@@ -22,14 +22,30 @@ from gunicorn.app.base import BaseApplication
 
 class GunicornApp(BaseApplication):
     def __init__(self, app, options=None):
+        """
+        Initialize a Gunicorn application.
+
+        Args:
+            app: The WSGI application to run.
+            options (dict, optional): Additional Gunicorn options (default is None).
+        """
         self.options = options or {}
         self.application = app
         super().__init__()
 
     def load_config(self):
+        """
+        Load Gunicorn configuration settings based on provided options.
+        """
         for key, value in self.options.items():
             if key in self.cfg.settings and value is not None:
                 self.cfg.set(key, value)
 
     def load(self):
+        """
+        Load the WSGI application to be run by Gunicorn.
+
+        Returns:
+            object: The WSGI application to run.
+        """
         return self.application.app

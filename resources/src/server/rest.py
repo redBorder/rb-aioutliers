@@ -36,19 +36,32 @@ Init local variables
 config = configmanager.ConfigManager(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "config.ini"))
 druid_client = client.DruidClient(config.get("Druid", "druid_endpoint"))
 query_modifier = query_builder.QueryBuilder(
-    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "druid", "aggregations.json"),
-    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "druid", "postAggregations.json")
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "druid", "data", "aggregations.json"),
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "druid", "data", "postAggregations.json")
 )
 
 class APIServer:
     def __init__(self):
+        """
+        Initialize the API server.
+
+        This class uses Flask to create a web API for processing requests.
+        """
         self.app = Flask(__name__)
         self.exit_code = 0
 
         @self.app.route('/api/v1/outliers', methods=['POST'])
         def calculate():
+            """
+            Handle POST requests to '/api/v1/outliers'.
+
+            This function processes requests by performing data manipulation and prediction.
+
+            Returns:
+                JSON response containing prediction results or an error message.
+            """
             logger.logger.info("Calculating predictions with Keras model")
-            if request.form.get('query') != None:
+            if request.form.get('query') is not None:
                 druid_query = json.loads(base64.b64decode(request.form.get('query')).decode('utf-8'))
                 logger.logger.info(f"original query -> {druid_query}")
                 druid_query = query_modifier.modify_aggregations(druid_query)
@@ -64,12 +77,20 @@ class APIServer:
                     ))
                 except Exception as e:
                     logger.logger.error("Error while calculating prediction model -> " + str(e))
-                    return jsonify(outliers.Autoencoder.return_error(error=str(e)))
+                    return jsonify(outliers.Autoencoder.return_error(error=str(e))
+                )
             else:
-                logger.logger.error("Error while proccessing, Druid query is empty")
+                logger.logger.error("Error while processing, Druid query is empty")
                 return jsonify(outliers.Autoencoder.return_error())
 
     def run_test_app(self):
+        """
+        Run the test server.
+
+        This function starts the Flask app to serve requests.
+
+        In case of an exception, it logs the error and sets the exit code to 1.
+        """
         try:
             self.app.run(debug=False, host=config.get("OutliersServerTesting", "outliers_binding_address"), port=config.get("OutliersServerTesting", "outliers_server_port"))
         except Exception as e:
@@ -77,6 +98,12 @@ class APIServer:
             self.exit_code = 1
 
     def start_test_server(self, test_run_github_action):
+        """
+        Start the test server.
+
+        Args:
+            test_run_github_action (bool): Indicates whether this is a test run in a GitHub action.
+        """
         if test_run_github_action:
             self.server_thread = threading.Thread(target=self.run_test_app)
             self.server_thread.daemon = True

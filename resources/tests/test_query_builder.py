@@ -27,8 +27,8 @@ from src.druid import query_builder
 
 class TestQueryBuilder(unittest.TestCase):
     def setUp(self) -> None:
-        aggregations_file = os.path.join(os.getcwd(),"resources", "src", "druid", "aggregations.json")
-        post_aggregations_file = os.path.join(os.getcwd(),"resources",  "src", "druid", "postAggregations.json")
+        aggregations_file = os.path.join(os.getcwd(),"resources", "src", "druid", "data", "aggregations.json")
+        post_aggregations_file = os.path.join(os.getcwd(),"resources",  "src", "druid", "data", "postAggregations.json")
         self.builder = query_builder.QueryBuilder(aggregations_file, post_aggregations_file)
 
     def test_known_granularities_granularities_to_seconds(self):
@@ -68,6 +68,25 @@ class TestQueryBuilder(unittest.TestCase):
         self.assertTrue("postAggregations" in modified_query)
         self.assertEqual(modified_query["granularity"]["period"], "pt5m")
         self.assertEqual(modified_query["postAggregations"][0]["fields"][1]["value"] , 300)
+
+    def test_modify_flow_sensor(self):
+        query = {"filter": {"type": "selector", "dimension": "sensor_name", "value": "FlowSensor1"}}
+        sensor = "FlowSensor2"
+        modified_query = self.builder.modify_flow_sensor(query, sensor)
+        self.assertEqual(modified_query["filter"]["value"], "FlowSensor2")
+
+    def test_set_time_origin(self):
+        query = {"granularity": {"origin": "2023-01-01T00:00:00Z"}}
+        time = "2023-01-01T12:00:00Z"
+        modified_query = self.builder.set_time_origin(query, time)
+        self.assertEqual(modified_query["granularity"]["origin"], "2023-01-01T12:00:00Z")
+
+    def test_set_time_interval(self):
+        query = {}
+        time_start = "2023-01-01T00:00:00Z"
+        time_end = "2023-01-02T00:00:00Z"
+        modified_query = self.builder.set_time_interval(query, time_start, time_end)
+        self.assertEqual(modified_query["intervals"], ["2023-01-01T00:00:00Z/2023-01-02T00:00:00Z"])
 
 if __name__ == '__main__':
     unittest.main()
