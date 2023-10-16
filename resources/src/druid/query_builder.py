@@ -98,3 +98,49 @@ class QueryBuilder:
         post_aggregations = post_aggregations.replace('"seconds_per_granularity"', str(spg))
         query["postAggregations"] = json.loads(post_aggregations)
         return query
+    
+    def modify_flow_sensor(self, query, sensor):
+        """
+        Modify a druid query to add every flow sensor of the traffic module.
+        
+        Args:
+            -query: dicitionary with the druid query.
+            -sensors: array with the flow sensorts
+        Returns:
+            -query: the modified query.
+        """
+        query["filter"] = {
+            "type": "selector",
+            "dimension": "sensor_name",
+            "value": sensor
+        }
+
+        return query
+
+    def set_time_origin(self, query, time):
+        """
+        Modify a druid query to change time origin
+        
+        Args:
+            -query: dicitionary with the druid query.
+        Returns:
+            -query: the modified query.
+        """
+        query["granularity"]["origin"] = time
+        return query
+    def set_time_interval(self, query, time_start, time_end):
+        """
+        Modify a druid query to change time interval
+        
+        Args:
+            -query: dicitionary with the druid query.
+            -time_start: the start time of the data to retrieve.
+            -time_end: the end data oof the data to retrieve.
+        Returns:
+            -query: the modified query.
+        """
+        query["intervals"] = [
+            f"{time_start}/{time_end}"
+        ]
+        return query
+

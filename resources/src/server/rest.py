@@ -36,8 +36,8 @@ Init local variables
 config = configmanager.ConfigManager(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "config.ini"))
 druid_client = client.DruidClient(config.get("Druid", "druid_endpoint"))
 query_modifier = query_builder.QueryBuilder(
-    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "druid", "aggregations.json"),
-    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "druid", "postAggregations.json")
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "druid", "data", "aggregations.json"),
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "druid", "data", "postAggregations.json")
 )
 
 class APIServer:

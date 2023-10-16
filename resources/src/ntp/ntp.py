@@ -17,18 +17,31 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import requests
+import pytz
+import ntplib
+from datetime import datetime, timedelta
 
-class RedBorderAPI:
-    def __init__(self, endpoint, oauth_token) -> None:
-        self.api_endpoint = endpoint
-        self.oauth_token = oauth_token
+class NTPClient:
+    def __init__(self, server="pool.ntp.org"):
+        print(server)
+        self.server = server
 
-    def request_flow_sensors(self):
-        response = requests.get(f'{self.api_endpoint}/sensors/flow/?auth_token={self.oauth_token}', verify=False)
+    def get_ntp_time(self):
+        try:
+            ntp_client = ntplib.NTPClient()
+            response = ntp_client.request(self.server)
+            ntp_time = datetime.fromtimestamp(response.tx_time)
+            return ntp_time
+        except Exception as e:
+            return None
 
-        if response.status_code == 200:
-            response_json = response.json()
-            return response_json['flow']
+    def get_substracted_day_time(self, time=None):
+        if time is None:
+            time = self.get_ntp_time()
+        return time - timedelta(days=1)
 
-        raise Exception(f"redBorder api request failed with status code {response.status_code}.")
+    def time_to_iso8601_time(self, time=None):
+        if time is None:
+            time = self.get_ntp_time()
+
+        return time.strftime("%Y-%m-%dT%H:%M:%SZ")

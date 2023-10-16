@@ -37,11 +37,13 @@ cp -r * %{buildroot}/opt/rb-aioutliers
 # Create the systemd service directory and install the service file
 install -d -m 0755 %{buildroot}/usr/lib/systemd/system/
 install -m 0644 resources/systemd/rb-aioutliers.service %{buildroot}/usr/lib/systemd/system/
+install -m 0644 resources/systemd/rb-aioutliers-train.service %{buildroot}/usr/lib/systemd/system/
 
 %files
 %defattr(-,root,root,-)
 /opt/rb-aioutliers/*
 /usr/lib/systemd/system/rb-aioutliers.service
+/usr/lib/systemd/system/rb-aioutliers-train.service
 
 %post
 # Activate the Python virtual environment
