@@ -68,7 +68,7 @@ class QueryBuilder:
             "minute": 60, "hour": 3600, "day": 86400,
             "fifteen_minute": 900, "thirty_minute": 1800,
             "m": 60, "h": 3600, "d": 86400
-        }
+            }
         granularity = granularity.lower()
         if granularity in base_granularities:
             return base_granularities[granularity]
@@ -98,7 +98,7 @@ class QueryBuilder:
         post_aggregations = post_aggregations.replace('"seconds_per_granularity"', str(spg))
         query["postAggregations"] = json.loads(post_aggregations)
         return query
-    
+
     def modify_flow_sensor(self, query, sensor):
         """
         Modify a druid query to add every flow sensor of the traffic module.
