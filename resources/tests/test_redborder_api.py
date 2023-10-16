@@ -47,7 +47,7 @@ class TestRedBorderAPI(unittest.TestCase):
             with self.assertRaises(Exception) as context:
                 api.request_flow_sensors()
 
-        self.assertIn("redBorder api request failed with status code 404.", str(context.exception))
+        self.assertIn("redBorder API request failed with status code 404.", str(context.exception))
 
 if __name__ == '__main__':
     unittest.main()

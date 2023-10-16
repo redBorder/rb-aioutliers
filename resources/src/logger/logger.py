@@ -23,16 +23,43 @@ from pylogrus import PyLogrus
 
 class CustomFormatter(logging.Formatter):
     def __init__(self, fmt=None, datefmt=None):
+        """
+        Initialize a custom log formatter.
+
+        Args:
+            fmt (str, optional): The log format string (default is None).
+            datefmt (str, optional): The date/time format string (default is None).
+        """
         super().__init__(fmt, datefmt)
 
     def format(self, record):
+        """
+        Format a log record into a custom log message.
+
+        Args:
+            record (LogRecord): The log record to be formatted.
+
+        Returns:
+            str: The formatted log message.
+
+        This method is called for each log record to create a custom log message.
+        """
         log_time = self.formatTime(record)
         log_level = record.levelname
         log_message = record.getMessage()
         return f"[[{log_time}]]\t{log_level} {log_message}"
 
 class Logger:
-    def __init__(self, log_level=logging.INFO, log_file=None):  # Accept log_file as an argument with a default value
+    def __init__(self, log_level=logging.INFO, log_file=None):
+        """
+        Initialize a custom logger.
+
+        Args:
+            log_level (int, optional): The log level (default is logging.INFO).
+            log_file (str, optional): The path to the log file (default is './outliers.log').
+
+        If log_file is not provided, the default log file is './outliers.log', but it can be configured using ConfigManager.
+        """
         if log_file is None:
             log_file = './outliers.log'
             try:
@@ -64,12 +91,30 @@ class Logger:
         self.logger.setLevel(log_level)
 
     def info(self, message):
+        """
+        Log an informational message.
+
+        Args:
+            message (str): The message to log.
+        """
         self.logger.info(message)
 
     def debug(self, message):
+        """
+        Log a debug message.
+
+        Args:
+            message (str): The debug message to log.
+        """
         self.logger.debug(message)
 
     def error(self, message):
+        """
+        Log an error message.
+
+        Args:
+            message (str): The error message to log.
+        """
         self.logger.error(message)
 
 logger = Logger()

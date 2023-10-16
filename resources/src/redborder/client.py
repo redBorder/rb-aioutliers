@@ -21,14 +21,29 @@ import requests
 
 class RedBorderAPI:
     def __init__(self, endpoint, oauth_token) -> None:
+        """
+        Initialize the RedBorder API client with the API endpoint and OAuth token.
+
+        Args:
+            endpoint (str): The API endpoint URL.
+            oauth_token (str): The OAuth token for authentication.
+        """
         self.api_endpoint = endpoint
         self.oauth_token = oauth_token
 
     def request_flow_sensors(self):
+        """
+        Request flow sensors data from the RedBorder API.
+
+        Returns:
+            list: A list of flow sensor data.
+
+        Raises:
+            Exception: If the API request fails with a non-200 status code.
+        """
         response = requests.get(f'{self.api_endpoint}/sensors/flow/?auth_token={self.oauth_token}', verify=False)
 
         if response.status_code == 200:
             response_json = response.json()
             return response_json['flow']
-
-        raise Exception(f"redBorder api request failed with status code {response.status_code}.")
+        raise Exception(f"redBorder API request failed with status code {response.status_code}.")

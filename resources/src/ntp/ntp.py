@@ -23,10 +23,23 @@ from datetime import datetime, timedelta
 
 class NTPClient:
     def __init__(self, server="pool.ntp.org"):
-        print(server)
+        """
+        Initialize an NTP client with the specified NTP server.
+
+        Args:
+            server (str, optional): The NTP server to use (default is "pool.ntp.org").
+        """
         self.server = server
 
     def get_ntp_time(self):
+        """
+        Get the current time from the NTP server.
+
+        Returns:
+            datetime: The current time obtained from the NTP server.
+
+        If an exception occurs during the NTP request, None is returned.
+        """
         try:
             ntp_client = ntplib.NTPClient()
             response = ntp_client.request(self.server)
@@ -36,12 +49,31 @@ class NTPClient:
             return None
 
     def get_substracted_day_time(self, time=None):
+        """
+        Get the time with one day subtracted from the given time or the current NTP time.
+
+        Args:
+            time (datetime, optional): The time to subtract one day from (default is None, which uses the current NTP time).
+
+        Returns:
+            datetime: The time with one day subtracted.
+        """
         if time is None:
             time = self.get_ntp_time()
         return time - timedelta(days=1)
 
     def time_to_iso8601_time(self, time=None):
+        """
+        Convert the given time to ISO 8601 format.
+
+        Args:
+            time (datetime, optional): The time to convert to ISO 8601 format (default is None, which uses the current NTP time).
+
+        Returns:
+            str: The time in ISO 8601 format.
+
+        ISO 8601 format: "YYYY-MM-DDTHH:MM:SSZ"
+        """
         if time is None:
             time = self.get_ntp_time()
-
         return time.strftime("%Y-%m-%dT%H:%M:%SZ")

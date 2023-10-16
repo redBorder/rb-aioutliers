@@ -22,9 +22,27 @@ import json
 
 class DruidClient:
     def __init__(self, druid_endpoint):
+        """
+        Initialize a DruidClient instance with the specified Druid endpoint.
+
+        Args:
+            druid_endpoint (str): The URL of the Druid endpoint.
+        """
         self.druid_endpoint = druid_endpoint
 
     def execute_query(self, druid_query):
+        """
+        Execute a Druid query using the specified query dictionary.
+
+        Args:
+            druid_query (dict): The Druid query in dictionary format.
+
+        Returns:
+            dict: The response from the Druid query in JSON format.
+        
+        Raises:
+            Exception: If the Druid query fails with a non-200 status code.
+        """
         query_json = json.dumps(druid_query)
         response = requests.post(self.druid_endpoint, data=query_json)
 
