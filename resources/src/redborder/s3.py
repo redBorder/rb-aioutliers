@@ -44,7 +44,6 @@ class S3:
         )
         self.s3_path = "rbaioutliers/"
         self.unique_s3_key = str(uuid.uuid4())
-    
     """
     Upload a local file to an S3 bucket.
 
