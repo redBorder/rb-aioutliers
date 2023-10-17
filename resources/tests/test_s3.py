@@ -87,7 +87,7 @@ class TestS3Methods(unittest.TestCase):
         objects = self.s3_client.list_objects(Bucket=self.bucket_name).get('Contents', [])
         for obj in objects:
             s3_key = obj['Key']
-            self.s3_client.delete_object(Bucket=self.bucket_name, Key=s3_key)        
+            self.s3_client.delete_object(Bucket=self.bucket_name, Key=s3_key)
         self.s3_client.delete_bucket(Bucket=self.bucket_name)
 
 if __name__ == '__main__':
