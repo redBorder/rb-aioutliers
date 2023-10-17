@@ -24,7 +24,7 @@ import boto3
 from moto import mock_s3
 import uuid
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from src.redborder import s3
+from src.redborder.s3 import S3
 
 @mock_s3
 class TestS3Methods(unittest.TestCase):
@@ -44,7 +44,7 @@ class TestS3Methods(unittest.TestCase):
 
         self.s3_client.create_bucket(Bucket=self.bucket_name, CreateBucketConfiguration={'LocationConstraint': self.region_name})
 
-        self.s3 = S3(self.access_key, self.secret_key, self.region_name, self.bucket_name, self.endpoint_url)
+        self.s3 = S3(self.access_key, self.secret_key, self.region_name, self.bucket_name, None)
 
     def test_upload_and_download_file(self):
         with tempfile.NamedTemporaryFile(delete=False) as temp_file:
@@ -84,6 +84,10 @@ class TestS3Methods(unittest.TestCase):
         os.remove(temp_file_path)
 
     def tearDown(self):
+        objects = self.s3_client.list_objects(Bucket=self.bucket_name).get('Contents', [])
+        for obj in objects:
+            s3_key = obj['Key']
+            self.s3_client.delete_object(Bucket=self.bucket_name, Key=s3_key)        
         self.s3_client.delete_bucket(Bucket=self.bucket_name)
 
 if __name__ == '__main__':

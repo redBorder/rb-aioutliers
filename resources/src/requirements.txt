@@ -55,3 +55,4 @@ gunicorn==21.2.0
 schedule==1.2.1
 ntplib==0.4.0
 boto3==1.28.64
+moto==4.2.6
