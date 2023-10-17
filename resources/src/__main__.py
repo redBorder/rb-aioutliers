@@ -25,7 +25,6 @@ from logger.logger import logger
 from druid.client import DruidClient
 from server.rest import APIServer, config
 from server.production import GunicornApp
-from redborder.client import RedBorderAPI
 from druid.query_builder import QueryBuilder
 
 class Outliers:
@@ -53,11 +52,10 @@ class Outliers:
         """
         logger.info("Starting Outliers Train Job")
 
-        redborder_client = self.initialize_redborder_client()
         redborder_ntp = self.initialize_ntp_client()
         druid_client = self.initialize_druid_client()
 
-        flow_sensors = redborder_client.request_flow_sensors()
+        flow_sensors = self.fetch_flow_sensors().split(",")
         manager_time = redborder_ntp.get_ntp_time()
 
         traffic_query = self.load_traffic_query()
@@ -68,14 +66,14 @@ class Outliers:
         for sensor in flow_sensors:
             self.process_sensor_data(sensor, query, redborder_ntp, manager_time, druid_client)
 
-    def initialize_redborder_client(self):
+    def fetch_flow_sensors(self):
         """
-        Initialize the RedBorder API client.
+        Fetch flow sensors from the config file
 
         Returns:
-            RedBorderAPI: The initialized RedBorder API client.
+            str: string with the flow sensors
         """
-        return RedBorderAPI(config.get("redBorder", "api_endpoint"), config.get("redBorder", "api_oauth_token"))
+        return config.get("Outliers", "target_sensors")
 
     def initialize_ntp_client(self):
         """
