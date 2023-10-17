@@ -165,3 +165,6 @@ pkgs
 #DS_Store
 .DS_Store
 
+#Testing trash
+resources/tests/test_backups/
+
