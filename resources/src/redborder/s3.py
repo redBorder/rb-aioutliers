@@ -23,18 +23,9 @@ import boto3
 class S3:
     """
     Initialize the S3 class with the necessary AWS credentials and bucket information.
-
-    Args:
-        access_key (str): AWS access key.
-        secret_key (str): AWS secret key.
-        region_name (str): AWS region name.
-        bucket_name (str): S3 bucket name.
     """
+    
     def __init__(self, access_key, secret_key, region_name, bucket_name, endpoint_url):
-        self.access_key = access_key
-        self.secret_key = secret_key
-        self.region_name = region_name
-        self.bucket_name = bucket_name
         self.s3_client = boto3.client(
             's3',
             aws_access_key_id=access_key,
@@ -42,8 +33,7 @@ class S3:
             region_name=region_name,
             endpoint_url=endpoint_url
         )
-        self.s3_path = "rbaioutliers/"
-        self.unique_s3_key = str(uuid.uuid4())
+        self.bucket_name = bucket_name
     """
     Upload a local file to an S3 bucket.
 
@@ -87,6 +77,19 @@ class S3:
         except Exception as e:
             print(f"Error listing objects in S3 bucket: {str(e)}")
 
+    def list_objects_in_folder(self, folder_prefix):
+        """
+        List all objects in the S3 bucket in a specific prefix.
+
+        This method lists all objects in the S3 bucket and prints their keys.
+        """
+        try:
+            response = self.s3_client.list_objects(Bucket=self.bucket_name, Prefix=folder_prefix)
+            objects = [obj['Key'] for obj in response.get('Contents', [])]
+            return objects
+        except Exception as e:
+            print(f"Error listing objects in S3 folder '{folder_prefix}': {str(e)}")
+            return []
     """
     Delete an object from the S3 bucket.
 
