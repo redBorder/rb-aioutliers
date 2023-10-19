@@ -112,7 +112,7 @@ class APIServer:
             self.sync_models_with_s3()
             logger.logger.info("Sync with S3 Finished")
             time.sleep(self.s3_sync_interval)
-    
+
     def sync_models_with_s3(self):
         """
         Synchronize models with Amazon S3.
