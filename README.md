@@ -1,5 +1,9 @@
 # rb-aioutliers Main package
 
+![test](https://github.com/redBorder/rb-aioutliers/actions/workflows/tests.yml/badge.svg?event=push)
+![lint](https://github.com/redBorder/rb-aioutliers/actions/workflows/lint.yml/badge.svg?event=push)
+![security check](https://github.com/redBorder/rb-aioutliers/actions/workflows/security.yml/badge.svg?event=push)
+
 Main package to install redborder ai outliers in Centos7
 
 #### Platforms
