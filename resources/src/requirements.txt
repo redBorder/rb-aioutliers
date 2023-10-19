@@ -87,3 +87,8 @@ rq==1.15.1
 click>=5.0.0
 redis>=4.0.0
 async-timeout>=4.0.2
+ntp==1.0.0a1
+croniter==2.0.1
+python-dateutil==2.8.2
+pytz>2021.1
+six>=1.5
