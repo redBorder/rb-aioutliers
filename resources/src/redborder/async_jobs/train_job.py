@@ -17,14 +17,25 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os, json
-from ntp.ntp import NTPClient
-from ai.trainer import Trainer
-from logger.logger import logger
-from druid.client import DruidClient
-from server.rest import config
-from druid.query_builder import QueryBuilder
-from redborder.s3 import S3
+import sys, os, json
+
+try:
+    from ntp.ntp import NTPClient
+    from ai.trainer import Trainer
+    from logger.logger import logger
+    from druid.client import DruidClient
+    from server.rest import config
+    from druid.query_builder import QueryBuilder
+    from redborder.s3 import S3
+except:
+    sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+    from src.ntp.ntp import NTPClient
+    from src.ai.trainer import Trainer
+    from src.logger.logger import logger
+    from src.druid.client import DruidClient
+    from src.server.rest import config
+    from src.druid.query_builder import QueryBuilder
+    from src.redborder.s3 import S3
 
 class RbOutlierTrainJob:
     def __init__(self) -> None:
