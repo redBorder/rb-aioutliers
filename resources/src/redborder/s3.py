@@ -24,7 +24,7 @@ class S3:
     """
     Initialize the S3 class with the necessary AWS credentials and bucket information.
     """
-    
+
     def __init__(self, access_key, secret_key, region_name, bucket_name, endpoint_url):
         self.s3_client = boto3.client(
             's3',

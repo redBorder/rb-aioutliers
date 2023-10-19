@@ -36,7 +36,7 @@ class RbOutlierTrainJob:
         self.flow_sensors = None
         self.query_builder = None
         self.s3_client = None
-    
+
     def setup_s3(self):
         """
         Set up the S3 client for handling interactions with Amazon S3.
@@ -79,7 +79,7 @@ class RbOutlierTrainJob:
             flow_sensor (str): The identifier or name of the flow sensor for which the latest model file needs to be downloaded.
         """
         self.s3_client.download_file(f'rbaioutliers/latest/{flow_sensor}.keras', os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "ai", f"{flow_sensor}.keras"))
-    
+
     def train_job(self, flow_sensors):
         """
         Start the Outliers training job.
@@ -154,7 +154,7 @@ class RbOutlierTrainJob:
             str: The path to the post-aggregations configuration file.
         """
         return os.path.join(os.path.dirname(__file__), "..", "..", "druid", "data", "postAggregations.json")
-    
+
     def upload_model_results_back_to_s3(self, sensor):
         """
         Upload a model file associated with a specific sensor to an Amazon S3 bucket.
@@ -189,7 +189,7 @@ class RbOutlierTrainJob:
         for sensor in self.flow_sensors:
             self.upload_model_results_back_to_s3(sensor)
             self.upload_model_config_results_back_to_s3(sensor)
-            
+
     def process_sensor_data(self, sensor, query, redborder_ntp, manager_time, druid_client):
         """
         Process sensor data and train the model.

@@ -57,7 +57,7 @@ class APIServer:
             config.get("AWS", "s3_hostname")
         )
 
-        self.s3_sync_interval = 60   
+        self.s3_sync_interval = 60
         self.s3_sync_thread = None
         self.start_s3_sync_thread()
 
@@ -94,7 +94,6 @@ class APIServer:
             else:
                 logger.logger.error("Error while processing, Druid query is empty")
                 return jsonify(outliers.Autoencoder.return_error())
-    
 
     def start_s3_sync_thread(self):
         """
@@ -124,7 +123,7 @@ class APIServer:
         objects = self.s3_client.list_objects_in_folder('rbaioutliers/latest')
         for obj in objects:
             file_name = obj.split("/")[-1]
-            self.s3_client.download_file(obj, os.path.join(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "ai"), file_name))        
+            self.s3_client.download_file(obj, os.path.join(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "ai"), file_name))
 
     def run_test_app(self):
         """

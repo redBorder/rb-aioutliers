@@ -26,7 +26,7 @@ from croniter import croniter
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from src.redborder.rq import RqManager
-from src.redborder.async_jobs.train_job import RbOutlierTrainJob 
+from src.redborder.async_jobs.train_job import RbOutlierTrainJob
 
 class TestRqManager(unittest.TestCase):
     def setUp(self):
@@ -78,7 +78,7 @@ class TestRqManager(unittest.TestCase):
     def test_cron_to_rq_datetime(self):
         cron_expression = "30 3 * * *"
         current_date = datetime.now()
-        
+
         year = current_date.year
         month = current_date.month
         day = current_date.day+1

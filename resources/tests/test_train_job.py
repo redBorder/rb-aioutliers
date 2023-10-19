@@ -21,10 +21,10 @@ import os, sys
 import unittest
 from unittest.mock import Mock, patch
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from src.redborder.async_jobs.train_job import RbOutlierTrainJob 
+from src.redborder.async_jobs.train_job import RbOutlierTrainJob
 
 class TestRbOutlierTrainJob(unittest.TestCase):
-    
+
     def setUp(self):
         self.mock_S3 = patch('src.redborder.async_jobs.train_job.S3').start()
         self.mock_config = patch('src.redborder.async_jobs.train_job.config').start()

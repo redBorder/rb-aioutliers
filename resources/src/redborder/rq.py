@@ -48,7 +48,7 @@ class RqManager:
             str: cron syntax
         """
         return config.get("Outliers", "schedule_hour")
-    
+
     def fetch_redis_hostname(self):
         """
         Fetch redis hostname from config file
