@@ -110,14 +110,13 @@ class RqManager:
         outlier_job = RbOutlierTrainJob()
         crontime = self.fetch_queue_default_job_hour()
         cron_schedule = self.cron_to_rq_datetime(crontime)
+        self.rq_queue.enqueue_at(cron_schedule, outlier_job.train_job, flow_sensors=self.fetch_flow_sensors())
 
-        while True:
-            current_time = time.time()
-            next_execution_time = cron_schedule.timestamp()
-            delay = max(0, next_execution_time - current_time)
+        current_time = time.time()
+        next_execution_time = cron_schedule.timestamp()
+        delay = max(0, next_execution_time - current_time)
 
-            if delay > 0:
-                logger.info("Waiting for re-queue...")
-                time.sleep(delay)
-                self.schedule_train_job()
+        logger.info("Waiting for re-queue...")
+        time.sleep(delay)
+        self.schedule_train_job()
 
