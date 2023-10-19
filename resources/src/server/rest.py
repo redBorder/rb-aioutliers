@@ -23,6 +23,7 @@ import json
 import time
 import base64
 import threading
+from redborder.s3 import S3
 from ai import outliers
 from druid import client, query_builder
 from logger import logger
@@ -47,6 +48,19 @@ class APIServer:
 
         This class uses Flask to create a web API for processing requests.
         """
+
+        self.s3_client = S3(
+            config.get("AWS", "s3_public_key"),
+            config.get("AWS", "s3_private_key"),
+            config.get("AWS", "s3_region"),
+            config.get("AWS", "s3_bucket"),
+            config.get("AWS", "s3_hostname")
+        )
+
+        self.s3_sync_interval = 60
+        self.s3_sync_thread = None
+        self.start_s3_sync_thread()
+
         self.app = Flask(__name__)
         self.exit_code = 0
 
@@ -63,17 +77,15 @@ class APIServer:
             logger.logger.info("Calculating predictions with Keras model")
             if request.form.get('query') is not None:
                 druid_query = json.loads(base64.b64decode(request.form.get('query')).decode('utf-8'))
-                logger.logger.info(f"original query -> {druid_query}")
                 druid_query = query_modifier.modify_aggregations(druid_query)
                 data = druid_client.execute_query(druid_query)
-                logger.logger.info(f"modified query -> {druid_query}")
-                logger.logger.info("Returning predicted data")
+                flow_sensor = druid_query["filter"]["value"]
                 try:
                     return jsonify(outliers.Autoencoder.execute_prediction_model(
                         data,
                         config.get("Outliers", "metric"),
-                        os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "ai", "traffic.keras"),
-                        os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "ai", "traffic.ini")
+                        os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "ai", f"{flow_sensor}.keras"),
+                        os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "ai", f"{flow_sensor}.ini")
                     ))
                 except Exception as e:
                     logger.logger.error("Error while calculating prediction model -> " + str(e))
@@ -82,6 +94,36 @@ class APIServer:
             else:
                 logger.logger.error("Error while processing, Druid query is empty")
                 return jsonify(outliers.Autoencoder.return_error())
+
+    def start_s3_sync_thread(self):
+        """
+        Start a thread for syncing with S3 at regular intervals.
+        """
+        self.s3_sync_thread = threading.Thread(target=self.sync_with_s3_periodically)
+        self.s3_sync_thread.daemon = True
+        self.s3_sync_thread.start()
+
+    def sync_with_s3_periodically(self):
+        """
+        Periodically sync with Amazon S3.
+        """
+        while True:
+            logger.logger.info("Sync with S3 Started")
+            self.sync_models_with_s3()
+            logger.logger.info("Sync with S3 Finished")
+            time.sleep(self.s3_sync_interval)
+
+    def sync_models_with_s3(self):
+        """
+        Synchronize models with Amazon S3.
+
+        This function retrieves a list of objects in the 'rbaioutliers/latest' folder on Amazon S3 using the S3 client.
+        It then iterates through the list, extracts the file name, and downloads each object to the local 'ai' directory.
+        """
+        objects = self.s3_client.list_objects_in_folder('rbaioutliers/latest')
+        for obj in objects:
+            file_name = obj.split("/")[-1]
+            self.s3_client.download_file(obj, os.path.join(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "ai"), file_name))
 
     def run_test_app(self):
         """

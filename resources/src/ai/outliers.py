@@ -28,6 +28,7 @@ End of important OS Variables
 import pytz
 import json
 import time
+import shutil
 import random
 import datetime
 import numpy as np
@@ -63,6 +64,7 @@ class Autoencoder:
                 LOSS_MULT_1 (float): Extra penalty in the loss function for guessing wrong metrics.
                 LOSS_MULT_2 (float): Extra penalty in the loss function for guessing wrong 'minute' field.
         """
+        self.check_existence(model_file, model_config_file)
 
         try:
             model_config = configparser.ConfigParser()
@@ -83,7 +85,6 @@ class Autoencoder:
             print(f"Error: Model file '{model_config_file}' not found.")
         except (OSError, ValueError) as e:
             print(f"Error loading model conif: {e}")
-
         try:
             self.model = tf.keras.models.load_model(
                 model_file,
@@ -96,6 +97,28 @@ class Autoencoder:
             print(f"Error: Model file '{model_file}' not found.")
         except (OSError, ValueError) as e:
             print(f"Error loading the model: {e}")
+
+    def check_existence(self, model_file, model_config_file):
+        """
+        Check existence of model files and copy them if missing.
+
+        This function checks if the provided `model_file` and `model_config_file` exist in their respective paths.
+        If they don't exist, it renames and copies the corresponding default files from the 'traffic.keras' and 'traffic.ini' files,
+        which are expected to be located in the same directory as the target files.
+
+        Args:
+            model_file (str): Path to the target model file.
+                - The full path to the model file you want to check and potentially copy.
+            model_config_file (str): Path to the target model configuration file.
+                - The full path to the model configuration file you want to check and potentially copy.
+        """
+        if not os.path.exists(model_file):
+            os.rename(f"{os.path.dirname(model_file)}/traffic.keras", model_file)
+            shutil.copy(model_file, f"{os.path.dirname(model_file)}/traffic.keras")
+        if not os.path.exists(model_config_file):
+            os.rename(f"{os.path.dirname(model_config_file)}/traffic.ini", model_config_file)
+            shutil.copy(model_config_file, f"{os.path.dirname(model_config_file)}/traffic.ini")
+
 
     def rescale(self, data):
         """

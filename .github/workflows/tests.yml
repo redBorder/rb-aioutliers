@@ -4,9 +4,13 @@ on:
   push:
     branches:
       - '*'
+  pull_request:
+    branches:
+      - master
 
 jobs:
   code_test:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.user.login == 'dependabot[bot]')
     runs-on: ubuntu-latest
 
     steps:
@@ -30,6 +34,7 @@ jobs:
         python3.8 -m unittest discover -s resources/tests -p 'test_*.py'
 
   run_outliers:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.user.login == 'dependabot[bot]')
     runs-on: ubuntu-latest
 
     steps:

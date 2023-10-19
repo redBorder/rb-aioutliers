@@ -15,13 +15,17 @@ jobs:
 
     steps:
       - name: Check if it's a Dependabot PR
+        id: dependabot-check
         run: |
           if [[ "${{ github.event.pull_request.user.login }}" == "dependabot[bot]" ]]; then
             echo "info: Skipping validation for Dependabot PR."
-            exit 0  # Exit with success, skipping the validation
+            echo "::set-output name=skip_validation::true"
+          else
+            echo "::set-output name=skip_validation::false"
           fi
 
       - name: Check PR title format
+        if: steps.dependabot-check.outputs.skip_validation != 'true'
         run: |
           PR_TITLE_REGEX="^PR-[0-9]+: .+"
           if [[ ! "${{ github.event.pull_request.title }}" =~ $PR_TITLE_REGEX ]]; then
@@ -30,6 +34,7 @@ jobs:
           fi
 
       - name: Check PR description format
+        if: steps.dependabot-check.outputs.skip_validation != 'true'
         run: |
           # Check if the description contains a list of changes (e.g., using '* ' to indicate list items)
           if ! grep -q '^\s*\*\s' <<< "${{ github.event.pull_request.body }}"; then

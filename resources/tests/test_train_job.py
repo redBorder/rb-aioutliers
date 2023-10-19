@@ -17,29 +17,28 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import datetime
-import unittest, sys, os
+import os, sys
+import unittest
+from unittest.mock import Mock, patch
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from src.rbntp.ntplib import NTPClient
+from src.redborder.async_jobs.train_job import RbOutlierTrainJob
 
-class TestNTPClient(unittest.TestCase):
-    def test_get_ntp_time(self):
-        ntp_client = NTPClient()
-        ntp_time = ntp_client.get_ntp_time()
-        self.assertTrue(isinstance(ntp_time, datetime.datetime))
+class TestRbOutlierTrainJob(unittest.TestCase):
 
-    def test_get_substracted_day_time(self):
-        ntp_client = NTPClient()
-        ntp_time = ntp_client.get_ntp_time()
-        subtracted_time = ntp_client.get_substracted_day_time(ntp_time)
-        self.assertTrue(isinstance(subtracted_time, datetime.datetime))
+    def setUp(self):
+        self.mock_S3 = patch('src.redborder.async_jobs.train_job.S3').start()
+        self.mock_config = patch('src.redborder.async_jobs.train_job.config').start()
 
-    def test_time_to_iso8601_time(self):
-        ntp_client = NTPClient()
-        ntp_time = ntp_client.get_ntp_time()
-        iso8601_time = ntp_client.time_to_iso8601_time(ntp_time)
-        self.assertTrue(isinstance(iso8601_time, str))
-        self.assertRegex(iso8601_time, r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z")
+        self.mock_config.get.return_value = 0
+
+    def tearDown(self):
+        patch.stopall()
+
+    def test_setup_s3(self):
+        job = RbOutlierTrainJob()
+        job.setup_s3()
+        self.mock_S3.assert_called_with(0,0,0,0,0)
+
 
 if __name__ == '__main__':
     unittest.main()
