@@ -33,6 +33,14 @@ jobs:
       run: |
         python3.8 -m unittest discover -s resources/tests -p 'test_*.py'
 
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v3
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      with:
+        files: resources
+
+
   run_outliers:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.user.login == 'dependabot[bot]')
     runs-on: ubuntu-latest
