@@ -7,7 +7,7 @@ After=network.target
 TimeoutStartSec=30
 RestartSec=10
 Restart=always
-WorkingDirectory=/opt/rb-aioutliers/resources/src
+WorkingDirectory=/opt/rb-aioutliers/
 
 User=root
 Group=root
@@ -15,7 +15,7 @@ Group=root
 KillSignal=SIGTERM
 Type=simple
 
-ExecStart=/usr/bin/scl enable rh-python38 -- ENVIRONMENT=train python3 /opt/rb-aioutliers/resources/src/__main__.py
+ExecStart=/usr/bin/scl enable rh-python38 -- ENVIRONMENT=train python3 resources/src/__main__.py
 
 TimeoutStopSec=60
 
