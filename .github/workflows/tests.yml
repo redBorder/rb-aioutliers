@@ -37,9 +37,6 @@ jobs:
       uses: codecov/codecov-action@v3
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-      with:
-        files: resources
-
 
   run_outliers:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.user.login == 'dependabot[bot]')
