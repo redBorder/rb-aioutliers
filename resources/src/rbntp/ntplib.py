@@ -46,7 +46,7 @@ class NTPClient:
         ntp_time = datetime.fromtimestamp(response.tx_time)
         return ntp_time
 
-    def get_substracted_day_time(self, time=None):
+    def get_substracted_day_time(self):
         """
         Get the time with one day subtracted from the given time or the current NTP time.
 
@@ -56,11 +56,9 @@ class NTPClient:
         Returns:
             datetime: The time with one day subtracted.
         """
-        if time is None:
-            time = self.get_ntp_time()
         return time - timedelta(days=1)
 
-    def time_to_iso8601_time(self, time=None):
+    def time_to_iso8601_time(self):
         """
         Convert the given time to ISO 8601 format.
 
@@ -72,6 +70,4 @@ class NTPClient:
 
         ISO 8601 format: "YYYY-MM-DDTHH:MM:SSZ"
         """
-        if time is None:
-            time = self.get_ntp_time()
         return time.strftime("%Y-%m-%dT%H:%M:%SZ")
