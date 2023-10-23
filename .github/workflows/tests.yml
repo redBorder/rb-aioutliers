@@ -32,7 +32,7 @@ jobs:
     - name: Run tests
       run: |
         pip install coverage
-        coverage run --source=resources/tests -m unittest discover -s resources/tests -p 'test_*.py'
+        coverage run --source=resources/src -m unittest discover -s resources/tests -p 'test_*.py'
 
     - name: Generate report
       run: |
