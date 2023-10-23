@@ -41,13 +41,10 @@ class NTPClient:
 
         If an exception occurs during the NTP request, None is returned.
         """
-        try:
-            ntp_client = ntplib.NTPClient()
-            response = ntp_client.request(self.server)
-            ntp_time = datetime.fromtimestamp(response.tx_time)
-            return ntp_time
-        except Exception as e:
-            return None
+        ntp_client = ntplib.NTPClient()
+        response = ntp_client.request(self.server)
+        ntp_time = datetime.fromtimestamp(response.tx_time)
+        return ntp_time
 
     def get_substracted_day_time(self, time=None):
         """
