@@ -90,7 +90,6 @@ class Autoencoder:
                 model_file,
                 compile=False
             )
-            self.model.compile(loss = self.model_loss, optimizer = tf.keras.optimizers.AdamW(learning_rate = 0.00001))
         except FileNotFoundError:
             print(f"Error: Model file '{model_file}' not found.")
         except (OSError, ValueError) as e:
