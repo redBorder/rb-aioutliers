@@ -3,6 +3,8 @@
 ![test](https://github.com/redBorder/rb-aioutliers/actions/workflows/tests.yml/badge.svg?event=push)
 ![lint](https://github.com/redBorder/rb-aioutliers/actions/workflows/lint.yml/badge.svg?event=push)
 ![security check](https://github.com/redBorder/rb-aioutliers/actions/workflows/security.yml/badge.svg?event=push)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+[![codecov](https://codecov.io/gh/redBorder/rb-aioutliers/graph/badge.svg?token=ZGBCLP3865)](https://codecov.io/gh/redBorder/rb-aioutliers)
 
 Main package to install redborder ai outliers in Centos7
 

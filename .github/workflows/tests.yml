@@ -31,12 +31,17 @@ jobs:
 
     - name: Run tests
       run: |
-        python3.8 -m unittest discover -s resources/tests -p 'test_*.py'
+        pip install coverage
+        coverage run --source=resources/src -m unittest discover -s resources/tests -p 'test_*.py'
 
-    - name: Upload coverage reports to Codecov
+    - name: Upload Coverage to Codecov
       uses: codecov/codecov-action@v3
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        directory: ./coverage/reports/
+        env_vars: OS,PYTHON
+        files: /home/runner/work/rb-aioutliers/rb-aioutliers/coverage.xml
+        flags: tests
 
   run_outliers:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.user.login == 'dependabot[bot]')
