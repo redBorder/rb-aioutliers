@@ -7,6 +7,8 @@
 [![codecov](https://codecov.io/gh/redBorder/rb-aioutliers/graph/badge.svg?token=ZGBCLP3865)](https://codecov.io/gh/redBorder/rb-aioutliers)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FredBorder%2Frb-aioutliers.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FredBorder%2Frb-aioutliers?ref=badge_shield)
 
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FredBorder%2Frb-aioutliers.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FredBorder%2Frb-aioutliers?ref=badge_large)
+
 Main package to install redborder ai outliers in Centos7
 
 #### Platforms
@@ -217,6 +219,3 @@ query=base64_string
 - Pablo Rodriguez Flores <prodriguez@redborder.com>
 
 LICENSE: GENERAL PUBLIC LICENSE, Version 2, June 1991
-
-
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FredBorder%2Frb-aioutliers.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FredBorder%2Frb-aioutliers?ref=badge_large)
