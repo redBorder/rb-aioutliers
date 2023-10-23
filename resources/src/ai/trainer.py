@@ -28,6 +28,7 @@ import sys
 import datetime
 import configparser
 from datetime import datetime
+from tensorflow.keras.optimizers import AdamW
 try:
     from ai.outliers import Autoencoder
 except:
@@ -58,6 +59,7 @@ class Trainer(Autoencoder):
         super().__init__(model_file, model_config_file)
         self.model_file = model_file
         self.model_config_file = model_config_file
+        self.model.compile(loss = self.model_loss, optimizer = AdamW(learning_rate = 0.00001))
 
     def save_model(self, save_model_file, save_config_file):
         """
@@ -140,7 +142,7 @@ class Trainer(Autoencoder):
         self.save_model(f"{backup_path}{date}.keras",f"{backup_path}{date}.ini")
         data = self.input_json(raw_data)[0]
         prep_data = self.prepare_data_for_training(data)
-        self.model.fit(prep_data, epochs = epochs, batch_size = batch_size, verbose = 0)
+        self.model.fit(x=prep_data, y=prep_data, epochs = epochs, batch_size = batch_size, verbose = 0)
         loss = self.model_loss(prep_data, self.model.predict(prep_data), single_value=False).numpy()
         self.AVG_LOSS = 0.9*self.AVG_LOSS + 0.1*loss.mean()
         self.STD_LOSS = 0.9*self.AVG_LOSS + 0.1*loss.std()

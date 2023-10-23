@@ -89,10 +89,7 @@ class Autoencoder:
             self.model = tf.keras.models.load_model(
                 model_file,
                 compile=False
-                #custom_objects={'weighted_loss': self.model_loss}
             )
-            self.model.loss = self.model_loss
-            self.model.compile()
         except FileNotFoundError:
             print(f"Error: Model file '{model_file}' not found.")
         except (OSError, ValueError) as e:
