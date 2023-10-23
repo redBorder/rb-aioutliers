@@ -140,7 +140,7 @@ class Trainer(Autoencoder):
         self.save_model(f"{backup_path}{date}.keras",f"{backup_path}{date}.ini")
         data = self.input_json(raw_data)[0]
         prep_data = self.prepare_data_for_training(data)
-        self.model.fit(prep_data, epochs = epochs, batch_size = batch_size, verbose = 0)
+        self.model.fit(x=prep_data, y=prep_data, epochs = epochs, batch_size = batch_size, verbose = 2)
         loss = self.model_loss(prep_data, self.model.predict(prep_data), single_value=False).numpy()
         self.AVG_LOSS = 0.9*self.AVG_LOSS + 0.1*loss.mean()
         self.STD_LOSS = 0.9*self.AVG_LOSS + 0.1*loss.std()
