@@ -36,7 +36,7 @@ jobs:
 
     - name: Generate report
       run: |
-        coverage report
+        coverage xml -i
 
     - name: Upload Coverage to Codecov
       uses: codecov/codecov-action@v3
