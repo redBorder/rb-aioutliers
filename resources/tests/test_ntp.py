@@ -32,13 +32,13 @@ class TestNTPClient(unittest.TestCase):
     def test_get_substracted_day_time(self):
         ntp_client = NTPClient()
         ntp_time = ntp_client.get_ntp_time()
-        subtracted_time = ntp_client.get_substracted_day_time(ntp_time)
+        subtracted_time = ntp_client.get_substracted_day_time()
         self.assertTrue(isinstance(subtracted_time, datetime.datetime))
 
     def test_time_to_iso8601_time(self):
         ntp_client = NTPClient()
         ntp_time = ntp_client.get_ntp_time()
-        iso8601_time = ntp_client.time_to_iso8601_time(ntp_time)
+        iso8601_time = ntp_client.time_to_iso8601_time()
         self.assertTrue(isinstance(iso8601_time, str))
         self.assertRegex(iso8601_time, r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z")
 
