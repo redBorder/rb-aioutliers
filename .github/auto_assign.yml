@@ -1,0 +1,12 @@
+addReviewers: true
+addAssignees: true
+
+reviewers: 
+  - malvads
+  - manegron
+  - PRodriguezFlores
+
+skipKeywords:
+  - wip
+
+numberOfReviewers: 0
