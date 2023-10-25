@@ -46,7 +46,7 @@ class Autoencoder:
 
     Args:
         model_file (str): Path to model .keras file.
-        model_config (dict): Model parameters (metrics, timestamps, granularities, etc...)
+        model_config (dict): Model parameters (metrics, timestamps, etc...)
     """
     def __init__(self, model_file, model_config_file):
         """
@@ -57,7 +57,6 @@ class Autoencoder:
             model_config_file (str): Path to the model config, including:
                 METRICS (list): Names of the metrics used by the module.
                 TIMESTAMP (list): Names of the timestamp columns used by the module.
-                GRANULARITIES (list): Possible granularities.
                 AVG_LOSS (float): Average loss of the model.
                 STD_LOSS (float): Standard deviation of the loss of the model.
                 WINDOW_SIZE (int): Number of entries the model will put together in a 'window'.
@@ -73,8 +72,7 @@ class Autoencoder:
             columns_section = model_config['Columns']
             self.METRICS = columns_section.get('METRICS', '').split(', ')
             self.TIMESTAMP = columns_section.get('TIMESTAMP', '').split(', ')
-            self.GRANULARITIES = columns_section.get('GRANULARITIES', '').split(', ')
-            self.COLUMNS = self.METRICS + self.TIMESTAMP + self.GRANULARITIES
+            self.COLUMNS = self.METRICS + self.TIMESTAMP
             general_section = model_config['General']
             self.AVG_LOSS = float(general_section.get('AVG_LOSS', 0.0))
             self.STD_LOSS = float(general_section.get('STD_LOSS', 0.0))
@@ -268,18 +266,19 @@ class Autoencoder:
 
     def granularity_from_dataframe(self, dataframe):
         """
-        Extract the granularity from a dataframe
+        Extract the granularity from a dataframe. The granularity is suposed to be the difference
+        between successive timestamps.
 
         Args:
             dataframe (pd.DataFrame): Dataframe with timestamp column
         
         Returns:
-            (int): Estimated Granularity of the dataframe.
+            time_diffs (pd.Series): Series with the estimated Granularity of the dataframe.
         """
-        stripped_granularities = [int(interval.split('_')[1].rstrip('m')) for interval in self.GRANULARITIES]
-        time_diffs = pd.to_datetime(dataframe["timestamp"]).diff().dt.total_seconds() / 60
-        average_gap = time_diffs.mean()
-        return min(stripped_granularities, key=lambda x: abs(x - average_gap))
+        time_diffs = pd.to_datetime(dataframe["timestamp"]).diff().dt.total_seconds() // 60
+        time_diffs.iloc[0] = time_diffs.iloc[1]
+        time_diffs = time_diffs.where(time_diffs >= 0, time_diffs.shift(-1))
+        return time_diffs
 
     def input_json(self, raw_json):
         """
@@ -294,9 +293,7 @@ class Autoencoder:
             timestamps (pd.Series): pandas series with the timestamp of each entry. 
         """
         data = pd.json_normalize(raw_json)
-        gran_num = self.granularity_from_dataframe(data)
-        gran = f"gran_{gran_num}m"
-        data[self.GRANULARITIES] = (pd.Series(self.GRANULARITIES) == gran).astype(int)
+        data["granularity"] = self.granularity_from_dataframe(data)
         metrics_dict = {f"result.{metric}": metric for metric in self.METRICS}
         data.rename(columns=metrics_dict, inplace=True)
         timestamps = data['timestamp'].copy()

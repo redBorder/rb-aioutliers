@@ -83,7 +83,6 @@ class Trainer(Autoencoder):
         columns_section = new_model_config['Columns']
         columns_section['METRICS'] = ', '.join(self.METRICS)
         columns_section['TIMESTAMP'] = ', '.join(self.TIMESTAMP)
-        columns_section['GRANULARITIES'] = ', '.join(self.GRANULARITIES)
         new_model_config.add_section('General')
         general_section = new_model_config['General']
         general_section['AVG_LOSS'] = str(self.AVG_LOSS)
