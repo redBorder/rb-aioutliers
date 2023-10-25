@@ -4,7 +4,7 @@ Release: %{__release}%{?dist}
 BuildArch: noarch
 Summary: RedBorder Python AI Outliers Detection Service
 
-License: AGPL-3.0
+License: GPL-2.0
 URL: https://github.com/redBorder/rb-aioutliers
 Source0: %{name}-%{version}.tar.gz
 
