@@ -26,19 +26,11 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
 '''
 End of important OS Variables
 '''
-import pytz
-import json
-import time
 import shutil
-import random
-import datetime
 import numpy as np
 import configparser
 import pandas as pd
 import tensorflow as tf
-from datetime import datetime
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 class Autoencoder:
     """
@@ -62,7 +54,8 @@ class Autoencoder:
                 WINDOW_SIZE (int): Number of entries the model will put together in a 'window'.
                 NUM_WINDOWS (int): Number of windows the model will put together in each slice.
                 LOSS_MULT_1 (float): Extra penalty in the loss function for guessing wrong metrics.
-                LOSS_MULT_2 (float): Extra penalty in the loss function for guessing wrong 'minute' field.
+                LOSS_MULT_2 (float): Extra penalty in the loss function for guessing wrong 
+                  'minute' field.
         """
         self.check_existence(model_file, model_config_file)
 
@@ -98,9 +91,10 @@ class Autoencoder:
         """
         Check existence of model files and copy them if missing.
 
-        This function checks if the provided `model_file` and `model_config_file` exist in their respective paths.
-        If they don't exist, it renames and copies the corresponding default files from the 'traffic.keras' and 'traffic.ini' files,
-        which are expected to be located in the same directory as the target files.
+        This function checks if the provided `model_file` and `model_config_file` exist in their 
+        respective paths. If they don't exist, it renames and copies the corresponding default 
+        files from the 'traffic.keras' and 'traffic.ini' files, which are expected to be located
+        in the same directory as the target files.
 
         Args:
             model_file (str): Path to the target model file.
@@ -126,7 +120,7 @@ class Autoencoder:
             data (numpy.ndarray): Input data as a numpy array.
 
         Returns:
-            numpy.ndarray: Rescaled data as a numpy array.
+            (numpy.ndarray): Rescaled data as a numpy array.
         """
         num_metrics = len(self.METRICS)
         rescaled=data.copy()
@@ -142,7 +136,7 @@ class Autoencoder:
             data (numpy.ndarray): Input data as a numpy array.
 
         Returns:
-            numpy.ndarray: Descaled data as a numpy array.
+            (numpy.ndarray): Descaled data as a numpy array.
         """
         num_metrics = len(self.METRICS)
         descaled = data.copy()
@@ -167,18 +161,23 @@ class Autoencoder:
             single_value (bool): Set to False to return a 3D array with the loss on each timestamp.
 
         Returns:
-            tf.Tensor: Weighted loss value or a 3D loss array.
+            (tf.Tensor): Weighted loss value or a 3D loss array.
         """
         y_true = tf.cast(y_true, tf.float16)
         y_pred = tf.cast(y_pred, tf.float16)
         num_metrics = len(self.METRICS)
         num_features = len(self.COLUMNS)
-        IS_METRIC = (tf.range(num_features) < num_metrics)
-        IS_MINUTE = (tf.range(num_features) == num_metrics)
-        mult_true = tf.where(IS_METRIC, self.LOSS_MULT_1 * y_true, tf.where(IS_MINUTE, self.LOSS_MULT_2 * y_true, y_true))
-        mult_pred = tf.where(IS_METRIC, self.LOSS_MULT_1 * y_pred, tf.where(IS_MINUTE, self.LOSS_MULT_2 * y_pred, y_pred))
+        is_metric = (tf.range(num_features) < num_metrics)
+        is_minute = (tf.range(num_features) == num_metrics)
+        mult_true = tf.where(
+            is_metric, self.LOSS_MULT_1 * y_true,
+            tf.where(is_minute, self.LOSS_MULT_2 * y_true, y_true)
+        )
+        mult_pred = tf.where(
+            is_metric, self.LOSS_MULT_1 * y_pred,
+            tf.where(is_minute, self.LOSS_MULT_2 * y_pred, y_pred)
+        )
         standard_loss = tf.math.log(tf.cosh((mult_true - mult_pred)))
-
         if single_value:
             standard_loss = tf.reduce_mean(standard_loss)
         return standard_loss
@@ -193,7 +192,7 @@ class Autoencoder:
             index (list): Index in case you want only some of the slices returned.
 
         Returns:
-            numpy.ndarray: 3D numpy array that can be processed by the model.
+            (numpy.ndarray): 3D numpy array that can be processed by the model.
         """
         _l = len(data)
         Xs = []
@@ -210,7 +209,7 @@ class Autoencoder:
         Args:
             data (numpy.ndarray): 3D numpy array.
         Returns:
-            numpy.ndarray: 2D numpy array with the natural format of the data.
+            (numpy.ndarray): 2D numpy array with the natural format of the data.
         """
         tsr = data.copy()
         num_slices, slice_len, features = tsr.shape
@@ -254,7 +253,8 @@ class Autoencoder:
             raw_json (Json): druid Json response with the data.
 
         Returns:
-            (Json): Json with the anomalies and predictions for the data with RedBorder prediction Json format.
+            (Json): Json with the anomalies and predictions for the data with RedBorder
+              prediction Json format.
         """
         threshold = self.AVG_LOSS+5*self.STD_LOSS
         data, timestamps = self.input_json(raw_json)
@@ -270,10 +270,10 @@ class Autoencoder:
         between successive timestamps.
 
         Args:
-            dataframe (pd.DataFrame): Dataframe with timestamp column
+            dataframe (pandas.DataFrame): Dataframe with timestamp column
         
         Returns:
-            time_diffs (pd.Series): Series with the estimated Granularity of the dataframe.
+            time_diffs (pandas.Series): Series with the estimated Granularity of the dataframe.
         """
         time_diffs = pd.to_datetime(dataframe["timestamp"]).diff().dt.total_seconds() // 60
         time_diffs.iloc[0] = time_diffs.iloc[1]
@@ -290,7 +290,7 @@ class Autoencoder:
         
         Returns:
             data (numpy.ndarray): transformed data.
-            timestamps (pd.Series): pandas series with the timestamp of each entry. 
+            timestamps (pandas.Series): pandas series with the timestamp of each entry. 
         """
         data = pd.json_normalize(raw_json)
         data["granularity"] = self.granularity_from_dataframe(data)
@@ -299,7 +299,7 @@ class Autoencoder:
         timestamps = data['timestamp'].copy()
         data['timestamp'] = pd.to_datetime(data['timestamp'])
         data['minute'] = data['timestamp'].dt.minute + 60 * data['timestamp'].dt.hour
-        data = pd.get_dummies(data, columns=['timestamp'], prefix=['weekday'], prefix_sep='_', drop_first=True)
+        data = pd.get_dummies(data, columns=['timestamp'], prefix=['weekday'], drop_first=True)
         missing_columns = set(self.COLUMNS) - set(data.columns)
         data[list(missing_columns)] = 0
         data = data[self.COLUMNS].dropna()
@@ -307,28 +307,25 @@ class Autoencoder:
         return data_array, timestamps
 
     def output_json(self, metric, anomalies, predicted):
-        #TODO think if return should be Json or Json array
         """
-        Transform Json data into numpy.ndarray readable by the model.
-        Also returns the timestamps for each entry.
+        Changes the format of the model's output to a JSON compatible with redBorder.
 
         Args:
             metric (string): the name of field being analyzed.
-            anomalies (numpy.ndarray): anomalies detected by the model.
-            predicted (numpy.ndarray): predictions made by the model.
+            anomalies (pandas.DataFrame): anomalies detected by the model.
+            predicted (pandas.DataFrame): predictions made by the model.
 
         Returns:
-            (Json): Json with the anomalies and predictions for the data with RedBorder prediction Json format.
+            (Json): Json with the anomalies and predictions for the data with RedBorder prediction
+              Json format.
         """
         predicted = predicted.copy()
         anomalies = anomalies.copy()
-        predicted.rename(columns={metric:"forecast"},inplace=True)
-        predicted = predicted[["forecast",'timestamp']].to_dict(orient="records")
-        anomalies.rename(columns={metric:"expected"},inplace=True)
-        anomalies = anomalies[["expected",'timestamp']].to_dict(orient="records")
+        predicted = predicted[[metric,'timestamp']].rename(columns={metric:"forecast"})
+        anomalies = anomalies[[metric,'timestamp']].rename(columns={metric:"expected"})
         return  {
-            "anomalies":anomalies,
-            "predicted":predicted,
+            "anomalies":anomalies.to_dict(orient="records"),
+            "predicted":predicted.to_dict(orient="records"),
             "status": "success"
         }
 
