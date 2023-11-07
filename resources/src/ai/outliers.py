@@ -120,7 +120,7 @@ class Autoencoder:
             data (numpy.ndarray): Input data as a numpy array.
 
         Returns:
-            numpy.ndarray: Rescaled data as a numpy array.
+            (numpy.ndarray): Rescaled data as a numpy array.
         """
         num_metrics = len(self.METRICS)
         rescaled=data.copy()
@@ -136,7 +136,7 @@ class Autoencoder:
             data (numpy.ndarray): Input data as a numpy array.
 
         Returns:
-            numpy.ndarray: Descaled data as a numpy array.
+            (numpy.ndarray): Descaled data as a numpy array.
         """
         num_metrics = len(self.METRICS)
         descaled = data.copy()
@@ -161,7 +161,7 @@ class Autoencoder:
             single_value (bool): Set to False to return a 3D array with the loss on each timestamp.
 
         Returns:
-            tf.Tensor: Weighted loss value or a 3D loss array.
+            (tf.Tensor): Weighted loss value or a 3D loss array.
         """
         y_true = tf.cast(y_true, tf.float16)
         y_pred = tf.cast(y_pred, tf.float16)
@@ -192,7 +192,7 @@ class Autoencoder:
             index (list): Index in case you want only some of the slices returned.
 
         Returns:
-            numpy.ndarray: 3D numpy array that can be processed by the model.
+            (numpy.ndarray): 3D numpy array that can be processed by the model.
         """
         _l = len(data)
         Xs = []
@@ -209,7 +209,7 @@ class Autoencoder:
         Args:
             data (numpy.ndarray): 3D numpy array.
         Returns:
-            numpy.ndarray: 2D numpy array with the natural format of the data.
+            (numpy.ndarray): 2D numpy array with the natural format of the data.
         """
         tsr = data.copy()
         num_slices, slice_len, features = tsr.shape
@@ -270,10 +270,10 @@ class Autoencoder:
         between successive timestamps.
 
         Args:
-            dataframe (pd.DataFrame): Dataframe with timestamp column
+            dataframe (pandas.DataFrame): Dataframe with timestamp column
         
         Returns:
-            time_diffs (pd.Series): Series with the estimated Granularity of the dataframe.
+            time_diffs (pandas.Series): Series with the estimated Granularity of the dataframe.
         """
         time_diffs = pd.to_datetime(dataframe["timestamp"]).diff().dt.total_seconds() // 60
         time_diffs.iloc[0] = time_diffs.iloc[1]
@@ -290,7 +290,7 @@ class Autoencoder:
         
         Returns:
             data (numpy.ndarray): transformed data.
-            timestamps (pd.Series): pandas series with the timestamp of each entry. 
+            timestamps (pandas.Series): pandas series with the timestamp of each entry. 
         """
         data = pd.json_normalize(raw_json)
         data["granularity"] = self.granularity_from_dataframe(data)
@@ -308,13 +308,12 @@ class Autoencoder:
 
     def output_json(self, metric, anomalies, predicted):
         """
-        Transform Json data into numpy.ndarray readable by the model.
-        Also returns the timestamps for each entry.
+        Changes the format of the model's output to a JSON compatible with redBorder.
 
         Args:
             metric (string): the name of field being analyzed.
-            anomalies (numpy.ndarray): anomalies detected by the model.
-            predicted (numpy.ndarray): predictions made by the model.
+            anomalies (pandas.DataFrame): anomalies detected by the model.
+            predicted (pandas.DataFrame): predictions made by the model.
 
         Returns:
             (Json): Json with the anomalies and predictions for the data with RedBorder prediction
@@ -322,13 +321,11 @@ class Autoencoder:
         """
         predicted = predicted.copy()
         anomalies = anomalies.copy()
-        predicted.rename(columns={metric:"forecast"},inplace=True)
-        predicted = predicted[["forecast",'timestamp']].to_dict(orient="records")
-        anomalies.rename(columns={metric:"expected"},inplace=True)
-        anomalies = anomalies[["expected",'timestamp']].to_dict(orient="records")
+        predicted = predicted[[metric,'timestamp']].rename(columns={metric:"forecast"})
+        anomalies = anomalies[[metric,'timestamp']].rename(columns={metric:"expected"})
         return  {
-            "anomalies":anomalies,
-            "predicted":predicted,
+            "anomalies":anomalies.to_dict(orient="records"),
+            "predicted":predicted.to_dict(orient="records"),
             "status": "success"
         }
 

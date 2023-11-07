@@ -44,7 +44,7 @@ class ShallowOutliers:
         """
         if len(arr) == 0:
             raise ValueError("Input array must be non empty")
-        if arr.ndim != 0:
+        if arr.ndim != 1:
             raise ValueError("Input array must be 1-dimensional")
         if not np.issubdtype(arr.dtype, np.number):
             raise ValueError("Input array must contain numerical data")
@@ -54,7 +54,7 @@ class ShallowOutliers:
         kernel = np.concatenate((kernel, kernel[-2::-1]))
         kernel[window_size // 2] = 0.25*window_size ** 2
         kernel /= np.sum(kernel)
-        padded_arr = np.pad(arr, (window_size // 2, window_size // 2 - 1), mode='edge')
+        padded_arr = np.pad(arr, (window_size // 2, window_size // 2), mode='edge')
         smooth_arr = np.convolve(padded_arr, kernel, mode='valid')
         return smooth_arr
 
@@ -80,7 +80,7 @@ class ShallowOutliers:
         """
         error = arr-smoothed_arr
         loss = error**2
-        data = np.stack((arr,smoothed_arr,error,loss), axis = 0).T
+        data = np.stack((arr,smoothed_arr,error,loss), axis = 1)
         model = IsolationForest(n_estimators=100, contamination=0.003)
         model.fit(data)
         outliers = model.predict(data)==-1
@@ -100,16 +100,25 @@ class ShallowOutliers:
             (Json): Json with the anomalies and predictions for the data with RedBorder prediction
               Json format.
         """
-
         data = pd.json_normalize(raw_json)
-        timestamp = data["timestamp"]
-        arr = np.array(data.drop(columns=["timestamp"]))
+        arr = data.iloc[:, 1].values
         smoothed_arr = self.predict(arr)
         outliers = self.get_outliers(arr, smoothed_arr)
-        anomalies = {"timestamp": timestamp.loc[outliers],"expected": smoothed_arr[outliers]}
-        predicted = {"timestamp": timestamp, "forecast": smoothed_arr}
+        data["smooth"] = smoothed_arr
+        predicted = data[["timestamp","smooth"]].rename(columns={"smooth":"forecast"})
+        anomalies = data[["timestamp","smooth"]].rename(columns={"smooth":"expected"}).loc[outliers]
         return  {
-            "anomalies":anomalies,
-            "predicted":predicted,
+            "anomalies":anomalies.to_dict(orient="records"),
+            "predicted":predicted.to_dict(orient="records"),
             "status": "success"
         }
+
+    @staticmethod
+    def execute_prediction_model(data):
+        shallow_outliers = ShallowOutliers()
+        result = shallow_outliers.compute_json(data)
+        return result
+
+    @staticmethod
+    def return_error(error="error"):
+        return { "status": "error", "msg":error }
