@@ -26,19 +26,11 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
 '''
 End of important OS Variables
 '''
-import pytz
-import json
-import time
 import shutil
-import random
-import datetime
 import numpy as np
 import configparser
 import pandas as pd
 import tensorflow as tf
-from datetime import datetime
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 class Autoencoder:
     """
@@ -62,7 +54,8 @@ class Autoencoder:
                 WINDOW_SIZE (int): Number of entries the model will put together in a 'window'.
                 NUM_WINDOWS (int): Number of windows the model will put together in each slice.
                 LOSS_MULT_1 (float): Extra penalty in the loss function for guessing wrong metrics.
-                LOSS_MULT_2 (float): Extra penalty in the loss function for guessing wrong 'minute' field.
+                LOSS_MULT_2 (float): Extra penalty in the loss function for guessing wrong 
+                  'minute' field.
         """
         self.check_existence(model_file, model_config_file)
 
@@ -98,9 +91,10 @@ class Autoencoder:
         """
         Check existence of model files and copy them if missing.
 
-        This function checks if the provided `model_file` and `model_config_file` exist in their respective paths.
-        If they don't exist, it renames and copies the corresponding default files from the 'traffic.keras' and 'traffic.ini' files,
-        which are expected to be located in the same directory as the target files.
+        This function checks if the provided `model_file` and `model_config_file` exist in their 
+        respective paths. If they don't exist, it renames and copies the corresponding default 
+        files from the 'traffic.keras' and 'traffic.ini' files, which are expected to be located
+        in the same directory as the target files.
 
         Args:
             model_file (str): Path to the target model file.
@@ -173,12 +167,17 @@ class Autoencoder:
         y_pred = tf.cast(y_pred, tf.float16)
         num_metrics = len(self.METRICS)
         num_features = len(self.COLUMNS)
-        IS_METRIC = (tf.range(num_features) < num_metrics)
-        IS_MINUTE = (tf.range(num_features) == num_metrics)
-        mult_true = tf.where(IS_METRIC, self.LOSS_MULT_1 * y_true, tf.where(IS_MINUTE, self.LOSS_MULT_2 * y_true, y_true))
-        mult_pred = tf.where(IS_METRIC, self.LOSS_MULT_1 * y_pred, tf.where(IS_MINUTE, self.LOSS_MULT_2 * y_pred, y_pred))
+        is_metric = (tf.range(num_features) < num_metrics)
+        is_minute = (tf.range(num_features) == num_metrics)
+        mult_true = tf.where(
+            is_metric, self.LOSS_MULT_1 * y_true,
+            tf.where(is_minute, self.LOSS_MULT_2 * y_true, y_true)
+        )
+        mult_pred = tf.where(
+            is_metric, self.LOSS_MULT_1 * y_pred,
+            tf.where(is_minute, self.LOSS_MULT_2 * y_pred, y_pred)
+        )
         standard_loss = tf.math.log(tf.cosh((mult_true - mult_pred)))
-
         if single_value:
             standard_loss = tf.reduce_mean(standard_loss)
         return standard_loss
@@ -254,7 +253,8 @@ class Autoencoder:
             raw_json (Json): druid Json response with the data.
 
         Returns:
-            (Json): Json with the anomalies and predictions for the data with RedBorder prediction Json format.
+            (Json): Json with the anomalies and predictions for the data with RedBorder
+              prediction Json format.
         """
         threshold = self.AVG_LOSS+5*self.STD_LOSS
         data, timestamps = self.input_json(raw_json)
@@ -299,7 +299,7 @@ class Autoencoder:
         timestamps = data['timestamp'].copy()
         data['timestamp'] = pd.to_datetime(data['timestamp'])
         data['minute'] = data['timestamp'].dt.minute + 60 * data['timestamp'].dt.hour
-        data = pd.get_dummies(data, columns=['timestamp'], prefix=['weekday'], prefix_sep='_', drop_first=True)
+        data = pd.get_dummies(data, columns=['timestamp'], prefix=['weekday'], drop_first=True)
         missing_columns = set(self.COLUMNS) - set(data.columns)
         data[list(missing_columns)] = 0
         data = data[self.COLUMNS].dropna()
@@ -307,7 +307,6 @@ class Autoencoder:
         return data_array, timestamps
 
     def output_json(self, metric, anomalies, predicted):
-        #TODO think if return should be Json or Json array
         """
         Transform Json data into numpy.ndarray readable by the model.
         Also returns the timestamps for each entry.
@@ -318,7 +317,8 @@ class Autoencoder:
             predicted (numpy.ndarray): predictions made by the model.
 
         Returns:
-            (Json): Json with the anomalies and predictions for the data with RedBorder prediction Json format.
+            (Json): Json with the anomalies and predictions for the data with RedBorder prediction
+              Json format.
         """
         predicted = predicted.copy()
         anomalies = anomalies.copy()
