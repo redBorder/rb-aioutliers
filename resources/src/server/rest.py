@@ -65,6 +65,7 @@ class APIServer:
         self.start_s3_sync_thread()
         self.app = Flask(__name__)
         self.exit_code = 0
+        self.ai_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "ai")
 
         @self.app.route('/api/v1/outliers', methods=['POST'])
         def calculate():
@@ -87,52 +88,99 @@ class APIServer:
                 A JSON response containing the prediction results or an error message.
             """
 
-            ai_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "ai")
             druid_query = request.form.get('query')
-            if druid_query is None:
-                logger.logger.error("Error while processing, Druid query is empty")
-                return jsonify(outliers.Autoencoder.return_error(error="Druid query is empty"))
             try:
-                druid_query = json.loads(base64.b64decode(druid_query).decode('utf-8'))
+                druid_query = base64.b64decode(druid_query).decode('utf-8')
+                druid_query = json.loads(druid_query)
             except Exception as e:
-                logger.logger.error("Error while decoding the query -> " + str(e))
-                logger.logger.error(f"Invalid query: {druid_query}")
-                return jsonify(outliers.Autoencoder.return_error(error=f"Invalid query: {druid_query}"))
+                error_message = "Error decoding query"
+                logger.logger.error(error_message + " -> " + str(e))
+                return self.return_error(error=error_message)
+            logger.logger.info("Druid query successfully decoded and loaded as JSON.")
 
             model = request.form.get('model')
-            if model is not None:
-                model = base64.b64decode(model).decode('utf-8')
-            if model != 'default' and os.path.isfile(os.path.join(ai_path, f"{model}.keras")):
+            if model is None:
+                logger.logger.info("No model requested")
+                model = 'default'
+            else:
+                try:
+                    model = base64.b64decode(model).decode('utf-8')
+                except Exception as e:
+                    logger.logger.error(f"Error decoding model -> {e}")
+                    model = 'default'
+                if not os.path.isfile(os.path.join(self.ai_path, f"{model}.keras")):
+                    logger.logger.error(f"Model {model} does not exist")
+                    model = 'default'
+
+            if model != 'default':
                 logger.logger.info(f"Calculating predictions with keras model {model}.keras")
-                druid_query = query_modifier.modify_aggregations(druid_query)
-                try:
-                    data = druid_client.execute_query(druid_query)
-                except Exception as e:
-                    logger.logger.error("Error while executing druid query -> " + str(e))
-                    return jsonify(outliers.Autoencoder.return_error(error=str(e)))
-                try:
-                    return jsonify(outliers.Autoencoder.execute_prediction_model(
-                        data,
-                        config.get("Outliers", "metric"),
-                        os.path.join(ai_path, f"{model}.keras"),
-                        os.path.join(ai_path, f"{model}.ini")
-                    ))
-                except Exception as e:
-                    logger.logger.error("Error while calculating prediction model -> " + str(e))
-                    return jsonify(outliers.Autoencoder.return_error(error=str(e))
-                )
+                return self.execute_keras_model(druid_query, config.get("Outliers","metric"), model)
             logger.logger.info("Calculating predictions with default model")
-            try:
-                data = druid_client.execute_query(druid_query)
-            except Exception as e:
-                logger.logger.error("Error while executing druid query -> " + str(e))
-                return jsonify(shallow_outliers.ShallowOutliers.return_error(error=str(e)))
-            try:
-                return jsonify(shallow_outliers.ShallowOutliers.execute_prediction_model(data))
-            except Exception as e:
-                logger.logger.error("Error while calculating prediction model -> " + str(e))
-                return jsonify(outliers.Autoencoder.return_error(error=str(e))
-            )
+            return self.execute_default_model(druid_query)
+
+    def execute_default_model(self, druid_query):
+        """
+        Execute a keras deep learning model to detect outliers.
+
+        Args:
+            druid_query (dict): druid query for the data that we want to analyze.
+
+        Returns:
+            (JSON): json containing the model's predictions and the outliers detected.
+        """
+        try:
+            data = druid_client.execute_query(druid_query)
+        except Exception as e:
+            error_message = "Error while executing druid query"
+            logger.logger.error(error_message + " -> " + str(e))
+            return self.return_error(error=error_message)
+        try:
+            return jsonify(shallow_outliers.ShallowOutliers.execute_prediction_model(data))
+        except Exception as e:
+            error_message = "Error while calculating prediction model"
+            logger.logger.error(error_message + " -> " + str(e))
+            return self.return_error(error=error_message)
+
+    def execute_keras_model(self, druid_query, metric, model):
+        """
+        Execute a keras deep learning model to detect outliers.
+
+        Args:
+            druid_query (dict): druid query for the data that we want to analyze.
+            metric (string): the name of field being analyzed.
+            model (string): the name of the model we want to use.
+
+        Returns:
+            (JSON): json containing the model's predictions and the outliers detected.
+        """
+
+        try:
+            druid_query = query_modifier.modify_aggregations(druid_query)
+            data = druid_client.execute_query(druid_query)
+        except Exception as e:
+            error_message = "Error while executing druid query"
+            logger.logger.error(error_message + " -> " + str(e))
+            return self.return_error(error=error_message)
+        try:
+            return jsonify(outliers.Autoencoder.execute_prediction_model(
+                data,
+                metric,
+                os.path.join(self.ai_path, f"{model}.keras"),
+                os.path.join(self.ai_path, f"{model}.ini")
+            ))
+        except Exception as e:
+            error_message = "Error while calculating prediction model"
+            logger.logger.error(error_message + " -> " + str(e))
+            return self.return_error(error=error_message)
+
+    def return_error(self, error="error"):
+        """
+        Returns an adequate formatted JSON for whenever there is an error.
+
+        Args:
+            error (string): message detailing what type of error has been fired.
+        """
+        return jsonify({ "status": "error", "msg":error })
 
     def start_s3_sync_thread(self):
         """

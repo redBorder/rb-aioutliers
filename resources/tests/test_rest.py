@@ -36,31 +36,50 @@ class TestAPIServer(unittest.TestCase):
         data = {'model':'YXNkZg=='}
         with self.api_server.app.test_client().post('/api/v1/outliers', data=data) as response:
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(response.get_json(), {'msg': 'Druid query is empty', 'status':'error'})
+            self.assertEqual(response.get_json()['status'], 'error')
 
     def test_calculate_endpoint_invalid_query(self):
         data = {'model':'YXNkZg==', 'query':'YXNkZg=='}
         with self.api_server.app.test_client().post('/api/v1/outliers', data=data) as response:
             self.assertEqual(response.status_code, 200)
             self.assertEqual(
-                response.get_json(),
-                {'msg': 'Invalid query: YXNkZg==', 'status':'error'}
+                response.get_json()['status'],
+                'error'
             )
 
     @patch('druid.client.DruidClient.execute_query')
+    @patch('ai.shallow_outliers.ShallowOutliers.execute_prediction_model')
     @patch('os.path.isfile')
-    def test_calculate_endpoint_invalid_model(self, mock_isfile, mock_execute_query):
+    def test_calculate_endpoint_invalid_model(self, mock_isfile, mock_execute_model, mock_query):
+        output_data = {
+            "anomalies": [{'expected': 1, 'timestamp': '2023-09-21T09:00:00.000Z'}],
+            "predicted": [{'expected': 1, 'timestamp': '2023-09-21T09:00:00.000Z'}],
+            "status": "success"
+        }
+        mock_execute_model.return_value = output_data
+        mock_query.return_value = {}
         mock_isfile.return_value = False
-        mock_execute_query.return_value = [
-            {"timestamp": "2023-01-01T00:00:00", "result": {"value": 1}},
-            {"timestamp": "2023-01-01T01:00:00", "result": {"value": 2}},
-            {"timestamp": "2023-01-01T02:00:00", "result": {"value": 3}},
-            {"timestamp": "2023-01-01T03:00:00", "result": {"value": 4}},
-        ]
         data = {'model':'YXNkZg==', 'query':'eyJhc2RmIjoiYXNkZiJ9'}
         with self.api_server.app.test_client().post('/api/v1/outliers', data=data) as response:
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(response.get_json()["status"], "success")
+            self.assertEqual(response.get_json(), output_data)
+
+    @patch('druid.client.DruidClient.execute_query')
+    @patch('ai.outliers.Autoencoder.execute_prediction_model')
+    @patch('os.path.isfile')
+    def test_calculate_endpoint_valid_model(self, mock_isfile, mock_execute_model, mock_query):
+        output_data = {
+            "anomalies": [{'expected': 1, 'timestamp': '2023-09-21T09:00:00.000Z'}],
+            "predicted": [{'expected': 1, 'timestamp': '2023-09-21T09:00:00.000Z'}],
+            "status": "success"
+        }
+        mock_execute_model.return_value = output_data
+        mock_query.return_value = {}
+        mock_isfile.return_value = True
+        data = {'model':'YXNkZg==', 'query':'eyJhc2RmIjoiYXNkZiJ9'}
+        with self.api_server.app.test_client().post('/api/v1/outliers', data=data) as response:
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.get_json(), output_data)
 
 if __name__ == '__main__':
     unittest.main()
