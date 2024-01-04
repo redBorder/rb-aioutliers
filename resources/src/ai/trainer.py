@@ -81,16 +81,16 @@ class Trainer(Autoencoder):
         new_model_config = configparser.ConfigParser()
         new_model_config.add_section('Columns')
         columns_section = new_model_config['Columns']
-        columns_section['METRICS'] = ', '.join(self.METRICS)
-        columns_section['TIMESTAMP'] = ', '.join(self.TIMESTAMP)
+        columns_section['METRICS'] = ', '.join(self.metrics)
+        columns_section['TIMESTAMP'] = ', '.join(self.timestamp)
         new_model_config.add_section('General')
         general_section = new_model_config['General']
-        general_section['AVG_LOSS'] = str(self.AVG_LOSS)
-        general_section['STD_LOSS'] = str(self.STD_LOSS)
-        general_section['WINDOW_SIZE'] = str(self.WINDOW_SIZE)
-        general_section['NUM_WINDOWS'] = str(self.NUM_WINDOWS)
-        general_section['LOSS_MULT_1'] = str(self.LOSS_MULT_1)
-        general_section['LOSS_MULT_2'] = str(self.LOSS_MULT_2)
+        general_section['AVG_LOSS'] = str(self.avg_loss)
+        general_section['STD_LOSS'] = str(self.std_loss)
+        general_section['WINDOW_SIZE'] = str(self.window_size)
+        general_section['NUM_WINDOWS'] = str(self.num_window)
+        general_section['LOSS_MULT_METRIC'] = str(self.loss_mult_metric)
+        general_section['LOSS_MULT_MINUTE'] = str(self.loss_mult_minute)
         with open(save_config_file, 'w') as configfile:
             new_model_config.write(configfile)
 
@@ -101,7 +101,7 @@ class Trainer(Autoencoder):
 
         Args:
             data (numpy ndarray): original data to be fed to the model.
-        
+
         Returns:
             augmented (numpy ndarray): augmented data.
         """
@@ -113,8 +113,9 @@ class Trainer(Autoencoder):
 
         Args:
             data (numpy ndarray): data to be used for training.
+
             augment (boolean): set to True to generate more data for training.
-        
+
         Returns:
             prep_data (numpy ndarray): transformed data for its use in the model.
         """
@@ -145,6 +146,6 @@ class Trainer(Autoencoder):
         prep_data = self.prepare_data_for_training(data)
         self.model.fit(x=prep_data, y=prep_data, epochs = epochs, batch_size = batch_size, verbose = 0)
         loss = self.model_loss(prep_data, self.model.predict(prep_data), single_value=False).numpy()
-        self.AVG_LOSS = 0.9*self.AVG_LOSS + 0.1*loss.mean()
-        self.STD_LOSS = 0.9*self.AVG_LOSS + 0.1*loss.std()
+        self.avg_loss = 0.9*self.avg_loss + 0.1*loss.mean()
+        self.std_loss = 0.9*self.std_loss + 0.1*loss.std()
         self.save_model(self.model_file ,self.model_config_file)

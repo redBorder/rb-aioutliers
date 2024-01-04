@@ -26,11 +26,15 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
 '''
 End of important OS Variables
 '''
+import sys
 import shutil
 import numpy as np
 import configparser
 import pandas as pd
 import tensorflow as tf
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from logger import logger
 
 class Autoencoder:
     """
@@ -47,14 +51,14 @@ class Autoencoder:
         Args:
             model_file (str): Path to model .keras file.
             model_config_file (str): Path to the model config, including:
-                METRICS (list): Names of the metrics used by the module.
-                TIMESTAMP (list): Names of the timestamp columns used by the module.
-                AVG_LOSS (float): Average loss of the model.
-                STD_LOSS (float): Standard deviation of the loss of the model.
-                WINDOW_SIZE (int): Number of entries the model will put together in a 'window'.
-                NUM_WINDOWS (int): Number of windows the model will put together in each slice.
-                LOSS_MULT_1 (float): Extra penalty in the loss function for guessing wrong metrics.
-                LOSS_MULT_2 (float): Extra penalty in the loss function for guessing wrong 
+                metrics (list): Names of the metrics used by the module.
+                timestamp (list): Names of the timestamp columns used by the module.
+                avg_loss (float): Average loss of the model.
+                std_loss (float): Standard deviation of the loss of the model.
+                window_size (int): Number of entries the model will put together in a 'window'.
+                num_window (int): Number of windows the model will put together in each slice.
+                loss_mult_metric (float): Extra penalty in the loss function for guessing wrong metrics.
+                loss_mult_minute (float): Extra penalty in the loss function for guessing wrong
                   'minute' field.
         """
         self.check_existence(model_file, model_config_file)
@@ -63,36 +67,36 @@ class Autoencoder:
             model_config = configparser.ConfigParser()
             model_config.read(model_config_file)
             columns_section = model_config['Columns']
-            self.METRICS = columns_section.get('METRICS', '').split(', ')
-            self.TIMESTAMP = columns_section.get('TIMESTAMP', '').split(', ')
-            self.COLUMNS = self.METRICS + self.TIMESTAMP
+            self.metrics = columns_section.get('METRICS', '').split(', ')
+            self.timestamp = columns_section.get('TIMESTAMP', '').split(', ')
+            self.columns = self.metrics + self.timestamp
             general_section = model_config['General']
-            self.AVG_LOSS = float(general_section.get('AVG_LOSS', 0.0))
-            self.STD_LOSS = float(general_section.get('STD_LOSS', 0.0))
-            self.WINDOW_SIZE = int(general_section.get('WINDOW_SIZE', 0))
-            self.NUM_WINDOWS = int(general_section.get('NUM_WINDOWS', 0))
-            self.LOSS_MULT_1 = float(general_section.get('LOSS_MULT_1', 0))
-            self.LOSS_MULT_2 = float(general_section.get('LOSS_MULT_2', 0))
+            self.avg_loss = float(general_section.get('AVG_LOSS', 0.0))
+            self.std_loss = float(general_section.get('STD_LOSS', 0.0))
+            self.window_size = int(general_section.get('WINDOW_SIZE', 0))
+            self.num_window = int(general_section.get('NUM_WINDOWS', 0))
+            self.loss_mult_metric = float(general_section.get('LOSS_MULT_METRIC', 0))
+            self.loss_mult_minute = float(general_section.get('LOSS_MULT_MINUTE', 0))
         except FileNotFoundError:
-            print(f"Error: Model file '{model_config_file}' not found.")
+            logger.logger.error(f"Error: Model file '{model_config_file}' not found.")
         except (OSError, ValueError) as e:
-            print(f"Error loading model conif: {e}")
+            logger.logger.error(f"Error loading model conif: {e}")
         try:
             self.model = tf.keras.models.load_model(
                 model_file,
                 compile=False
             )
         except FileNotFoundError:
-            print(f"Error: Model file '{model_file}' not found.")
+            logger.logger.error(f"Error: Model file '{model_file}' not found.")
         except (OSError, ValueError) as e:
-            print(f"Error loading the model: {e}")
+            logger.logger.error(f"Error loading the model: {e}")
 
     def check_existence(self, model_file, model_config_file):
         """
         Check existence of model files and copy them if missing.
 
-        This function checks if the provided `model_file` and `model_config_file` exist in their 
-        respective paths. If they don't exist, it renames and copies the corresponding default 
+        This function checks if the provided `model_file` and `model_config_file` exist in their
+        respective paths. If they don't exist, it renames and copies the corresponding default
         files from the 'traffic.keras' and 'traffic.ini' files, which are expected to be located
         in the same directory as the target files.
 
@@ -122,7 +126,7 @@ class Autoencoder:
         Returns:
             (numpy.ndarray): Rescaled data as a numpy array.
         """
-        num_metrics = len(self.METRICS)
+        num_metrics = len(self.metrics)
         rescaled=data.copy()
         rescaled[..., 0:num_metrics]=np.tanh(np.log1p(rescaled[..., 0:num_metrics])/32)
         rescaled[..., num_metrics]=rescaled[..., num_metrics]/1440
@@ -138,7 +142,7 @@ class Autoencoder:
         Returns:
             (numpy.ndarray): Descaled data as a numpy array.
         """
-        num_metrics = len(self.METRICS)
+        num_metrics = len(self.metrics)
         descaled = data.copy()
         descaled = np.where(descaled > 1.0, 1.0, np.where(descaled < -1.0, -1.0, descaled))
         descaled[..., 0:num_metrics] = np.expm1(32*np.arctanh(descaled[..., 0:num_metrics]))
@@ -154,7 +158,7 @@ class Autoencoder:
         otherwise, the value is left unchanged.
         Then, the difference between both tensors is evaluated and a log_cosh loss
         is applied.
-        
+
         Args:
             y_true (tf.Tensor): True target values.
             y_pred (tf.Tensor): Predicted values.
@@ -165,17 +169,17 @@ class Autoencoder:
         """
         y_true = tf.cast(y_true, tf.float16)
         y_pred = tf.cast(y_pred, tf.float16)
-        num_metrics = len(self.METRICS)
-        num_features = len(self.COLUMNS)
+        num_metrics = len(self.metrics)
+        num_features = len(self.columns)
         is_metric = (tf.range(num_features) < num_metrics)
         is_minute = (tf.range(num_features) == num_metrics)
         mult_true = tf.where(
-            is_metric, self.LOSS_MULT_1 * y_true,
-            tf.where(is_minute, self.LOSS_MULT_2 * y_true, y_true)
+            is_metric, self.loss_mult_metric * y_true,
+            tf.where(is_minute, self.loss_mult_minute * y_true, y_true)
         )
         mult_pred = tf.where(
-            is_metric, self.LOSS_MULT_1 * y_pred,
-            tf.where(is_minute, self.LOSS_MULT_2 * y_pred, y_pred)
+            is_metric, self.loss_mult_metric * y_pred,
+            tf.where(is_minute, self.loss_mult_minute * y_pred, y_pred)
         )
         standard_loss = tf.math.log(tf.cosh((mult_true - mult_pred)))
         if single_value:
@@ -183,7 +187,6 @@ class Autoencoder:
         return standard_loss
 
     def slice(self, data, index = []):
-        #TODO add a graph to doc to explain this
         """
         Transform a 2D numpy array into a 3D array readable by the model.
 
@@ -195,13 +198,13 @@ class Autoencoder:
             (numpy.ndarray): 3D numpy array that can be processed by the model.
         """
         _l = len(data)
-        Xs = []
-        slice_length = self.WINDOW_SIZE * self.NUM_WINDOWS
+        sliced_data = []
+        slice_length = self.window_size * self.num_window
         if len(index) == 0:
-            index = np.arange(0, _l-slice_length+1 , self.WINDOW_SIZE)
+            index = np.arange(0, _l-slice_length+1 , self.window_size)
         for i in index:
-            Xs.append(data[i:i+slice_length])
-        return np.array(Xs)
+            sliced_data.append(data[i:i+slice_length])
+        return np.array(sliced_data)
 
     def flatten(self, data):
         """
@@ -213,11 +216,11 @@ class Autoencoder:
         """
         tsr = data.copy()
         num_slices, slice_len, features = tsr.shape
-        flattened_len = (num_slices-1)*self.WINDOW_SIZE + slice_len
+        flattened_len = (num_slices-1)*self.window_size + slice_len
         flattened_tensor = np.zeros([flattened_len, features])
         scaling = np.zeros(flattened_len)
         for i in range(num_slices):
-            left_pad = i*self.WINDOW_SIZE
+            left_pad = i*self.window_size
             right_pad = left_pad+slice_len
             flattened_tensor[left_pad:right_pad] += tsr[i]
             scaling[left_pad:right_pad] +=1
@@ -256,10 +259,10 @@ class Autoencoder:
             (Json): Json with the anomalies and predictions for the data with RedBorder
               prediction Json format.
         """
-        threshold = self.AVG_LOSS+5*self.STD_LOSS
+        threshold = self.std_loss+5*self.std_loss
         data, timestamps = self.input_json(raw_json)
         predicted, loss = self.calculate_predictions(data)
-        predicted = pd.DataFrame(predicted, columns=self.COLUMNS)
+        predicted = pd.DataFrame(predicted, columns=self.columns)
         predicted['timestamp'] = timestamps
         anomalies = predicted[loss>threshold]
         return self.output_json(metric, anomalies, predicted)
@@ -271,7 +274,7 @@ class Autoencoder:
 
         Args:
             dataframe (pandas.DataFrame): Dataframe with timestamp column
-        
+
         Returns:
             time_diffs (pandas.Series): Series with the estimated Granularity of the dataframe.
         """
@@ -287,22 +290,23 @@ class Autoencoder:
 
         Args:
             raw_json (Json): druid Json response with the data.
-        
+
         Returns:
             data (numpy.ndarray): transformed data.
-            timestamps (pandas.Series): pandas series with the timestamp of each entry. 
+            timestamps (pandas.Series): pandas series with the timestamp of each entry.
         """
         data = pd.json_normalize(raw_json)
         data["granularity"] = self.granularity_from_dataframe(data)
-        metrics_dict = {f"result.{metric}": metric for metric in self.METRICS}
+        metrics_dict = {f"result.{metric}": metric for metric in self.metrics}
         data.rename(columns=metrics_dict, inplace=True)
         timestamps = data['timestamp'].copy()
         data['timestamp'] = pd.to_datetime(data['timestamp'])
         data['minute'] = data['timestamp'].dt.minute + 60 * data['timestamp'].dt.hour
-        data = pd.get_dummies(data, columns=['timestamp'], prefix=['weekday'], drop_first=True)
-        missing_columns = set(self.COLUMNS) - set(data.columns)
+        data['weekday']= data['timestamp'].dt.weekday
+        data = pd.get_dummies(data, columns=['weekday'], prefix=['weekday'], drop_first=True)
+        missing_columns = set(self.columns) - set(data.columns)
         data[list(missing_columns)] = 0
-        data = data[self.COLUMNS].dropna()
+        data = data[self.columns].dropna().astype('float')
         data_array = data.values
         return data_array, timestamps
 

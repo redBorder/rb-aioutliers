@@ -51,9 +51,9 @@ class TestTrainer(unittest.TestCase):
     def test_save_model(self):
         dummy_model = os.path.join(self.test_backup_path, "dummy.keras")
         dummy_config = os.path.join(self.test_backup_path, "dummy_config.ini")
-        self.trainer.METRICS = ["metric1", "metric2"]
-        self.trainer.AVG_LOSS = 0.5
-        self.trainer.STD_LOSS = 0.2
+        self.trainer.metrics = ["metric1", "metric2"]
+        self.trainer.avg_loss = 0.5
+        self.trainer.std_loss = 0.2
         self.trainer.save_model(dummy_model, dummy_config)
         self.assertTrue(os.path.exists(dummy_model))
         self.assertTrue(os.path.exists(dummy_config))
@@ -68,7 +68,7 @@ class TestTrainer(unittest.TestCase):
     def test_prepare_data_for_training(self):
         data = np.zeros((100,100))
         prep_data = self.trainer.prepare_data_for_training(data)
-        self.assertEqual(prep_data.shape[1], self.trainer.NUM_WINDOWS*self.trainer.WINDOW_SIZE)
+        self.assertEqual(prep_data.shape[1], self.trainer.num_window*self.trainer.window_size)
         self.assertEqual(prep_data.shape[2], 100)
 
     def test_train(self):

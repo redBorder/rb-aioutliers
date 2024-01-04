@@ -38,7 +38,7 @@ class ShallowOutliers:
 
         Args:
             arr (numpy.ndarray): 1D numpy array with the datapoints to be smoothed.
-        
+
         Returns:
             smooth_arr (numpy.ndarray): 1D numpy array with the smoothed data. Same shape as arr.
         """
@@ -66,7 +66,7 @@ class ShallowOutliers:
         an outlier and False otherwise.
 
         The method used for outlier detection is an isolation forest, which will look for
-        the 0.3% most isolated points when taking into account the original value, the 
+        the 0.3% most isolated points when taking into account the original value, the
         smoothed valued, the diference between them (error) and the squared diference
         between them.
 
@@ -74,7 +74,7 @@ class ShallowOutliers:
             arr (numpy.ndarray): 1D numpy array where the outliers shall be detected.
             smoothed_arr (numpy.ndarray): 1D numpy array that tries to approximate arr.
                 -Must have the same shape as arr.
-        
+
         Returns:
             numpy.ndarray: 1D numpy array with the smoothed data.
         """
