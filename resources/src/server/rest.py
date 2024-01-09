@@ -105,8 +105,11 @@ class APIServer:
             else:
                 try:
                     decoded_model = base64.b64decode(model).decode('utf-8')
-                    model_path = os.path.join(self.ai_path, f"{decoded_model}.keras")
-                    if not os.path.isfile(model_path):
+                    model_path = os.path.normpath(os.path.join(self.ai_path, f"{decoded_model}.keras"))
+                    if not model_path.startswith(os.path.normpath(self.ai_path)):
+                        logger.logger.error(f"Attempted unauthorized file access: {decoded_model}")
+                        model = 'default'
+                    elif not os.path.isfile(model_path):
                         logger.logger.error(f"Model {decoded_model} does not exist")
                         model = 'default'
                     else:
