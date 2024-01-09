@@ -259,7 +259,7 @@ class Autoencoder:
             (Json): Json with the anomalies and predictions for the data with RedBorder
               prediction Json format.
         """
-        threshold = self.std_loss+5*self.std_loss
+        threshold = self.avg_loss+5*self.std_loss
         data, timestamps = self.input_json(raw_json)
         predicted, loss = self.calculate_predictions(data)
         predicted = pd.DataFrame(predicted, columns=self.columns)
