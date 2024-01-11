@@ -90,19 +90,20 @@ class QueryBuilder:
         Args:
             -query: dicitionary with the druid query.
         Returns:
-            -query: the modified query.
+            -new_query: the modified query.
         """
-        query["aggregations"] = self.aggregations
+        new_query=query.copy()
+        new_query["aggregations"] = self.aggregations
         granularity = query.get("granularity", {}).get("period", "minute")
         spg = self.granularity_to_seconds(granularity)
         post_aggregations = json.dumps(self.post_aggregations)
         post_aggregations = post_aggregations.replace('"seconds_per_granularity"', str(spg))
-        query["postAggregations"] = json.loads(post_aggregations)
-        return query
+        new_query["postAggregations"] = json.loads(post_aggregations)
+        return new_query
 
-    def modify_flow_sensor(self, query, sensor):
+    def modify_flow_sensor(self, query, sensors):
         """
-        Modify a druid query to add every flow sensor of the traffic module.
+        Modify a druid query to add sensors of the traffic module.
         
         Args:
             -query: dicitionary with the druid query.
@@ -110,38 +111,55 @@ class QueryBuilder:
         Returns:
             -query: the modified query.
         """
-        query["filter"] = {
+        new_query=query.copy()
+        new_query["filter"] = {
             "type": "selector",
             "dimension": "sensor_name",
-            "value": sensor
+            "value": sensors
         }
+        return new_query
 
-        return query
+    def modify_filter(self, query, filter):
+        """
+         a druid query to add sensors of the traffic module.
+        
+        Args:
+            -query: dicitionary with the druid query.
+            -filter: array with the flow sensorts
+        Returns:
+            -query: the modified query.
+        """
+        new_query=query.copy()
+        new_query["filter"] = filter
+        return new_query
 
     def set_time_origin(self, query, time):
         """
         Modify a druid query to change time origin
         
         Args:
-            -query: dicitionary with the druid query.
+            -query: dictionary with the druid query.
         Returns:
             -query: the modified query.
         """
-        query["granularity"]["origin"] = time
-        return query
+        new_query=query.copy()
+        new_query["granularity"]["origin"] = time
+        return new_query
+
     def set_time_interval(self, query, time_start, time_end):
         """
         Modify a druid query to change time interval
         
         Args:
-            -query: dicitionary with the druid query.
+            -query: dictionary with the druid query.
             -time_start: the start time of the data to retrieve.
             -time_end: the end data oof the data to retrieve.
         Returns:
             -query: the modified query.
         """
-        query["intervals"] = [
+        new_query=query.copy()
+        new_query["intervals"] = [
             f"{time_start}/{time_end}"
         ]
-        return query
+        return new_query
 
