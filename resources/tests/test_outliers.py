@@ -49,6 +49,18 @@ class TestAutoencoder(unittest.TestCase):
             os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "ai", "traffic.keras"),
             os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "ai", "traffic.ini")
         )
+    def test_invalid_model(self):
+        with self.assertRaises(FileNotFoundError):
+            Autoencoder(
+                os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "ai", "test.keras"),
+                os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "ai", "traffic.ini")
+            )
+    def test_invalid_config(self):
+        with self.assertRaises(FileNotFoundError):
+            Autoencoder(
+                os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "ai", "traffic.keras"),
+                os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "ai", "test.ini")
+            )
 
 if __name__ == '__main__':
     unittest.main()
