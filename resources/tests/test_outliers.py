@@ -35,13 +35,27 @@ class TestAutoencoder(unittest.TestCase):
             self.sample_data = json.load(data_file)
 
     def test_model_execution_with_no_data(self):
-        with self.assertRaises(Exception):
-            Autoencoder.execute_prediction_model(
-                {},
-                "bytes",
-                os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "ai", "traffic.keras"),
-                os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "ai", "traffic.ini")
-            )
+        result = Autoencoder.execute_prediction_model(
+            {},
+            "bytes",
+            os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "ai", "traffic.keras"),
+            os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "ai", "traffic.ini")
+        )
+        self.assertEqual(
+            result['status'],
+            'error'
+        )
+    def test_model_execution_with_no_metric(self):
+        result = Autoencoder.execute_prediction_model(
+            self.sample_data,
+            "",
+            os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "ai", "traffic.keras"),
+            os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "ai", "traffic.ini")
+        )
+        self.assertEqual(
+            result['status'],
+            'error'
+        )
     def test_model_execution_with_sample_data(self):
         Autoencoder.execute_prediction_model(
             self.sample_data,

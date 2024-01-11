@@ -17,9 +17,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
+import sys
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import IsolationForest
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from logger import logger
 
 class ShallowOutliers:
     """
@@ -43,11 +48,18 @@ class ShallowOutliers:
             smooth_arr (numpy.ndarray): 1D numpy array with the smoothed data. Same shape as arr.
         """
         if len(arr) == 0:
-            raise ValueError("Input array must be non empty")
+            error_msg = "Input array must be non-empty"
+            logger.logger.error(error_msg)
+            raise ValueError(error_msg)
         if arr.ndim != 1:
-            raise ValueError("Input array must be 1-dimensional")
+            error_msg = "Input array must be 1-dimensional"
+            logger.logger.error(error_msg)
+            raise ValueError(error_msg)
         if not np.issubdtype(arr.dtype, np.number):
-            raise ValueError("Input array must contain numerical data")
+            error_msg = "Input array must contain numerical data"
+            logger.logger.error(error_msg)
+            raise ValueError(error_msg)
+
         window_size = max(int(0.05 * len(arr)), min(len(arr), int(5 + np.log(len(arr)))))
         window_size += 1 if window_size % 2 == 0 else 0
         kernel = np.arange(1, window_size // 2 + 2, dtype=float)
@@ -115,10 +127,20 @@ class ShallowOutliers:
 
     @staticmethod
     def execute_prediction_model(data):
-        shallow_outliers = ShallowOutliers()
-        result = shallow_outliers.compute_json(data)
-        return result
+        try:
+            result = ShallowOutliers.compute_json(data)
+        except Exception as e:
+            result = ShallowOutliers.return_error(e)
+            raise
+        finally:
+            return result
 
     @staticmethod
     def return_error(error="error"):
+        """
+        Returns an adequate formatted JSON for whenever there is an error.
+
+        Args:
+            error (string): message detailing what type of error has been fired.
+        """
         return { "status": "error", "msg":error }
