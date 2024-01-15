@@ -68,15 +68,15 @@ class RqManager:
             str: redis secret
         """
         return config.get("Redis", "rd_secret")
-
-    def fetch_flow_sensors(self):
+    
+    def fetch_model_names(self):
         """
-        Fetch flow sensors from the config file
+        Fetch model names from the config file
         Returns:
-            str: flow sensors
+            str: model names
         """
-        return config.get("Outliers", "target_sensors")
-
+        return config.get("Outliers", "model_names")
+    
     def cron_to_rq_datetime(self, cron_expression):
         """
         Convert a cron expression to a valid datetime object for the next scheduled time.
@@ -111,7 +111,7 @@ class RqManager:
         outlier_job = RbOutlierTrainJob()
         crontime = self.fetch_queue_default_job_hour()
         cron_schedule = self.cron_to_rq_datetime(crontime)
-        self.rq_queue.enqueue_at(cron_schedule, outlier_job.train_job, flow_sensors=self.fetch_flow_sensors())
+        self.rq_queue.enqueue_at(cron_schedule, outlier_job.train_job, model_names=self.fetch_model_names())
 
         current_time = time.time()
         next_execution_time = cron_schedule.timestamp()

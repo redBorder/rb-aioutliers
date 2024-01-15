@@ -101,24 +101,6 @@ class QueryBuilder:
         new_query["postAggregations"] = json.loads(post_aggregations)
         return new_query
 
-    def modify_flow_sensor(self, query, sensors):
-        """
-        Modify a druid query to add sensors of the traffic module.
-        
-        Args:
-            -query: dicitionary with the druid query.
-            -sensors: array with the flow sensorts
-        Returns:
-            -query: the modified query.
-        """
-        new_query=query.copy()
-        new_query["filter"] = {
-            "type": "selector",
-            "dimension": "sensor_name",
-            "value": sensors
-        }
-        return new_query
-
     def modify_filter(self, query, filter):
         """
          a druid query to add sensors of the traffic module.

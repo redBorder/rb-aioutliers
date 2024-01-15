@@ -1,0 +1,5 @@
+{
+    "type": "selector",
+    "dimension": "sensor_name",
+    "value": "ASR"
+}

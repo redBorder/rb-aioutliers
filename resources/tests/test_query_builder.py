@@ -70,11 +70,11 @@ class TestQueryBuilder(unittest.TestCase):
         self.assertEqual(modified_query["granularity"]["period"], "pt5m")
         self.assertEqual(modified_query["postAggregations"][0]["fields"][1]["value"] , 300)
 
-    def test_modify_flow_sensor(self):
-        query = {"filter": {"type": "selector", "dimension": "sensor_name", "value": "FlowSensor1"}}
-        sensor = "FlowSensor2"
-        modified_query = self.builder.modify_flow_sensor(query, sensor)
-        self.assertEqual(modified_query["filter"]["value"], "FlowSensor2")
+    def test_modify_filter(self):
+        query = {"filter": {"type": "selector", "dimension": "sensor_name", "value": "FlowSensor"}}
+        filter = {"type": "test1", "dimension": "test2", "value": "test3"}
+        modified_query = self.builder.modify_filter(query, filter)
+        self.assertEqual(modified_query["filter"], filter)
 
     def test_set_time_origin(self):
         query = {"granularity": {"origin": "2023-01-01T00:00:00Z"}}

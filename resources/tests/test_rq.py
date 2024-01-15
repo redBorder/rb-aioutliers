@@ -71,10 +71,10 @@ class TestRqManager(unittest.TestCase):
         self.assertEqual(redis_secret, "your_redis_secret")
 
     @patch('src.redborder.rq.config')
-    def test_fetch_flow_sensors(self, mock_config):
-        mock_config.get.return_value = "sensor1,sensor2,sensor3"
-        flow_sensors = self.rq_manager.fetch_flow_sensors()
-        self.assertEqual(flow_sensors, "sensor1,sensor2,sensor3")
+    def test_fetch_model_names(self, mock_config):
+        mock_config.get.return_value = "model1,model2,model3"
+        model_names = self.rq_manager.fetch_model_names()
+        self.assertEqual(model_names, "model1,model2,model3")
 
     def test_cron_to_rq_datetime(self):
         cron_expression = "30 3 * * *"

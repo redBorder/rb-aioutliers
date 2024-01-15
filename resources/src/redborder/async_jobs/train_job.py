@@ -35,9 +35,10 @@ class RbOutlierTrainJob:
 
         This class manages the training and running of the Outliers application.
         """
-        self.flow_sensors = None
+        self.models= None
         self.query_builder = None
         self.s3_client = None
+        self.main_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
 
     def setup_s3(self):
         """
@@ -55,34 +56,66 @@ class RbOutlierTrainJob:
 
     def setup_remote_model_sync(self):
         """
-        Set up remote model synchronization for flow sensors.
+        Set up remote model synchronization for models.
 
-        This function iterates through a list of flow sensors and calls functions to download the latest model
-        configuration and model files from Amazon S3 for each flow sensor.
+        This function iterates through a list of model names and calls functions to download the latest model
+        configuration and model files from Amazon S3 for each model.
         """
-        for flow_sensor in self.flow_sensors:
-            self.download_latest_model_config_from_s3(flow_sensor)
-            self.download_latest_model_from_s3(flow_sensor)
+        for model_name in self.models:
+            self.download_latest_model_from_s3(model_name)
+            self.download_latest_model_config_from_s3(model_name)
+            self.download_latest_model_filter_from_s3(model_name)
 
-    def download_latest_model_config_from_s3(self, flow_sensor):
+    def download_latest_model_config_from_s3(self, model_name):
         """
-        Download the latest model configuration file associated with a specific flow sensor from Amazon S3 and save it to the local AI directory.
+        Download the latest model configuration file associated with a specific model from Amazon S3 and save it to the local AI directory.
 
         Args:
-            flow_sensor (str): The identifier or name of the flow sensor for which the latest model configuration file needs to be downloaded.
+            model_name (str): The identifier of the model for which the latest model configuration file needs to be downloaded.
         """
-        self.s3_client.download_file(f'rbaioutliers/latest/{flow_sensor}.ini', os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "ai", f"{flow_sensor}.ini"))
+        self.s3_client.download_file(
+            f'rbaioutliers/latest/{model_name}.ini',
+            os.path.join(self.main_dir,"ai", f"{model_name}.ini")
+        )
 
-    def download_latest_model_from_s3(self, flow_sensor):
+    def download_latest_model_from_s3(self, model_name):
         """
-        Download the latest model file associated with a specific flow sensor from Amazon S3 and save it to the local AI directory.
+        Download the latest model file associated with a specific model from Amazon S3 and save it to the local AI directory.
 
         Args:
-            flow_sensor (str): The identifier or name of the flow sensor for which the latest model file needs to be downloaded.
+            model_name (str): The identifier of the model for which the latest model file needs to be downloaded.
         """
-        self.s3_client.download_file(f'rbaioutliers/latest/{flow_sensor}.keras', os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "ai", f"{flow_sensor}.keras"))
+        self.s3_client.download_file(
+            f'rbaioutliers/latest/{model_name}.keras',
+            os.path.join(self.main_dir,"ai", f"{model_name}.keras")
+        )
 
-    def train_job(self, flow_sensors):
+    def download_latest_model_filter_from_s3(self, model_name):
+        """
+        Download the latest model file associated with a specific model from Amazon S3 and save it to the local AI directory.
+
+        Args:
+            model_name (str): The identifier of the model for which the latest model file needs to be downloaded.
+        """
+        self.s3_client.download_file(
+            f'rbaioutliers/latest/{model_name}_filter.json',
+            os.path.join(self.main_dir,"ai", f"{model_name}_filter.json")
+        )
+
+    def get_model_filter(self, model_name):
+        """
+        Given a model name, returns its filter as a python dictionary.
+
+        Args:
+            model_name (str): The identifier of the model.
+        
+        Returns:
+            (dict): Dictionary with the filter of the model.
+        """
+        with open(os.path.join(self.main_dir,"ai", f"{model_name}_filter.json"), 'r') as json_file:
+            return json.load(json_file)
+
+    def train_job(self, model_names):
         """
         Start the Outliers training job.
 
@@ -100,15 +133,16 @@ class RbOutlierTrainJob:
         self.query_builder = QueryBuilder(self.get_aggregation_config_path(), self.get_post_aggregations_config_path())
         query = self.query_builder.modify_aggregations(traffic_query)
 
-        self.flow_sensors = flow_sensors.join(flow_sensors.split()).split(',')
+        self.model_names = model_names.join(model_names.split()).split(',')
         self.setup_remote_model_sync()
 
-        for sensor in self.flow_sensors:
+        for model_name in self.model_names:
             self.trainer = Trainer(
-                os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "ai", f"{sensor}.keras"),
-                os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "ai", f"{sensor}.ini"),
+                os.path.join(self.main_dir, "ai", f"{model_name}.keras"),
+                os.path.join(self.main_dir, "ai", f"{model_name}.ini"),
             )
-            self.process_sensor_data(sensor, query, redborder_ntp, manager_time, druid_client)
+            self.get_model_filter(model_name)
+            self.process_model_data(model_name, query, redborder_ntp, manager_time, druid_client)
 
     def initialize_ntp_client(self):
         """
@@ -135,7 +169,7 @@ class RbOutlierTrainJob:
         Returns:
             dict: The loaded traffic query as a dictionary.
         """
-        traffic_json_file_path = os.path.join(os.path.dirname(__file__), "..", "..", "druid", "data", "trafficquery.json")
+        traffic_json_file_path = os.path.join(self.main_dir, "druid", "data", "trafficquery.json")
         with open(traffic_json_file_path, 'r') as json_file:
             return json.load(json_file)
 
@@ -146,7 +180,7 @@ class RbOutlierTrainJob:
         Returns:
             str: The path to the aggregation configuration file.
         """
-        return os.path.join(os.path.dirname(__file__), "..", "..", "druid", "data", "aggregations.json")
+        return os.path.join(self.main_dir, "druid", "data", "aggregations.json")
 
     def get_post_aggregations_config_path(self):
         """
@@ -155,60 +189,59 @@ class RbOutlierTrainJob:
         Returns:
             str: The path to the post-aggregations configuration file.
         """
-        return os.path.join(os.path.dirname(__file__), "..", "..", "druid", "data", "postAggregations.json")
+        return os.path.join(self.main_dir, "druid", "data", "postAggregations.json")
 
-    def upload_model_results_back_to_s3(self, sensor):
+    def upload_model_results_back_to_s3(self, model_name):
         """
-        Upload a model file associated with a specific sensor to an Amazon S3 bucket.
+        Upload a model file associated with a specific model to an Amazon S3 bucket.
 
         Args:
-            sensor (str): The sensor identifier or name for which the model file needs to be uploaded to S3.
+            model_name (str): The identifier or name for which the model file needs to be uploaded to S3.
         """
         self.s3_client.upload_file(
-            os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "ai", f"{sensor}.keras"),
-            f'rbaioutliers/latest/{sensor}.keras'
+            os.path.join(self.main_dir, "ai", f"{model_name}.keras"),
+            f'rbaioutliers/latest/{model_name}.keras'
         )
 
-    def upload_model_config_results_back_to_s3(self, sensor):
+    def upload_model_config_results_back_to_s3(self, model_name):
         """
-        Upload a model configuration file associated with a specific sensor to an Amazon S3 bucket.
+        Upload a model configuration file associated with a specific model to an Amazon S3 bucket.
 
         Args:
-            sensor (str): The sensor identifier or name for which the model configuration file needs to be uploaded to S3.
+            model_name (str): The name for which the model configuration file needs to be uploaded to S3.
         """
         self.s3_client.upload_file(
-            os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "ai", f"{sensor}.ini"),
-            f'rbaioutliers/latest/{sensor}.ini'
+            os.path.join(self.main_dir, "ai", f"{model_name}.ini"),
+            f'rbaioutliers/latest/{model_name}.ini'
         )
 
     def upload_results_back_to_s3(self):
         """
-        Upload results for all flow sensors to an Amazon S3 bucket.
+        Upload results for all models to an Amazon S3 bucket.
 
-        This function iterates through a list of flow sensors and uploads both the model file and model configuration
-        file for each sensor to the 'rbaioutliers/latest' path in the S3 bucket.
+        This function iterates through a list of models and uploads both the model file and model configuration
+        file for each model to the 'rbaioutliers/latest' path in the S3 bucket.
         """
-        for sensor in self.flow_sensors:
-            self.upload_model_results_back_to_s3(sensor)
-            self.upload_model_config_results_back_to_s3(sensor)
+        for model_name in self.model_names:
+            self.upload_model_results_back_to_s3(model_name)
+            self.upload_model_config_results_back_to_s3(model_name)
 
-    def process_sensor_data(self, sensor, query, redborder_ntp, manager_time, druid_client):
+    def process_model_data(self, model_name, query, redborder_ntp, manager_time, druid_client):
         """
-        Process sensor data and train the model.
+        Process data and train the model.
 
         Args:
-            sensor (dict): Sensor information.
+            model_name (dict): Model identifier.
             query (dict): The query to be modified.
             redborder_ntp (NTPClient): The NTP client.
             manager_time (datetime): The manager time.
             druid_client (DruidClient): The Druid client.
 
-        This function processes sensor data, modifies the query, and trains the model.
+        This function processes data, modifies the query, and trains the model.
         """
         start_time = redborder_ntp.time_to_iso8601_time(redborder_ntp.get_substracted_day_time(manager_time))
         end_time = redborder_ntp.time_to_iso8601_time(manager_time)
-
-        query = self.query_builder.modify_flow_sensor(query, sensor)
+        query = self.query_builder.modify_filter(query, model_name)
         query = self.query_builder.set_time_origin(query, start_time)
         query = self.query_builder.set_time_interval(query, start_time, end_time)
         traffic_data = druid_client.execute_query(query)
