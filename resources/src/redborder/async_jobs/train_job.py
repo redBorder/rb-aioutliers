@@ -92,7 +92,7 @@ class RbOutlierTrainJob:
 
     def download_latest_model_filter_from_s3(self, model_name):
         """
-        Download the latest model file associated with a specific model from Amazon S3 and save it to the local AI directory.
+        Download the latest model filter file associated with a specific model from Amazon S3 and save it to the local AI directory.
 
         Args:
             model_name (str): The identifier of the model for which the latest model file needs to be downloaded.

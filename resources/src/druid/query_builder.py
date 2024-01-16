@@ -69,7 +69,7 @@ class QueryBuilder:
             "minute": 60, "hour": 3600, "day": 86400,
             "fifteen_minute": 900, "thirty_minute": 1800,
             "m": 60, "h": 3600, "d": 86400
-            }
+        }
         granularity = granularity.lower()
         if granularity in base_granularities:
             return base_granularities[granularity]
@@ -88,9 +88,9 @@ class QueryBuilder:
         and "flows_per_sec_per_client".
         
         Args:
-            -query: dicitionary with the druid query.
+            -query (dict): dicitionary with the druid query.
         Returns:
-            -new_query: the modified query.
+            -new_query (dict): the modified query.
         """
         new_query=query.copy()
         new_query["aggregations"] = self.aggregations
@@ -101,18 +101,32 @@ class QueryBuilder:
         new_query["postAggregations"] = json.loads(post_aggregations)
         return new_query
 
-    def modify_filter(self, query, filter):
+    def modify_granularity(self, query, gran):
         """
-         a druid query to add sensors of the traffic module.
+        Modify the granularity of a druid query.
         
         Args:
-            -query: dicitionary with the druid query.
-            -filter: array with the flow sensorts
+            -query (dict): dicitionary with the druid query.
+            -granularity (string): druid granularity.
+        Returns:
+            -query (dict): the modified query.
+        """
+        new_query=query.copy()
+        new_query["granularity"]["period"] = gran
+        return new_query
+
+    def modify_filter(self, query, filter_druid):
+        """
+        Modify a druid query to add a filter of the traffic module.
+        
+        Args:
+            -query (dict): dicitionary with the serialized druid query.
+            -filter_druid (dict): dictionary with the serialized filter.
         Returns:
             -query: the modified query.
         """
         new_query=query.copy()
-        new_query["filter"] = filter
+        new_query["filter"] = filter_druid
         return new_query
 
     def set_time_origin(self, query, time):
