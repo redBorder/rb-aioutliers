@@ -108,7 +108,7 @@ class RbOutlierTrainJob:
 
         Args:
             model_name (str): The identifier of the model.
-        
+
         Returns:
             (dict): Dictionary with the filter of the model.
         """

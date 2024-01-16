@@ -33,7 +33,7 @@ class QueryBuilder:
     def __init__(self, aggregations, post_aggregations):
         """
         Initializer of the class
-        
+
         Args:
             aggregations (string): path to json file with the 'aggregations'
               value of the druid query.
@@ -84,9 +84,9 @@ class QueryBuilder:
         """
         Modify a druid query to add every field the traffic module uses.
         Those are: "bytes", "pkts", "clients", "flows", "bps", "pps", "fps",
-        "bytes_per_client" , "bytes_per_sec_per_client", "flows_per_client" 
+        "bytes_per_client" , "bytes_per_sec_per_client", "flows_per_client"
         and "flows_per_sec_per_client".
-        
+
         Args:
             -query (dict): dicitionary with the druid query.
         Returns:
@@ -104,7 +104,7 @@ class QueryBuilder:
     def modify_granularity(self, query, gran):
         """
         Modify the granularity of a druid query.
-        
+
         Args:
             -query (dict): dicitionary with the druid query.
             -granularity (string): druid granularity.
@@ -118,7 +118,7 @@ class QueryBuilder:
     def modify_filter(self, query, filter_druid):
         """
         Modify a druid query to add a filter of the traffic module.
-        
+
         Args:
             -query (dict): dicitionary with the serialized druid query.
             -filter_druid (dict): dictionary with the serialized filter.
@@ -132,7 +132,7 @@ class QueryBuilder:
     def set_time_origin(self, query, time):
         """
         Modify a druid query to change time origin
-        
+
         Args:
             -query: dictionary with the druid query.
         Returns:
@@ -145,7 +145,7 @@ class QueryBuilder:
     def set_time_interval(self, query, time_start, time_end):
         """
         Modify a druid query to change time interval
-        
+
         Args:
             -query: dictionary with the druid query.
             -time_start: the start time of the data to retrieve.
@@ -158,4 +158,3 @@ class QueryBuilder:
             f"{time_start}/{time_end}"
         ]
         return new_query
-

@@ -68,7 +68,7 @@ class RqManager:
             str: redis secret
         """
         return config.get("Redis", "rd_secret")
-    
+
     def fetch_model_names(self):
         """
         Fetch model names from the config file
@@ -76,7 +76,7 @@ class RqManager:
             str: model names
         """
         return config.get("Outliers", "model_names")
-    
+
     def cron_to_rq_datetime(self, cron_expression):
         """
         Convert a cron expression to a valid datetime object for the next scheduled time.
@@ -120,4 +120,3 @@ class RqManager:
         logger.info("Waiting for re-queue...")
         time.sleep(delay)
         self.schedule_train_job()
-
