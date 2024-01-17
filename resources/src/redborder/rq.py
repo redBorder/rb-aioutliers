@@ -19,14 +19,14 @@
 
 
 import sys, os, time
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from rq import Queue
 from redis import Redis
 from datetime import datetime
 from croniter import croniter
-from server.rest import config
-from logger.logger import logger
-from redborder.async_jobs.train_job import RbOutlierTrainJob
+
+from resources.src.server.rest import config
+from resources.src.logger.logger import logger
+from resources.src.redborder.async_jobs.train_job import RbOutlierTrainJob
 
 class RqManager:
     def __init__(self) -> None:

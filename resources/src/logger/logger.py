@@ -21,7 +21,8 @@
 import os
 import logging
 from pylogrus import PyLogrus
-from src.config import configmanager
+
+from resources.src.config import configmanager
 
 class CustomFormatter(logging.Formatter):
     def __init__(self, fmt=None, datefmt=None):

@@ -26,8 +26,7 @@ import numpy as np
 import configparser
 from tempfile import TemporaryDirectory
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from src.ai.trainer import Trainer
+from resources.src.ai.trainer import Trainer
 
 class TestTrainer(unittest.TestCase):
 

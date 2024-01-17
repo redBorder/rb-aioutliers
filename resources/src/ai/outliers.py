@@ -33,8 +33,7 @@ import configparser
 import pandas as pd
 import tensorflow as tf
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from logger import logger
+from resources.src.logger import logger
 
 class Autoencoder:
     """

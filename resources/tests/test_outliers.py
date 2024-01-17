@@ -24,8 +24,7 @@ import sys
 import json
 import tempfile
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from src.ai.outliers import Autoencoder
+from resources.src.ai.outliers import Autoencoder
 
 class TestAutoencoder(unittest.TestCase):
     main_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src")

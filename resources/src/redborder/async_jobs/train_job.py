@@ -19,14 +19,14 @@
 
 
 import sys, os, json
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
-from rbntp.ntplib import NTPClient
-from ai.trainer import Trainer
-from logger.logger import logger
-from druid.client import DruidClient
-from server.rest import config
-from druid.query_builder import QueryBuilder
-from redborder.s3 import S3
+
+from resources.src.rbntp.ntplib import NTPClient
+from resources.src.ai.trainer import Trainer
+from resources.src.logger.logger import logger
+from resources.src.druid.client import DruidClient
+from resources.src.server.rest import config
+from resources.src.druid.query_builder import QueryBuilder
+from resources.src.redborder.s3 import S3
 
 class RbOutlierTrainJob:
     def __init__(self) -> None:

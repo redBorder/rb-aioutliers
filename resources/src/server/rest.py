@@ -24,14 +24,14 @@ import json
 import time
 import base64
 import threading
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from redborder.s3 import S3
-from ai import outliers, shallow_outliers
-from druid import client, query_builder
-from logger import logger
-from config import configmanager
 from flask import Flask, jsonify, request
+
+from resources.src.redborder.s3 import S3
+from resources.src.ai import outliers, shallow_outliers
+from resources.src.druid import client, query_builder
+from resources.src.logger import logger
+from resources.src.config import configmanager
+
 
 '''
 Init local variables

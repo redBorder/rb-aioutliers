@@ -21,10 +21,7 @@
 import unittest
 import sys
 import os
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
-from src.druid import query_builder
+from resources.src.druid import query_builder
 
 class TestQueryBuilder(unittest.TestCase):
     def setUp(self) -> None:

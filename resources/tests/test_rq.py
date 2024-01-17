@@ -25,9 +25,8 @@ from unittest.mock import Mock, patch, create_autospec
 from datetime import datetime
 from croniter import croniter
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from src.redborder.rq import RqManager
-from src.redborder.async_jobs.train_job import RbOutlierTrainJob
+from resources.src.redborder.rq import RqManager
+from resources.src.redborder.async_jobs.train_job import RbOutlierTrainJob
 
 class TestRqManager(unittest.TestCase):
     def setUp(self):
@@ -36,8 +35,8 @@ class TestRqManager(unittest.TestCase):
     def tearDown(self):
         self.rq_manager = None
 
-    @patch('src.redborder.rq.Redis')
-    @patch('src.redborder.rq.config')
+    @patch('resources.src.redborder.rq.Redis')
+    @patch('resources.src.redborder.rq.config')
     def test_init(self, mock_config, mock_redis):
         mock_config.get.return_value = 0
         mock_redis.return_value = Mock()
@@ -46,31 +45,31 @@ class TestRqManager(unittest.TestCase):
         self.assertIsInstance(rq_manager.rq_queue, Queue)
         mock_redis.assert_called_with(host=0, port=0, password=0)
 
-    @patch('src.redborder.rq.config')
+    @patch('resources.src.redborder.rq.config')
     def test_fetch_queue_default_job_hour(self, mock_config):
         mock_config.get.return_value = "30 3 * * *"
         cron_syntax = self.rq_manager.fetch_queue_default_job_hour()
         self.assertEqual(cron_syntax, "30 3 * * *")
 
-    @patch('src.redborder.rq.config')
+    @patch('resources.src.redborder.rq.config')
     def test_fetch_redis_hostname(self, mock_config):
         mock_config.get.return_value = "localhost"
         redis_hostname = self.rq_manager.fetch_redis_hostname()
         self.assertEqual(redis_hostname, "localhost")
 
-    @patch('src.redborder.rq.config')
+    @patch('resources.src.redborder.rq.config')
     def test_fetch_redis_port(self, mock_config):
         mock_config.get.return_value = 16379
         redis_port = self.rq_manager.fetch_redis_port()
         self.assertEqual(redis_port, 16379)
 
-    @patch('src.redborder.rq.config')
+    @patch('resources.src.redborder.rq.config')
     def test_fetch_redis_secret(self, mock_config):
         mock_config.get.return_value = "your_redis_secret"
         redis_secret = self.rq_manager.fetch_redis_secret()
         self.assertEqual(redis_secret, "your_redis_secret")
 
-    @patch('src.redborder.rq.config')
+    @patch('resources.src.redborder.rq.config')
     def test_fetch_model_names(self, mock_config):
         mock_config.get.return_value = "model1,model2,model3"
         model_names = self.rq_manager.fetch_model_names()

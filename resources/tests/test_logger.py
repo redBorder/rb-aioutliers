@@ -26,9 +26,7 @@ from io import StringIO
 from unittest.mock import Mock, patch
 from tempfile import TemporaryDirectory
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-import src
-from src.logger.logger import Logger
+from resources.src.logger.logger import Logger
 
 class TestLogger(unittest.TestCase):
     def setUp(self):

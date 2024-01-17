@@ -22,8 +22,7 @@ import sys
 import unittest
 from unittest.mock import patch
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from src.server.rest import APIServer
+from resources.src.server.rest import APIServer
 
 class TestAPIServer(unittest.TestCase):
     output_data = {
@@ -56,8 +55,8 @@ class TestAPIServer(unittest.TestCase):
                 {'msg': 'Error decoding query', 'status': 'error'}
             )
 
-    @patch('druid.client.DruidClient.execute_query')
-    @patch('ai.shallow_outliers.ShallowOutliers.execute_prediction_model')
+    @patch('resources.src.druid.client.DruidClient.execute_query')
+    @patch('resources.src.ai.shallow_outliers.ShallowOutliers.execute_prediction_model')
     @patch('os.path.isfile')
     def test_calculate_endpoint_invalid_model(self, mock_isfile, mock_execute_model, mock_query):
         mock_execute_model.return_value = self.output_data
@@ -68,8 +67,8 @@ class TestAPIServer(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.get_json(), self.output_data)
 
-    @patch('druid.client.DruidClient.execute_query')
-    @patch('ai.shallow_outliers.ShallowOutliers.execute_prediction_model')
+    @patch('resources.src.druid.client.DruidClient.execute_query')
+    @patch('resources.src.ai.shallow_outliers.ShallowOutliers.execute_prediction_model')
     @patch('os.path.isfile')
     def test_calculate_endpoint_unathorized_model_access(self, mock_isfile, mock_execute_model, mock_query):
         mock_execute_model.return_value = self.output_data
@@ -80,8 +79,8 @@ class TestAPIServer(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.get_json(), self.output_data)
 
-    @patch('druid.client.DruidClient.execute_query')
-    @patch('ai.shallow_outliers.ShallowOutliers.execute_prediction_model')
+    @patch('resources.src.druid.client.DruidClient.execute_query')
+    @patch('resources.src.ai.shallow_outliers.ShallowOutliers.execute_prediction_model')
     @patch('os.path.isfile')
     def test_calculate_endpoint_none_model(self, mock_isfile, mock_execute_model, mock_query):
         mock_execute_model.return_value = self.output_data
@@ -92,8 +91,8 @@ class TestAPIServer(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.get_json(), self.output_data)
 
-    @patch('druid.client.DruidClient.execute_query')
-    @patch('ai.shallow_outliers.ShallowOutliers.execute_prediction_model')
+    @patch('resources.src.druid.client.DruidClient.execute_query')
+    @patch('resources.src.ai.shallow_outliers.ShallowOutliers.execute_prediction_model')
     @patch('os.path.isfile')
     def test_calculate_endpoint_invalid_b64_model(self, mock_isfile, mock_execute_model, mock_query):
         mock_execute_model.return_value = self.output_data
@@ -104,8 +103,8 @@ class TestAPIServer(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.get_json(), self.output_data)
 
-    @patch('druid.client.DruidClient.execute_query')
-    @patch('ai.outliers.Autoencoder.execute_prediction_model')
+    @patch('resources.src.druid.client.DruidClient.execute_query')
+    @patch('resources.src.ai.outliers.Autoencoder.execute_prediction_model')
     @patch('os.path.isfile')
     def test_calculate_endpoint_valid_model(self, mock_isfile, mock_execute_model, mock_query):
         mock_execute_model.return_value = self.output_data
@@ -116,7 +115,7 @@ class TestAPIServer(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.get_json(), self.output_data)
 
-    @patch('druid.client.DruidClient.execute_query')
+    @patch('resources.src.druid.client.DruidClient.execute_query')
     @patch('os.path.isfile')
     def test_execute_default_model_invalid_query(self, mock_isfile, mock_query):
         mock_query.return_value = {"test":"test"}
