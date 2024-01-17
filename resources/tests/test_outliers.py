@@ -22,15 +22,16 @@ import unittest
 import os
 import sys
 import json
+import tempfile
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from src.ai.outliers import Autoencoder
 
 class TestAutoencoder(unittest.TestCase):
+    main_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src")
     def setUp(self):
         current_dir = os.path.dirname(os.path.abspath(__file__))
         data_file_path = os.path.join(current_dir, "outliers_test_data.json")
-
         with open(data_file_path, "r") as data_file:
             self.sample_data = json.load(data_file)
 
@@ -38,8 +39,8 @@ class TestAutoencoder(unittest.TestCase):
         result = Autoencoder.execute_prediction_model(
             {},
             "bytes",
-            os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "ai", "traffic.keras"),
-            os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "ai", "traffic.ini")
+            os.path.join(self.main_dir, "ai", "traffic.keras"),
+            os.path.join(self.main_dir, "ai", "traffic.ini")
         )
         self.assertEqual(
             result['status'],
@@ -49,8 +50,8 @@ class TestAutoencoder(unittest.TestCase):
         result = Autoencoder.execute_prediction_model(
             self.sample_data,
             "",
-            os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "ai", "traffic.keras"),
-            os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "ai", "traffic.ini")
+            os.path.join(self.main_dir, "ai", "traffic.keras"),
+            os.path.join(self.main_dir, "ai", "traffic.ini")
         )
         self.assertEqual(
             result['status'],
@@ -60,20 +61,39 @@ class TestAutoencoder(unittest.TestCase):
         Autoencoder.execute_prediction_model(
             self.sample_data,
             "bytes",
-            os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "ai", "traffic.keras"),
-            os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "ai", "traffic.ini")
+            os.path.join(self.main_dir, "ai", "traffic.keras"),
+            os.path.join(self.main_dir, "ai", "traffic.ini")
         )
     def test_invalid_model(self):
         with self.assertRaises(FileNotFoundError):
             Autoencoder(
-                os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "ai", "test.keras"),
-                os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "ai", "traffic.ini")
+                os.path.join(self.main_dir, "ai", "test.keras"),
+                os.path.join(self.main_dir, "ai", "traffic.ini")
             )
+
     def test_invalid_config(self):
         with self.assertRaises(FileNotFoundError):
             Autoencoder(
-                os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "ai", "traffic.keras"),
-                os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "ai", "test.ini")
+                os.path.join(self.main_dir, "ai", "traffic.keras"),
+                os.path.join(self.main_dir, "ai", "test.ini")
+            )
+
+    def test_load_empty_model(self):
+        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+            temp_file_path = temp_file.name
+        with self.assertRaises(Exception):
+            Autoencoder(
+                os.path.join(temp_file_path),
+                os.path.join(self.main_dir, "ai", "traffic.ini")
+            )
+
+    def test_load_empty_conifg(self):
+        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+            temp_file_path = temp_file.name
+        with self.assertRaises(Exception):
+            Autoencoder(
+                os.path.join(self.main_dir, "ai", "traffic.keras"),
+                os.path.join(temp_file_path)
             )
 
 if __name__ == '__main__':

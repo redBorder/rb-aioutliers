@@ -71,7 +71,7 @@ class TestLogger(unittest.TestCase):
     def test_create_log_directory(self):
         log_dir = os.path.join(self.temp_dir.name, 'log_directory')
         logger = Logger(log_file=os.path.join(log_dir, 'test.log'))
-        self.assertTrue(os.path.exists(log_dir)) 
+        self.assertTrue(os.path.exists(log_dir))
         self.assertTrue(os.path.isdir(log_dir))
         self.assertTrue(os.path.exists(os.path.join(log_dir, 'test.log')))
 

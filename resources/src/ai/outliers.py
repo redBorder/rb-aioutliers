@@ -110,7 +110,7 @@ class Autoencoder:
             logger.logger.error(error_msg)
             raise FileNotFoundError(error_msg)
         if not os.path.exists(model_config_file):
-            error_msg=f"Model config file '{os.path.basename(model_file)}' not found"
+            error_msg=f"Model config file '{os.path.basename(model_config_file)}' not found"
             logger.logger.error(error_msg)
             raise FileNotFoundError(error_msg)
 
