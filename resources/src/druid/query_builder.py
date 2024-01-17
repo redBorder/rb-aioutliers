@@ -22,8 +22,10 @@
 Module to modify the druid queries so they can be
 processed by the model.
 """
-
+import os
 import json
+
+from resources.src.logger import logger
 
 class QueryBuilder:
     """
@@ -41,14 +43,39 @@ class QueryBuilder:
               value of the druid query.
         """
         try:
-            with open(aggregations, encoding="utf-8") as agr:
-                self.aggregations = json.load(agr)
-            with open(post_aggregations, encoding="utf-8") as pagr:
-                self.post_aggregations = json.load(pagr)
-        except FileNotFoundError as exc:
-            raise FileNotFoundError("One or both files not found.") from exc
-        except json.JSONDecodeError as exc:
-            raise ValueError("JSON decoding failed. Check the JSON format.") from exc
+            self.aggregations=self.load_json(aggregations)
+        except Exception as e:
+            error_msg=f"Aggregations decoding failed."
+            logger.logger.error(error_msg)
+            raise e
+        try:
+            self.post_aggregations=self.load_json(post_aggregations)
+        except Exception as e:
+            error_msg=f"PostAggregations decoding failed."
+            logger.logger.error(error_msg)
+            raise e
+
+    def load_json(self, path):
+        """
+        Load a json file as a dictionary.
+
+        Args:
+            path (string): path to json file.
+
+        Returns:
+            (dict): deserialized json.
+        """
+        try:
+            with open(path, encoding="utf-8") as json_file:
+                return json.load(json_file)
+        except FileNotFoundError:
+            error_msg=f"File {os.path.basename(path)} not found."
+            logger.logger.error(error_msg)
+            raise FileNotFoundError(error_msg)
+        except json.JSONDecodeError:
+            error_msg=f"Could not decode{os.path.basename(path)} as a Json. Check the JSON format."
+            logger.logger.error(error_msg)
+            raise FileNotFoundError(error_msg)
 
     def granularity_to_seconds(self, granularity):
         """
@@ -62,9 +89,13 @@ class QueryBuilder:
             - (int): number of seconds in the granularity.
         """
         if not isinstance(granularity, str):
-            raise ValueError("Granularity must be a string")
+            error_msg="Granularity must be a string"
+            logger.logger.error(error_msg)
+            raise ValueError(error_msg)
         if len(granularity)==0:
-            raise ValueError("Granularity must be a non-empty string")
+            error_msg="Granularity must be a non-empty string"
+            logger.logger.error(error_msg)
+            raise ValueError(error_msg)
         base_granularities = {
             "minute": 60, "hour": 3600, "day": 86400,
             "fifteen_minute": 900, "thirty_minute": 1800,
@@ -75,8 +106,10 @@ class QueryBuilder:
             return base_granularities[granularity]
         try:
             multiplier = base_granularities[granularity[-1]]
-        except Exception as exc:
-            raise Exception('Invalid granularity') from exc
+        except Exception:
+            error_msg='Invalid granularity'
+            logger.logger.error(error_msg)
+            raise FileNotFoundError(error_msg)
         numbers = int(''.join(filter(str.isdigit, granularity)))
         return numbers * multiplier
 

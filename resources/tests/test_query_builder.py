@@ -25,16 +25,21 @@ from resources.src.druid import query_builder
 
 class TestQueryBuilder(unittest.TestCase):
     def setUp(self) -> None:
-        aggregations_file = os.path.join(os.getcwd(),"resources", "src", "druid", "data", "aggregations.json")
-        post_aggregations_file = os.path.join(os.getcwd(),"resources",  "src", "druid", "data", "postAggregations.json")
-        self.builder = query_builder.QueryBuilder(aggregations_file, post_aggregations_file)
+        self.aggregations_file = os.path.join(os.getcwd(),"resources", "src", "druid", "data", "aggregations.json")
+        self.post_aggregations_file = os.path.join(os.getcwd(),"resources",  "src", "druid", "data", "postAggregations.json")
+        self.builder = query_builder.QueryBuilder(self.aggregations_file, self.post_aggregations_file)
+
+    def test_invalid_files(self):
+        with self.assertRaises(FileNotFoundError):
+            query_builder.QueryBuilder("invalid.json", self.post_aggregations_file)
+        with self.assertRaises(FileNotFoundError):
+            query_builder.QueryBuilder(self.aggregations_file, "invalid.json")
 
     def test_known_granularities_granularities_to_seconds(self):
         test_cases = [
             ("minute", 60),
             ("pt2h", 7200),
             ("P1D", 86400),
-            # Add more known granularities and expected results here
         ]
         for granularity, expected_seconds in test_cases:
             with self.subTest(granularity=granularity):
@@ -51,7 +56,7 @@ class TestQueryBuilder(unittest.TestCase):
 
     def test_invalid_input_granularities_to_seconds(self):
         with self.assertRaises(ValueError):
-            self.builder.granularity_to_seconds(None)  # Test with None input
+            self.builder.granularity_to_seconds(None)
         with self.assertRaises(ValueError):
             self.builder.granularity_to_seconds("")
 
