@@ -29,7 +29,8 @@ class ConfigManager:
             config_file (str): The path to the configuration file to read and write.
         """
         self.config = configparser.ConfigParser()
-        self.config.read(config_file)
+        with open(config_file, 'r') as file:
+            self.config.read_file(file)
 
     def get(self, section, option):
         """
