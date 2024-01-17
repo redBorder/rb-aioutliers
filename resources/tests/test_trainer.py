@@ -34,7 +34,7 @@ class TestTrainer(unittest.TestCase):
     def setUp(self):
         self.test_backup_dir = TemporaryDirectory()
         self.test_backup_path = self.test_backup_dir.name
-        self.trainer = Trainer("resources/tests/model_test.keras", 
+        self.trainer = Trainer("resources/tests/model_test.keras",
                                "resources/tests/model_test_config.ini")
         self.trainer.model_config_file = os.path.join(self.test_backup_path, "dummy_config.ini")
         self.trainer.model_file = os.path.join(self.test_backup_path, "dummy.keras")
