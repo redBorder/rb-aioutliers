@@ -75,7 +75,7 @@ class QueryBuilder:
         except json.JSONDecodeError:
             error_msg=f"Could not decode{os.path.basename(path)} as a Json. Check the JSON format."
             logger.logger.error(error_msg)
-            raise FileNotFoundError(error_msg)
+            raise ValueError(error_msg)
 
     def granularity_to_seconds(self, granularity):
         """
@@ -106,11 +106,11 @@ class QueryBuilder:
             return base_granularities[granularity]
         try:
             multiplier = base_granularities[granularity[-1]]
+            numbers = int(''.join(filter(str.isdigit, granularity)))
         except Exception:
             error_msg='Invalid granularity'
             logger.logger.error(error_msg)
-            raise FileNotFoundError(error_msg)
-        numbers = int(''.join(filter(str.isdigit, granularity)))
+            raise ValueError(error_msg)
         return numbers * multiplier
 
     def modify_aggregations(self, query):

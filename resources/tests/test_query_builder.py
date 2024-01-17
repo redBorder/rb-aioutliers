@@ -21,6 +21,8 @@
 import unittest
 import sys
 import os
+import json
+import tempfile
 from resources.src.druid import query_builder
 
 class TestQueryBuilder(unittest.TestCase):
@@ -29,11 +31,19 @@ class TestQueryBuilder(unittest.TestCase):
         self.post_aggregations_file = os.path.join(os.getcwd(),"resources",  "src", "druid", "data", "postAggregations.json")
         self.builder = query_builder.QueryBuilder(self.aggregations_file, self.post_aggregations_file)
 
-    def test_invalid_files(self):
+    def test_nonexistent_files(self):
         with self.assertRaises(FileNotFoundError):
-            query_builder.QueryBuilder("invalid.json", self.post_aggregations_file)
+            query_builder.QueryBuilder("nonexist.json", self.post_aggregations_file)
         with self.assertRaises(FileNotFoundError):
-            query_builder.QueryBuilder(self.aggregations_file, "invalid.json")
+            query_builder.QueryBuilder(self.aggregations_file, "nonexist.json")
+
+    def test_nonjson_files(self):
+        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+            temp_file_path = temp_file.name
+        with self.assertRaises(ValueError):
+            query_builder.QueryBuilder(temp_file_path, self.post_aggregations_file)
+        with self.assertRaises(ValueError):
+            query_builder.QueryBuilder(self.aggregations_file, temp_file_path)
 
     def test_known_granularities_granularities_to_seconds(self):
         test_cases = [
@@ -59,6 +69,23 @@ class TestQueryBuilder(unittest.TestCase):
             self.builder.granularity_to_seconds(None)
         with self.assertRaises(ValueError):
             self.builder.granularity_to_seconds("")
+        with self.assertRaises(ValueError):
+            self.builder.granularity_to_seconds("pttenm")
+        with self.assertRaises(ValueError):
+            self.builder.granularity_to_seconds("x")
+
+    def test_modify_granularity(self):
+        query1 = {
+            "granularity": {
+                "period": "pt5m"
+            }
+        }
+        query2 = {
+            "granularity": {
+                "period": "pt10m"
+            }
+        }
+        self.assertEqual(self.builder.modify_granularity(query1, "pt10m"), query2)
 
     def test_modify_aggregations(self):
         query = {
