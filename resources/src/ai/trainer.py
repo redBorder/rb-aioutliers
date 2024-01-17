@@ -31,11 +31,9 @@ import datetime
 import configparser
 from datetime import datetime
 from tensorflow.keras.optimizers import AdamW
-try:
-    from ai.outliers import Autoencoder
-except:
-    from src.ai.outliers import Autoencoder
-    sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from src.ai.outliers import Autoencoder
 
 """
 This module extends the Autoencoder class to allow further training of the model.
