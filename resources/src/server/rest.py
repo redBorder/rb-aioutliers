@@ -96,7 +96,7 @@ class APIServer:
                 error_message = "Error decoding query"
                 logger.logger.error(error_message + " -> " + str(e))
                 return self.return_error(error=error_message)
-            logger.logger.info("Druid query successfully decoded and loaded as JSON.")
+            logger.logger.info("Druid query successfully decoded and loaded.")
 
             model = request.form.get('model')
             if model is None:
