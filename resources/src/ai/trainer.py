@@ -33,6 +33,7 @@ from datetime import datetime
 from tensorflow.keras.optimizers import AdamW
 
 from resources.src.ai.outliers import Autoencoder
+from resources.src.logger.logger import logger
 
 """
 This module extends the Autoencoder class to allow further training of the model.
@@ -70,10 +71,14 @@ class Trainer(Autoencoder):
         """
         if os.path.exists(save_model_file):
             if not os.access(save_model_file, os.W_OK):
-                raise PermissionError(f"Permission denied: Cannot overwrite '{save_model_file}'")
+                error_msg = f"Permission denied: Cannot overwrite '{save_model_file}'"
+                logger.logger.error(error_msg)
+                raise PermissionError(error_msg)
         if os.path.exists(save_config_file):
             if not os.access(save_config_file, os.W_OK):
-                raise PermissionError(f"Permission denied: Cannot overwrite '{save_config_file}'")
+                error_msg = f"Permission denied: Cannot overwrite '{save_config_file}'"
+                logger.logger.error(error_msg)
+                raise PermissionError(error_msg)
         self.model.save(save_model_file)
         new_model_config = configparser.ConfigParser()
         new_model_config.add_section('Columns')

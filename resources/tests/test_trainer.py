@@ -77,6 +77,16 @@ class TestTrainer(unittest.TestCase):
         with open(save_config_file, 'w'):
             pass
         os.chmod(save_model_file, 0o444)
+        with self.assertRaises(PermissionError):
+            self.trainer.save_model(save_model_file, save_config_file)
+
+    def test_save_model_config_permission_denied(self):
+        save_model_file = os.path.join(self.test_backup_path, 'unauthorized.keras')
+        save_config_file = os.path.join(self.test_backup_path, 'unauthorized.ini')
+        with open(save_model_file, 'w'):
+            pass
+        with open(save_config_file, 'w'):
+            pass
         os.chmod(save_config_file, 0o444)
         with self.assertRaises(PermissionError):
             self.trainer.save_model(save_model_file, save_config_file)
