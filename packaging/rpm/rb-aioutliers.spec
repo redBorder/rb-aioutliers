@@ -55,8 +55,12 @@ install -m 0644 resources/systemd/rb-aioutliers-rq.service %{buildroot}/usr/lib/
 %post
 # Install Python dependencies
 pip3 install virtualenv
-python3 -m venv aioutliers
-source aioutliers/bin/activate
+
+# Create and activate the virtual environment
+python3 -m venv /opt/rb-aioutliers/aioutliers
+source /opt/rb-aioutliers/aioutliers/bin/activate
+
+# Install project dependencies
 pip3 install -r /opt/rb-aioutliers/resources/src/requirements.txt
 
 %changelog

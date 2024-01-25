@@ -15,7 +15,7 @@ Group=rb-aioutliers
 KillSignal=SIGTERM
 Type=simple
 
-ExecStart=ENVIRONMENT=production python3 resources/src/__main__.py
+ExecStart=/opt/rb-aioutliers/aioutliers/bin/python3 /opt/rb-aioutliers/resources/src/__main__.py
 
 TimeoutStopSec=60
 
