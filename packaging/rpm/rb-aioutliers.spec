@@ -8,6 +8,8 @@ License: GPL-2.0
 URL: https://github.com/redBorder/rb-aioutliers
 Source0: %{name}-%{version}.tar.gz
 
+Requires: python3.9-pip
+
 %description
 This package provides the RedBorder Python AI Outliers Detection Service.
 
@@ -44,7 +46,7 @@ install -m 0644 resources/systemd/rb-aioutliers-rq.service %{buildroot}/usr/lib/
 
 %post
 # Install Python dependencies
-pip install -r /opt/rb-aioutliers/resources/src/requirements.txt
+pip3 install -r /opt/rb-aioutliers/resources/src/requirements.txt
 
 %changelog
 * Mon Sep 25 2023 Miguel Álvarez <malvarez@redborder.com> - 0.0.2-1
