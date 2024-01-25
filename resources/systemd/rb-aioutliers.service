@@ -7,7 +7,7 @@ After=network.target
 TimeoutStartSec=30
 RestartSec=10
 Restart=always
-WorkingDirectory=/opt/rb-aioutliers/
+WorkingDirectory=/opt/rb-aioutliers/resources
 
 User=rb-aioutliers
 Group=rb-aioutliers

@@ -64,7 +64,7 @@ class Logger:
         if log_file is None:
             log_file = './outliers.log'
             try:
-                from src.config import configmanager
+                from config import configmanager
                 config = configmanager.ConfigManager(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "config.ini"))
                 log_file = config.get('Logger', 'log_file')
             except Exception as e:
