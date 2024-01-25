@@ -54,7 +54,10 @@ install -m 0644 resources/systemd/rb-aioutliers-rq.service %{buildroot}/usr/lib/
 
 %post
 # Install Python dependencies
-sudo -u rb-aioutliers pip3 install -r /opt/rb-aioutliers/resources/src/requirements.txt
+pip3 install virtualenv
+python3 -m venv aioutliers
+source aioutliers/bin/activate
+pip3 install -r /opt/rb-aioutliers/resources/src/requirements.txt
 
 %changelog
 * Mon Sep 25 2023 Miguel Álvarez <malvarez@redborder.com> - 0.0.2-1
