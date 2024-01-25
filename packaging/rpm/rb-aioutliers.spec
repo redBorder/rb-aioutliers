@@ -15,6 +15,13 @@ This package provides the RedBorder Python AI Outliers Detection Service.
 
 %exclude /opt/rb-aioutliers/.git
 
+%pre
+getent group %{name} >/dev/null || groupadd -r %{name}
+getent passwd %{name} >/dev/null || \
+    useradd -r -g %{name} -d / -s /sbin/nologin \
+    -c "User of %{name} service" %{name}
+exit 0
+
 %prep
 %setup -qn %{name}-%{version}
 
