@@ -46,10 +46,11 @@ install -m 0644 resources/systemd/rb-aioutliers-rq.service %{buildroot}/usr/lib/
 
 %files
 %defattr(-,root,root,-)
-/opt/rb-aioutliers/*
 /usr/lib/systemd/system/rb-aioutliers.service
 /usr/lib/systemd/system/rb-aioutliers-train.service
 /usr/lib/systemd/system/rb-aioutliers-rq.service
+%defattr(-,rb-aioutliers,rb-aioutliers,-)
+/opt/rb-aioutliers/*
 
 %post
 # Install Python dependencies
