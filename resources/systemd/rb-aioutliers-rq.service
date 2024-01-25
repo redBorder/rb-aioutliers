@@ -15,7 +15,7 @@ Group=root
 KillSignal=SIGTERM
 Type=simple
 
-ExecStart=/usr/bin/scl enable rh-python38 -- rq worker --with-scheduler --url redis://127.0.0.1:16379
+ExecStart=rq worker --with-scheduler --url redis://127.0.0.1:16379
 
 TimeoutStopSec=60
 

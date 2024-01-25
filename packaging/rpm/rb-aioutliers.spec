@@ -8,8 +8,6 @@ License: GPL-2.0
 URL: https://github.com/redBorder/rb-aioutliers
 Source0: %{name}-%{version}.tar.gz
 
-Requires: rh-python38
-
 %description
 This package provides the RedBorder Python AI Outliers Detection Service.
 
@@ -28,9 +26,6 @@ cd %{_builddir}/%{name}-%{version}
 # Create the destination directory for the installation
 install -d -m 0755 %{buildroot}/opt/rb-aioutliers
 
-# Enable the shell option to include hidden files
-shopt -s dotglob
-
 # Install all files (including hidden ones) to the destination directory
 cp -r * %{buildroot}/opt/rb-aioutliers
 
@@ -48,9 +43,6 @@ install -m 0644 resources/systemd/rb-aioutliers-rq.service %{buildroot}/usr/lib/
 /usr/lib/systemd/system/rb-aioutliers-rq.service
 
 %post
-# Activate the Python virtual environment
-source /opt/rh/rh-python38/enable
-
 # Install Python dependencies
 pip install -r /opt/rb-aioutliers/resources/src/requirements.txt
 

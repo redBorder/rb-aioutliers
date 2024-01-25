@@ -15,7 +15,7 @@ Group=root
 KillSignal=SIGTERM
 Type=simple
 
-ExecStart=/usr/bin/scl enable rh-python38 -- ENVIRONMENT=production python3 resources/src/__main__.py
+ExecStart=ENVIRONMENT=production python3 resources/src/__main__.py
 
 TimeoutStopSec=60
 
