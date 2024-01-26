@@ -37,7 +37,6 @@ install -d -m 0755 %{buildroot}/opt/rb-aioutliers
 
 #Create outliers log file
 install -d -m 0755 %{buildroot}/var/log/rb-aioutliers
-install -m 0644 outliers.log %{buildroot}/var/log/rb-aioutliers/
 
 # Install all files (including hidden ones) to the destination directory
 cp -r * %{buildroot}/opt/rb-aioutliers
@@ -55,7 +54,7 @@ install -m 0644 resources/systemd/rb-aioutliers-rq.service %{buildroot}/usr/lib/
 /usr/lib/systemd/system/rb-aioutliers-rq.service
 %defattr(-,rb-aioutliers,rb-aioutliers,-)
 /opt/rb-aioutliers/*
-/var/log/rb-aioutliers/outliers.log
+/var/log/rb-aioutliers/*
 
 %post
 # Install Python dependencies
