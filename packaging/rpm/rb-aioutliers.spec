@@ -40,7 +40,7 @@ install -d -m 0755 %{buildroot}/var/log/rb-aioutliers
 
 # Install all files (including hidden ones) to the destination directory
 cp -r * %{buildroot}/opt/rb-aioutliers
-touch %{buildroot}/opt/rb-aioutliers/outliers.log
+touch %{buildroot}/var/log/rb-aioutliers/outliers.log
 
 # Create the systemd service directory and install the service file
 install -d -m 0755 %{buildroot}/usr/lib/systemd/system/
