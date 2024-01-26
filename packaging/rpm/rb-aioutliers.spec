@@ -35,6 +35,10 @@ cd %{_builddir}/%{name}-%{version}
 # Create the destination directory for the installation
 install -d -m 0755 %{buildroot}/opt/rb-aioutliers
 
+#Create outliers log file
+install -d -m 0755 %{buildroot}/var/log/rb-aioutliers
+install -m 0644 outliers.log %{buildroot}/var/log/rb-aioutliers/
+
 # Install all files (including hidden ones) to the destination directory
 cp -r * %{buildroot}/opt/rb-aioutliers
 
