@@ -51,6 +51,7 @@ install -m 0644 resources/systemd/rb-aioutliers-rq.service %{buildroot}/usr/lib/
 /usr/lib/systemd/system/rb-aioutliers-rq.service
 %defattr(-,rb-aioutliers,rb-aioutliers,-)
 /opt/rb-aioutliers/*
+/var/log/rb-aioutliers/outliers.log
 
 %post
 # Install Python dependencies
