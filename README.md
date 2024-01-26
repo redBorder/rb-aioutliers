@@ -9,7 +9,7 @@
 
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FredBorder%2Frb-aioutliers.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FredBorder%2Frb-aioutliers?ref=badge_large)
 
-Main package to install redborder ai outliers in Centos7
+Main package to install redborder AI outliers in Rocky Linux 9
 
 #### Platforms
 
