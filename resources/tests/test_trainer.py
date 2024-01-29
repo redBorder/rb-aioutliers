@@ -59,14 +59,15 @@ class TestTrainer(unittest.TestCase):
         self.assertEqual('0.2', general_section.get('STD_LOSS'))
 
     def test_prepare_data_for_training(self):
-        data = np.zeros((100,100))
-        prep_data = self.trainer.prepare_data_for_training(data)
+        with open("./resources/tests/outliers_test_data.json", "r") as file:
+            raw_data = [json.load(file)]
+        prep_data = self.trainer.prepare_data_for_training(raw_data)
         self.assertEqual(prep_data.shape[1], self.trainer.num_window * self.trainer.window_size)
-        self.assertEqual(prep_data.shape[2], 100)
+        self.assertEqual(prep_data.shape[2], 20)
 
     def test_train(self):
         with open("./resources/tests/outliers_test_data.json", "r") as file:
-            raw_data = json.load(file)
+            raw_data = [json.load(file)]
         self.trainer.train(raw_data, epochs=10, batch_size=32, backup_path=self.test_backup_path)
 
     def test_save_model_permission_denied(self):

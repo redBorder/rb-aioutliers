@@ -141,7 +141,6 @@ class RbOutlierTrainJob:
                 os.path.join(self.main_dir, "ai", f"{model_name}.keras"),
                 os.path.join(self.main_dir, "ai", f"{model_name}.ini"),
             )
-            self.get_model_filter(model_name)
             self.process_model_data(model_name, query, redborder_ntp, manager_time, druid_client)
 
     def initialize_ntp_client(self):
@@ -231,7 +230,7 @@ class RbOutlierTrainJob:
         Process data and train the model.
 
         Args:
-            model_name (dict): Model identifier.
+            model_name (str): Model identifier.
             query (dict): The query to be modified.
             redborder_ntp (NTPClient): The NTP client.
             manager_time (datetime): The manager time.
@@ -239,12 +238,17 @@ class RbOutlierTrainJob:
 
         This function processes data, modifies the query, and trains the model.
         """
+        rb_granularities=["pt1m", "pt2m", "pt5m", "pt15m", "pt30m", "pt1h", "pt2h", "pt8h"]
         start_time = redborder_ntp.time_to_iso8601_time(redborder_ntp.get_substracted_day_time(manager_time))
         end_time = redborder_ntp.time_to_iso8601_time(manager_time)
-        query = self.query_builder.modify_filter(query, model_name)
+        model_filter = self.get_model_filter(model_name)
+        query = self.query_builder.modify_filter(query, model_filter)
         query = self.query_builder.set_time_origin(query, start_time)
         query = self.query_builder.set_time_interval(query, start_time, end_time)
-        traffic_data = druid_client.execute_query(query)
+        traffic_data=[]
+        for gran in rb_granularities:
+            temp_query = self.query_builder.modify_granularity(query,gran)
+            traffic_data.append(druid_client.execute_query(temp_query))
         self.trainer.train(
             traffic_data,
             int(config.get("Outliers", "epochs")),
