@@ -24,8 +24,8 @@ import os, sys
 import boto3
 from moto import mock_s3
 import uuid
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from src.redborder.s3 import S3
+
+from resources.src.redborder.s3 import S3
 
 @mock_s3
 class TestS3Methods(unittest.TestCase):

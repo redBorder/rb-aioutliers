@@ -21,23 +21,35 @@
 import unittest
 import sys
 import os
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
-from src.druid import query_builder
+import json
+import tempfile
+from resources.src.druid import query_builder
 
 class TestQueryBuilder(unittest.TestCase):
     def setUp(self) -> None:
-        aggregations_file = os.path.join(os.getcwd(),"resources", "src", "druid", "data", "aggregations.json")
-        post_aggregations_file = os.path.join(os.getcwd(),"resources",  "src", "druid", "data", "postAggregations.json")
-        self.builder = query_builder.QueryBuilder(aggregations_file, post_aggregations_file)
+        self.aggregations_file = os.path.join(os.getcwd(),"resources", "src", "druid", "data", "aggregations.json")
+        self.post_aggregations_file = os.path.join(os.getcwd(),"resources",  "src", "druid", "data", "postAggregations.json")
+        self.builder = query_builder.QueryBuilder(self.aggregations_file, self.post_aggregations_file)
+
+    def test_nonexistent_files(self):
+        with self.assertRaises(FileNotFoundError):
+            query_builder.QueryBuilder("nonexist.json", self.post_aggregations_file)
+        with self.assertRaises(FileNotFoundError):
+            query_builder.QueryBuilder(self.aggregations_file, "nonexist.json")
+
+    def test_nonjson_files(self):
+        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+            temp_file_path = temp_file.name
+        with self.assertRaises(ValueError):
+            query_builder.QueryBuilder(temp_file_path, self.post_aggregations_file)
+        with self.assertRaises(ValueError):
+            query_builder.QueryBuilder(self.aggregations_file, temp_file_path)
 
     def test_known_granularities_granularities_to_seconds(self):
         test_cases = [
             ("minute", 60),
             ("pt2h", 7200),
             ("P1D", 86400),
-            # Add more known granularities and expected results here
         ]
         for granularity, expected_seconds in test_cases:
             with self.subTest(granularity=granularity):
@@ -54,9 +66,26 @@ class TestQueryBuilder(unittest.TestCase):
 
     def test_invalid_input_granularities_to_seconds(self):
         with self.assertRaises(ValueError):
-            self.builder.granularity_to_seconds(None)  # Test with None input
+            self.builder.granularity_to_seconds(None)
         with self.assertRaises(ValueError):
             self.builder.granularity_to_seconds("")
+        with self.assertRaises(ValueError):
+            self.builder.granularity_to_seconds("pttenm")
+        with self.assertRaises(ValueError):
+            self.builder.granularity_to_seconds("x")
+
+    def test_modify_granularity(self):
+        query1 = {
+            "granularity": {
+                "period": "pt5m"
+            }
+        }
+        query2 = {
+            "granularity": {
+                "period": "pt10m"
+            }
+        }
+        self.assertEqual(self.builder.modify_granularity(query1, "pt10m"), query2)
 
     def test_modify_aggregations(self):
         query = {
@@ -70,11 +99,11 @@ class TestQueryBuilder(unittest.TestCase):
         self.assertEqual(modified_query["granularity"]["period"], "pt5m")
         self.assertEqual(modified_query["postAggregations"][0]["fields"][1]["value"] , 300)
 
-    def test_modify_flow_sensor(self):
-        query = {"filter": {"type": "selector", "dimension": "sensor_name", "value": "FlowSensor1"}}
-        sensor = "FlowSensor2"
-        modified_query = self.builder.modify_flow_sensor(query, sensor)
-        self.assertEqual(modified_query["filter"]["value"], "FlowSensor2")
+    def test_modify_filter(self):
+        query = {"filter": {"type": "selector", "dimension": "sensor_name", "value": "FlowSensor"}}
+        filter = {"type": "test1", "dimension": "test2", "value": "test3"}
+        modified_query = self.builder.modify_filter(query, filter)
+        self.assertEqual(modified_query["filter"], filter)
 
     def test_set_time_origin(self):
         query = {"granularity": {"origin": "2023-01-01T00:00:00Z"}}

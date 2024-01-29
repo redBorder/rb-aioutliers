@@ -27,6 +27,7 @@ jobs:
 
     - name: Install safety for security checks
       run: |
+        pip install cffi
         pip install safety
 
     - name: Run safety check

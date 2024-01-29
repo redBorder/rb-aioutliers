@@ -28,14 +28,13 @@ End of important OS Variables
 '''
 import sys
 import datetime
+import numpy as np
 import configparser
 from datetime import datetime
 from tensorflow.keras.optimizers import AdamW
-try:
-    from ai.outliers import Autoencoder
-except:
-    from src.ai.outliers import Autoencoder
-    sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from resources.src.ai.outliers import Autoencoder
+from resources.src.logger.logger import logger
 
 """
 This module extends the Autoencoder class to allow further training of the model.
@@ -73,10 +72,14 @@ class Trainer(Autoencoder):
         """
         if os.path.exists(save_model_file):
             if not os.access(save_model_file, os.W_OK):
-                raise PermissionError(f"Permission denied: Cannot overwrite '{save_model_file}'")
+                error_msg = f"Permission denied: Cannot overwrite '{save_model_file}'"
+                logger.logger.error(error_msg)
+                raise PermissionError(error_msg)
         if os.path.exists(save_config_file):
             if not os.access(save_config_file, os.W_OK):
-                raise PermissionError(f"Permission denied: Cannot overwrite '{save_config_file}'")
+                error_msg = f"Permission denied: Cannot overwrite '{save_config_file}'"
+                logger.logger.error(error_msg)
+                raise PermissionError(error_msg)
         self.model.save(save_model_file)
         new_model_config = configparser.ConfigParser()
         new_model_config.add_section('Columns')
@@ -107,18 +110,18 @@ class Trainer(Autoencoder):
         """
         return data
 
-    def prepare_data_for_training(self, data, augment = False):
+    def prepare_data_for_training(self, raw_data, augment = False):
         """
         Prepares data to be used for training the model.
 
         Args:
-            data (numpy ndarray): data to be used for training.
-
+            raw_data (list): list with the response form one or more druid queries.
             augment (boolean): set to True to generate more data for training.
 
         Returns:
             prep_data (numpy ndarray): transformed data for its use in the model.
         """
+        data = np.concatenate([self.input_json(query_json)[0] for query_json in raw_data], axis = 0)
         prep_data = self.rescale(data)
         if augment:
             #TODO actually augment data
@@ -132,7 +135,7 @@ class Trainer(Autoencoder):
         Given a druid query response, it is fed to the model for training.
 
         Args:
-            raw_data (json): response form a druid query.
+            raw_data (list): list with the response form one or more druid queries.
             epochs (int): how many times should the model train on the data.
             batch_size (int): how many slices should the model take at once
             for training.
@@ -142,8 +145,7 @@ class Trainer(Autoencoder):
             backup_path = "./backups/"
         date = datetime.now().strftime("%y-%m-%dT%H:%M")
         self.save_model(f"{backup_path}{date}.keras",f"{backup_path}{date}.ini")
-        data = self.input_json(raw_data)[0]
-        prep_data = self.prepare_data_for_training(data)
+        prep_data = self.prepare_data_for_training(raw_data)
         self.model.fit(x=prep_data, y=prep_data, epochs = epochs, batch_size = batch_size, verbose = 0)
         loss = self.model_loss(prep_data, self.model.predict(prep_data), single_value=False).numpy()
         self.avg_loss = 0.9*self.avg_loss + 0.1*loss.mean()

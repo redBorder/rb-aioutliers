@@ -19,14 +19,14 @@
 
 
 import sys, os, time
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from rq import Queue
 from redis import Redis
 from datetime import datetime
 from croniter import croniter
-from server.rest import config
-from logger.logger import logger
-from redborder.async_jobs.train_job import RbOutlierTrainJob
+
+from resources.src.server.rest import config
+from resources.src.logger.logger import logger
+from resources.src.redborder.async_jobs.train_job import RbOutlierTrainJob
 
 class RqManager:
     def __init__(self) -> None:
@@ -69,13 +69,13 @@ class RqManager:
         """
         return config.get("Redis", "rd_secret")
 
-    def fetch_flow_sensors(self):
+    def fetch_model_names(self):
         """
-        Fetch flow sensors from the config file
+        Fetch model names from the config file
         Returns:
-            str: flow sensors
+            str: model names
         """
-        return config.get("Outliers", "target_sensors")
+        return config.get("Outliers", "model_names")
 
     def cron_to_rq_datetime(self, cron_expression):
         """
@@ -111,7 +111,7 @@ class RqManager:
         outlier_job = RbOutlierTrainJob()
         crontime = self.fetch_queue_default_job_hour()
         cron_schedule = self.cron_to_rq_datetime(crontime)
-        self.rq_queue.enqueue_at(cron_schedule, outlier_job.train_job, flow_sensors=self.fetch_flow_sensors())
+        self.rq_queue.enqueue_at(cron_schedule, outlier_job.train_job, model_names=self.fetch_model_names())
 
         current_time = time.time()
         next_execution_time = cron_schedule.timestamp()
@@ -120,4 +120,3 @@ class RqManager:
         logger.info("Waiting for re-queue...")
         time.sleep(delay)
         self.schedule_train_job()
-

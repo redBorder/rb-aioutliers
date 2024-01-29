@@ -20,8 +20,8 @@
 
 import datetime
 import unittest, sys, os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from src.rbntp.ntplib import NTPClient
+
+from resources.src.rbntp.ntplib import NTPClient
 
 class TestNTPClient(unittest.TestCase):
     def test_get_ntp_time(self):
