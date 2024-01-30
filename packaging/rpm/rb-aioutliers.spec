@@ -69,6 +69,8 @@ source /opt/rb-aioutliers/aioutliers/bin/activate
 pip3 install -r /opt/rb-aioutliers/resources/src/requirements.txt
 
 %changelog
+* Tue Jan 30 2024 Miguel Álvarez <malvarez@redborder.com> - 0.0.3-1
+- Adapt for rhel9 build and user/group creation
 * Mon Sep 25 2023 Miguel Álvarez <malvarez@redborder.com> - 0.0.2-1
 - Update AI model, create query builder and clean code
 * Thu Sep 21 2023 Miguel Negrón <manegron@redborder.com> - 0.0.1-1
