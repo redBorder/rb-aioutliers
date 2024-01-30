@@ -23,18 +23,19 @@ import sys
 import logging
 import unittest
 from io import StringIO
+from unittest.mock import Mock, patch
+from tempfile import TemporaryDirectory
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from src.logger.logger import Logger
+from resources.src.logger.logger import Logger
 
 class TestLogger(unittest.TestCase):
     def setUp(self):
         self.temp_log_file = './test_log.log'
         self.logger = Logger(log_file=self.temp_log_file, log_level=logging.DEBUG)
+        self.temp_dir = TemporaryDirectory()
 
     def tearDown(self):
-        if os.path.exists(self.temp_log_file):
-            os.remove(self.temp_log_file)
+        self.temp_dir.cleanup()
 
     def test_info_logging(self):
         self.logger.info("Test info message")
@@ -59,6 +60,18 @@ class TestLogger(unittest.TestCase):
             log_content = log_file.read()
 
         self.assertTrue("This is a debug message" in log_content)
+
+
+    def test_invalid_config_manager(self,):
+        log_file=self.logger.get_log_file('./invalid_config.ini')
+        self.assertEqual(log_file, "./outliers.log")
+
+    def test_create_log_directory(self):
+        log_dir = os.path.join(self.temp_dir.name, 'log_directory')
+        logger = Logger(log_file=os.path.join(log_dir, 'test.log'))
+        self.assertTrue(os.path.exists(log_dir))
+        self.assertTrue(os.path.isdir(log_dir))
+        self.assertTrue(os.path.exists(os.path.join(log_dir, 'test.log')))
 
 if __name__ == '__main__':
     unittest.main()

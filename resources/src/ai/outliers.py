@@ -33,8 +33,7 @@ import configparser
 import pandas as pd
 import tensorflow as tf
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from logger import logger
+from resources.src.logger import logger
 
 class Autoencoder:
     """
@@ -61,8 +60,11 @@ class Autoencoder:
                 loss_mult_minute (float): Extra penalty in the loss function for guessing wrong
                   'minute' field.
         """
-        self.check_existence(model_file, model_config_file)
-
+        try:
+            self.check_existence(model_file, model_config_file)
+        except FileNotFoundError as e:
+            logger.logger.error("Could not find the asked model files")
+            raise e
         try:
             model_config = configparser.ConfigParser()
             model_config.read(model_config_file)
@@ -77,28 +79,24 @@ class Autoencoder:
             self.num_window = int(general_section.get('NUM_WINDOWS', 0))
             self.loss_mult_metric = float(general_section.get('LOSS_MULT_METRIC', 0))
             self.loss_mult_minute = float(general_section.get('LOSS_MULT_MINUTE', 0))
-        except FileNotFoundError:
-            logger.logger.error(f"Error: Model file '{model_config_file}' not found.")
-        except (OSError, ValueError) as e:
-            logger.logger.error(f"Error loading model conif: {e}")
+        except Exception as e:
+            logger.logger.error(f"Could not load model conif: {e}")
+            raise e
         try:
             self.model = tf.keras.models.load_model(
                 model_file,
                 compile=False
             )
-        except FileNotFoundError:
-            logger.logger.error(f"Error: Model file '{model_file}' not found.")
-        except (OSError, ValueError) as e:
-            logger.logger.error(f"Error loading the model: {e}")
+        except Exception as e:
+            logger.logger.error(f"Could not load model {e}")
+            raise e
 
     def check_existence(self, model_file, model_config_file):
         """
         Check existence of model files and copy them if missing.
 
         This function checks if the provided `model_file` and `model_config_file` exist in their
-        respective paths. If they don't exist, it renames and copies the corresponding default
-        files from the 'traffic.keras' and 'traffic.ini' files, which are expected to be located
-        in the same directory as the target files.
+        respective paths. If they don't exist, it raises an error.
 
         Args:
             model_file (str): Path to the target model file.
@@ -107,12 +105,13 @@ class Autoencoder:
                 - The full path to the model configuration file you want to check and potentially copy.
         """
         if not os.path.exists(model_file):
-            os.rename(f"{os.path.dirname(model_file)}/traffic.keras", model_file)
-            shutil.copy(model_file, f"{os.path.dirname(model_file)}/traffic.keras")
+            error_msg=f"Model file '{os.path.basename(model_file)}' not found"
+            logger.logger.error(error_msg)
+            raise FileNotFoundError(error_msg)
         if not os.path.exists(model_config_file):
-            os.rename(f"{os.path.dirname(model_config_file)}/traffic.ini", model_config_file)
-            shutil.copy(model_config_file, f"{os.path.dirname(model_config_file)}/traffic.ini")
-
+            error_msg=f"Model config file '{os.path.basename(model_config_file)}' not found"
+            logger.logger.error(error_msg)
+            raise FileNotFoundError(error_msg)
 
     def rescale(self, data):
         """
@@ -253,12 +252,20 @@ class Autoencoder:
 
         Args:
             metric (string): the name of field being analyzed.
-            raw_json (Json): druid Json response with the data.
+            raw_json (dict): deserialized Json druid response with the data.
 
         Returns:
-            (Json): Json with the anomalies and predictions for the data with RedBorder
+            (dict): deserialized Json with the anomalies and predictions for the data with RedBorder
               prediction Json format.
         """
+        if metric=="" or metric not in self.metrics:
+            error_msg = f"Model has not a metric called {metric}"
+            logger.logger.error(error_msg)
+            raise ValueError(error_msg)
+        if not raw_json:
+            error_msg = f"Input data is empty"
+            logger.logger.error(error_msg)
+            raise ValueError(error_msg)
         threshold = self.avg_loss+5*self.std_loss
         data, timestamps = self.input_json(raw_json)
         predicted, loss = self.calculate_predictions(data)
@@ -289,7 +296,7 @@ class Autoencoder:
         Also returns the timestamps for each entry.
 
         Args:
-            raw_json (Json): druid Json response with the data.
+            raw_json (dict): deserialized Json druid response with the data.
 
         Returns:
             data (numpy.ndarray): transformed data.
@@ -320,7 +327,7 @@ class Autoencoder:
             predicted (pandas.DataFrame): predictions made by the model.
 
         Returns:
-            (Json): Json with the anomalies and predictions for the data with RedBorder prediction
+            (dict): deserialized Json with the anomalies and predictions for the data with RedBorder prediction
               Json format.
         """
         predicted = predicted.copy()
@@ -335,9 +342,18 @@ class Autoencoder:
 
     @staticmethod
     def execute_prediction_model(data, metric, model_file, model_config):
-        autoencoder = Autoencoder(model_file, model_config)
-        result = autoencoder.compute_json(metric, data)
-        return result
+        try:
+            autoencoder = Autoencoder(model_file, model_config)
+            return autoencoder.compute_json(metric, data)
+        except Exception as e:
+            logger.logger.error("Couldn't execute model")
+            return Autoencoder.return_error(e)
     @staticmethod
     def return_error(error="error"):
+        """
+        Returns an adequate formatted JSON for whenever there is an error.
+
+        Args:
+            error (string): message detailing what type of error has been fired.
+        """
         return { "status": "error", "msg":error }

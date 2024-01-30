@@ -22,6 +22,8 @@ import os
 import logging
 from pylogrus import PyLogrus
 
+from resources.src.config import configmanager
+
 class CustomFormatter(logging.Formatter):
     def __init__(self, fmt=None, datefmt=None):
         """
@@ -90,6 +92,24 @@ class Logger:
             self.logger.addHandler(file_handler)
 
         self.logger.setLevel(log_level)
+
+    def get_log_file(self, config_file):
+        """
+        Get the path to the log file.
+
+        Args:
+            config_file (str): The path to the config file being used.
+
+        Returns:
+            (str): path to the log file.
+        """
+
+        try:
+            return configmanager.ConfigManager(config_file).get('Logger', 'log_file')
+        except Exception as e:
+            print("Could not resolve ConfigManager, default set to ./outliers.log")
+            return './outliers.log'
+
 
     def info(self, message):
         """

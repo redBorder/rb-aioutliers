@@ -23,8 +23,7 @@ import os
 import sys
 import numpy as np
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from src.ai.shallow_outliers import ShallowOutliers
+from resources.src.ai.shallow_outliers import ShallowOutliers
 
 class TestShallowOutliers(unittest.TestCase):
 

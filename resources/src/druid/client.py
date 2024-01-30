@@ -40,7 +40,7 @@ class DruidClient:
 
         Returns:
             dict: The response from the Druid query in JSON format.
-        
+
         Raises:
             Exception: If the Druid query fails with a non-200 status code.
         """
