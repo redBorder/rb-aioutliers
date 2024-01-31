@@ -22,7 +22,7 @@ import os, sys
 import unittest
 from rq import Queue
 from unittest.mock import Mock, patch, create_autospec
-from datetime import datetime
+from datetime import datetime, timedelta
 from croniter import croniter
 
 from resources.src.redborder.rq import RqManager
@@ -78,13 +78,8 @@ class TestRqManager(unittest.TestCase):
     def test_cron_to_rq_datetime(self):
         cron_expression = "30 3 * * *"
         current_date = datetime.now()
-
-        year = current_date.year
-        month = current_date.month
-        day = current_date.day+1
-
-        expected_datetime = datetime(year, month, day, 3, 30)
-
+        expected_datetime = current_date+timedelta(days=1)
+        expected_datetime = expected_datetime.replace(hour=3,minute=30,second=0,microsecond=0)
         result_datetime = self.rq_manager.cron_to_rq_datetime(cron_expression)
         self.assertEqual(result_datetime, expected_datetime)
 
