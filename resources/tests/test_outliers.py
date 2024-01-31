@@ -23,6 +23,7 @@ import os
 import sys
 import json
 import tempfile
+import numpy as np
 
 from resources.src.ai.outliers import Autoencoder
 
@@ -49,6 +50,17 @@ class TestAutoencoder(unittest.TestCase):
         result = Autoencoder.execute_prediction_model(
             self.sample_data,
             "",
+            os.path.join(self.main_dir, "ai", "traffic.keras"),
+            os.path.join(self.main_dir, "ai", "traffic.ini")
+        )
+        self.assertEqual(
+            result['status'],
+            'error'
+        )
+    def test_model_execution_with_too_little_data(self):
+        result = Autoencoder.execute_prediction_model(
+            self.sample_data[:10],
+            "bytes",
             os.path.join(self.main_dir, "ai", "traffic.keras"),
             os.path.join(self.main_dir, "ai", "traffic.ini")
         )
@@ -85,7 +97,6 @@ class TestAutoencoder(unittest.TestCase):
                 os.path.join(temp_file_path),
                 os.path.join(self.main_dir, "ai", "traffic.ini")
             )
-
     def test_load_empty_conifg(self):
         with tempfile.NamedTemporaryFile(delete=False) as temp_file:
             temp_file_path = temp_file.name
@@ -94,6 +105,17 @@ class TestAutoencoder(unittest.TestCase):
                 os.path.join(self.main_dir, "ai", "traffic.keras"),
                 os.path.join(temp_file_path)
             )
+
+    def test_flatten_slice_identity(self):
+        TestAutoencoder = Autoencoder(
+            os.path.join(self.main_dir, "ai", "traffic.keras"),
+            os.path.join(self.main_dir, "ai", "traffic.ini")
+        )
+        np.random.seed(0)
+        rand_data = np.random.rand(32, 3)
+        sliced_data = TestAutoencoder.slice(rand_data)
+        flattened_data = TestAutoencoder.flatten(sliced_data)
+        self.assertTrue(np.allclose(flattened_data, rand_data))
 
 if __name__ == '__main__':
     unittest.main()
