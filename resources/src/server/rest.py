@@ -94,7 +94,7 @@ class APIServer:
                 druid_query = json.loads(druid_query)
             except Exception as e:
                 error_message = "Error decoding query"
-                logger.logger.error(error_message + " -> " + str(e))
+                logger.logger.error(error_message + ": " + str(e))
                 return self.return_error(error=error_message)
             logger.logger.info("Druid query successfully decoded and loaded.")
 
@@ -115,8 +115,8 @@ class APIServer:
                     else:
                         model = decoded_model
                 except Exception as e:
-                    logger.logger.error(f"Error decoding or checking model -> {e}")
-                    model = 'default'
+                    logger.logger.error(f"Error decoding or checking model: {e}")
+                    model = 'default' 
             return self.execute_model(druid_query, config.get("Outliers","metric"), model)
 
     def execute_model(self, druid_query, metric, model='default'):
@@ -137,7 +137,12 @@ class APIServer:
             druid_query = query_modifier.modify_aggregations(druid_query)
         else:
             logger.logger.info("Calculating predictions with default model")
-        data = druid_client.execute_query(druid_query)
+        try:
+            data = druid_client.execute_query(druid_query)
+        except Exception as e:
+            error_message = "Could not execute druid query"
+            logger.logger.error(error_message + ": " + str(e))
+            return self.return_error(error=error_message)
         try:
             if model != 'default':
                 return jsonify(outliers.Autoencoder.execute_prediction_model(
@@ -149,7 +154,7 @@ class APIServer:
             return jsonify(shallow_outliers.ShallowOutliers.execute_prediction_model(data))
         except Exception as e:
             error_message = "Error while calculating prediction model"
-            logger.logger.error(error_message + " -> " + str(e))
+            logger.logger.error(error_message + ": " + str(e))
             return self.return_error(error=error_message)
 
     def return_error(self, error="error"):
