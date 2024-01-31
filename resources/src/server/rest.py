@@ -116,7 +116,7 @@ class APIServer:
                         model = decoded_model
                 except Exception as e:
                     logger.logger.error(f"Error decoding or checking model: {e}")
-                    model = 'default' 
+                    model = 'default'
             return self.execute_model(druid_query, config.get("Outliers","metric"), model)
 
     def execute_model(self, druid_query, metric, model='default'):
