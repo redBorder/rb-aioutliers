@@ -77,8 +77,8 @@ class Autoencoder:
             self.std_loss = float(general_section.get('STD_LOSS', 1.0))
             self.window_size = int(general_section.get('WINDOW_SIZE', 1))
             self.num_window = int(general_section.get('NUM_WINDOWS', 1))
-            self.loss_mult_metric = float(general_section.get('LOSS_MULT_METRIC', 1))
-            self.loss_mult_minute = float(general_section.get('LOSS_MULT_MINUTE', 1))
+            self.loss_mult_metric = float(general_section.get('LOSS_MULT_METRIC', 1.0))
+            self.loss_mult_minute = float(general_section.get('LOSS_MULT_MINUTE', 1.0))
         except Exception as e:
             logger.logger.error(f"Could not load model conif: {e}")
             raise e
@@ -237,7 +237,6 @@ class Autoencoder:
         """
         prep_data = self.slice(self.rescale(data))
         predicted = self.model.predict(prep_data)
-        #predicted=prep_data.copy()
         loss = self.flatten(self.model_loss(prep_data, predicted, single_value = False).numpy())
         predicted = self.descale(self.flatten(predicted))
         return predicted, loss
@@ -349,12 +348,13 @@ class Autoencoder:
     def execute_prediction_model(data, metric, model_file, model_config):
         try:
             autoencoder = Autoencoder(model_file, model_config)
-            return autoencoder.compute_json(metric, data)
+            result = autoencoder.compute_json(metric, data)
         except Exception as e:
             logger.logger.error("Could not execute model")
-            return Autoencoder.return_error(e)
+            result = Autoencoder.return_error(e)
         finally:
             tf.keras.backend.clear_session()
+            return result
 
     @staticmethod
     def return_error(error="error"):

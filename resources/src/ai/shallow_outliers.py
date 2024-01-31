@@ -129,8 +129,8 @@ class ShallowOutliers:
         try:
             result = ShallowOutliers.compute_json(data)
         except Exception as e:
+            logger.logger.error("Could not execute model")
             result = ShallowOutliers.return_error(e)
-            raise
         finally:
             return result
 
