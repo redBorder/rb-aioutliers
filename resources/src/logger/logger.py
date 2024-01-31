@@ -64,13 +64,7 @@ class Logger:
         If log_file is not provided, the default log file is './outliers.log', but it can be configured using ConfigManager.
         """
         if log_file is None:
-            log_file = './outliers.log'
-            try:
-                from config import configmanager
-                config = configmanager.ConfigManager(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "config.ini"))
-                log_file = config.get('Logger', 'log_file')
-            except Exception as e:
-                print("Could not resolve ConfigManager, default set to ./outliers.log")
+            log_file = self.get_log_file(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "config.ini"))
         self.logger = PyLogrus(name="Outlierslogger")
         log_dir = os.path.dirname(log_file)
         if not os.path.isdir(log_dir):
