@@ -115,7 +115,7 @@ class TestAutoencoder(unittest.TestCase):
 
     def test_scale_descale_identity(self):
         np.random.seed(0)
-        rand_data = np.random.rand(32, len(TestAutoencoder.columns))
+        rand_data = np.random.rand(32, len(self.autoencoder.columns))
         rescaled_data = self.autoencoder.rescale(rand_data.copy())
         descaled_data = self.autoencoder.descale(rescaled_data)
         self.assertTrue(np.allclose(descaled_data, rand_data))
