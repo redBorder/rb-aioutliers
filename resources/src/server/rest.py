@@ -64,60 +64,61 @@ class APIServer:
         self.s3_sync_thread = None
         self.start_s3_sync_thread()
         self.app = Flask(__name__)
+        self.app.add_url_rule('/api/v1/outliers', view_func=self.calculate, methods=['POST'])
         self.exit_code = 0
         self.ai_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "ai")
+        self.deep_models={}
 
-        @self.app.route('/api/v1/outliers', methods=['POST'])
-        def calculate():
-            """
-            Handle POST requests to '/api/v1/outliers'.
-            The endpoint expects parameters either in the request body or as form parameters with
-            the following format:
-            {
-                "query": "<base64_encoded_json_druid_query>",
-                "model": "<base64_encoded_model_name>"  # Optional field
-            }
+    def calculate(self):
+        """
+        Handle POST requests to '/api/v1/outliers'.
+        The endpoint expects parameters either in the request body or as form parameters with
+        the following format:
+        {
+            "query": "<base64_encoded_json_druid_query>",
+            "model": "<base64_encoded_model_name>"  # Optional field
+        }
 
-            Where:
-            - `query`: A base64 encoded JSON Druid query specifying the data for analysis.
-            - `model` (Optional): A base64 encoded string representing the path of the predictive
-            model to be used. If not provided or if the specified model is not found, a default
-            model is used.
+        Where:
+        - `query`: A base64 encoded JSON Druid query specifying the data for analysis.
+        - `model` (Optional): A base64 encoded string representing the path of the predictive
+        model to be used. If not provided or if the specified model is not found, a default
+        model is used.
 
-            Returns:
-                A JSON response containing the prediction results or an error message.
-            """
+        Returns:
+            A JSON response containing the prediction results or an error message.
+        """
 
-            druid_query = request.form.get('query')
+        druid_query = request.form.get('query')
+        try:
+            druid_query = base64.b64decode(druid_query).decode('utf-8')
+            druid_query = json.loads(druid_query)
+        except Exception as e:
+            error_message = "Error decoding query"
+            logger.logger.error(error_message + ": " + str(e))
+            return self.return_error(error=error_message)
+        logger.logger.info("Druid query successfully decoded and loaded.")
+
+        model = request.form.get('model')
+        if model is None:
+            logger.logger.info("No model requested")
+            model = 'default'
+        else:
             try:
-                druid_query = base64.b64decode(druid_query).decode('utf-8')
-                druid_query = json.loads(druid_query)
-            except Exception as e:
-                error_message = "Error decoding query"
-                logger.logger.error(error_message + ": " + str(e))
-                return self.return_error(error=error_message)
-            logger.logger.info("Druid query successfully decoded and loaded.")
-
-            model = request.form.get('model')
-            if model is None:
-                logger.logger.info("No model requested")
-                model = 'default'
-            else:
-                try:
-                    decoded_model = base64.b64decode(model).decode('utf-8')
-                    model_path = os.path.normpath(os.path.join(self.ai_path, f"{decoded_model}.keras"))
-                    if not model_path.startswith(os.path.normpath(self.ai_path)):
-                        logger.logger.error(f"Attempted unauthorized file access: {decoded_model}")
-                        model = 'default'
-                    elif not os.path.isfile(model_path):
-                        logger.logger.error(f"Model {decoded_model} does not exist")
-                        model = 'default'
-                    else:
-                        model = decoded_model
-                except Exception as e:
-                    logger.logger.error(f"Error decoding or checking model: {e}")
+                decoded_model = base64.b64decode(model).decode('utf-8')
+                model_path = os.path.normpath(os.path.join(self.ai_path, f"{decoded_model}.keras"))
+                if not model_path.startswith(os.path.normpath(self.ai_path)):
+                    logger.logger.error(f"Attempted unauthorized file access: {decoded_model}")
                     model = 'default'
-            return self.execute_model(druid_query, config.get("Outliers","metric"), model)
+                elif not os.path.isfile(model_path):
+                    logger.logger.error(f"Model {decoded_model} does not exist")
+                    model = 'default'
+                else:
+                    model = decoded_model
+            except Exception as e:
+                logger.logger.error(f"Error decoding or checking model: {e}")
+                model = 'default'
+        return self.execute_model(druid_query, config.get("Outliers","metric"), model)
 
     def execute_model(self, druid_query, metric, model='default'):
         """
@@ -143,15 +144,21 @@ class APIServer:
             error_message = "Could not execute druid query"
             logger.logger.error(error_message + ": " + str(e))
             return self.return_error(error=error_message)
+        logger.logger.info("Druid query executed succesfully")
         try:
-            if model != 'default':
-                return jsonify(outliers.Autoencoder.execute_prediction_model(
-                    data,
-                    metric,
+            if model == 'default':
+                return jsonify(shallow_outliers.ShallowOutliers.execute_prediction_model(data))
+            if model not in self.deep_models:
+                logger.logger.info(f"Creating instance of model {model}")
+                self.deep_models[model]=outliers.Autoencoder(
                     os.path.join(self.ai_path, f"{model}.keras"),
                     os.path.join(self.ai_path, f"{model}.ini")
-                ))
-            return jsonify(shallow_outliers.ShallowOutliers.execute_prediction_model(data))
+                )
+            return jsonify(self.deep_models[model].execute_prediction_model(
+                self.deep_models[model],
+                data,
+                metric,
+            ))
         except Exception as e:
             error_message = "Error while calculating prediction model"
             logger.logger.error(error_message + ": " + str(e))

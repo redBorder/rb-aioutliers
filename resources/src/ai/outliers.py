@@ -126,7 +126,7 @@ class Autoencoder:
             (numpy.ndarray): Rescaled data as a numpy array.
         """
         num_metrics = len(self.metrics)
-        rescaled=data.copy()
+        rescaled=data
         rescaled[..., 0:num_metrics]=np.tanh(np.log1p(rescaled[..., 0:num_metrics])/32)
         rescaled[..., num_metrics]=rescaled[..., num_metrics]/1440
         return rescaled
@@ -142,12 +142,13 @@ class Autoencoder:
             (numpy.ndarray): Descaled data as a numpy array.
         """
         num_metrics = len(self.metrics)
-        descaled = data.copy()
+        descaled = data
         descaled = np.where(descaled > 1.0, 1.0, np.where(descaled < -1.0, -1.0, descaled))
         descaled[..., 0:num_metrics] = np.expm1(32*np.arctanh(descaled[..., 0:num_metrics]))
         descaled[..., num_metrics]=descaled[..., num_metrics]*1440
         return descaled
 
+    @tf.function
     def model_loss(self, y_true, y_pred, single_value=True):
         """
         Calculate the weighted loss for the model.
@@ -267,7 +268,7 @@ class Autoencoder:
         threshold = self.avg_loss+5*self.std_loss
         data, timestamps = self.input_json(raw_json)
         if self.window_size*self.num_window > len(data):
-            error_msg = (f"Too few datapoints for current model. The model "
+            error_msg = ("Too few datapoints for current model. The model "
                          f"needs at least {self.window_size*self.num_window } "
                          f"datapoints but only {len(data)} were inputted.")
             logger.logger.error(error_msg)
@@ -308,18 +309,17 @@ class Autoencoder:
         """
         data = pd.json_normalize(raw_json)
         data["granularity"] = self.granularity_from_dataframe(data)
-        metrics_dict = {f"result.{metric}": metric for metric in self.metrics}
-        data.rename(columns=metrics_dict, inplace=True)
-        timestamps = data['timestamp'].copy()
-        data['timestamp'] = pd.to_datetime(data['timestamp'])
-        data['minute'] = data['timestamp'].dt.minute + 60 * data['timestamp'].dt.hour
-        data['weekday']= data['timestamp'].dt.weekday
+        data.rename(columns={f"result.{metric}": metric for metric in self.metrics}, inplace=True)
+        timestamps = data['timestamp']
+        timestamp_dt = pd.to_datetime(timestamps)
+        data['timestamp'] = timestamp_dt
+        data['minute'] = timestamp_dt.dt.minute + 60 * timestamp_dt.dt.hour
+        data['weekday'] = timestamp_dt.dt.weekday
         data = pd.get_dummies(data, columns=['weekday'], prefix=['weekday'], drop_first=True)
-        missing_columns = set(self.columns) - set(data.columns)
-        data[list(missing_columns)] = 0
+        for missing_column in set(self.columns) - set(data.columns):
+            data[missing_column] = 0
         data = data[self.columns].dropna().astype('float')
-        data_array = data.values
-        return data_array, timestamps
+        return data.values, timestamps
 
     def output_json(self, metric, anomalies, predicted):
         """
@@ -334,8 +334,6 @@ class Autoencoder:
             (dict): deserialized Json with the anomalies and predictions for the data with RedBorder prediction
               Json format.
         """
-        predicted = predicted.copy()
-        anomalies = anomalies.copy()
         predicted = predicted[[metric,'timestamp']].rename(columns={metric:"forecast"})
         anomalies = anomalies[[metric,'timestamp']].rename(columns={metric:"expected"})
         return  {
@@ -345,16 +343,14 @@ class Autoencoder:
         }
 
     @staticmethod
-    def execute_prediction_model(data, metric, model_file, model_config):
+    def execute_prediction_model(autoencoder, data, metric):
         try:
-            autoencoder = Autoencoder(model_file, model_config)
-            result = autoencoder.compute_json(metric, data)
+            return autoencoder.compute_json(metric, data)
         except Exception as e:
-            logger.logger.error("Could not execute model")
-            result = Autoencoder.return_error(e)
+            logger.logger.error("Could not execute deep learning model")
+            return autoencoder.return_error(e)
         finally:
             tf.keras.backend.clear_session()
-            return result
 
     @staticmethod
     def return_error(error="error"):

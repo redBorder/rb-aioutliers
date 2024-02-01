@@ -119,7 +119,7 @@ class TestAPIServer(unittest.TestCase):
         mock_execute_model.return_value = self.output_data
         mock_query.return_value = {}
         mock_isfile.return_value = True
-        data = {'model':'YXNkZg==', 'query':'eyJhc2RmIjoiYXNkZiJ9'}
+        data = {'model':'dHJhZmZpYw==', 'query':'eyJhc2RmIjoiYXNkZiJ9'}
         with self.api_server.app.test_client().post('/api/v1/outliers', data=data) as response:
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.get_json(), self.output_data)

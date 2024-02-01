@@ -34,13 +34,16 @@ class TestAutoencoder(unittest.TestCase):
         data_file_path = os.path.join(current_dir, "outliers_test_data.json")
         with open(data_file_path, "r") as data_file:
             self.sample_data = json.load(data_file)
+        self.autoencoder=Autoencoder(
+            os.path.join(self.main_dir, "ai", "traffic.keras"),
+            os.path.join(self.main_dir, "ai", "traffic.ini")
+        )
 
     def test_model_execution_with_no_data(self):
         result = Autoencoder.execute_prediction_model(
+            self.autoencoder,
             {},
-            "bytes",
-            os.path.join(self.main_dir, "ai", "traffic.keras"),
-            os.path.join(self.main_dir, "ai", "traffic.ini")
+            "bytes"
         )
         self.assertEqual(
             result['status'],
@@ -48,10 +51,9 @@ class TestAutoencoder(unittest.TestCase):
         )
     def test_model_execution_with_no_metric(self):
         result = Autoencoder.execute_prediction_model(
+            self.autoencoder,
             self.sample_data,
-            "",
-            os.path.join(self.main_dir, "ai", "traffic.keras"),
-            os.path.join(self.main_dir, "ai", "traffic.ini")
+            ""
         )
         self.assertEqual(
             result['status'],
@@ -59,10 +61,9 @@ class TestAutoencoder(unittest.TestCase):
         )
     def test_model_execution_with_too_little_data(self):
         result = Autoencoder.execute_prediction_model(
+            self.autoencoder,
             self.sample_data[:10],
-            "bytes",
-            os.path.join(self.main_dir, "ai", "traffic.keras"),
-            os.path.join(self.main_dir, "ai", "traffic.ini")
+            "bytes"
         )
         self.assertEqual(
             result['status'],
@@ -70,10 +71,9 @@ class TestAutoencoder(unittest.TestCase):
         )
     def test_model_execution_with_sample_data(self):
         Autoencoder.execute_prediction_model(
+            self.autoencoder,
             self.sample_data,
             "bytes",
-            os.path.join(self.main_dir, "ai", "traffic.keras"),
-            os.path.join(self.main_dir, "ai", "traffic.ini")
         )
     def test_invalid_model(self):
         with self.assertRaises(FileNotFoundError):
@@ -107,15 +107,18 @@ class TestAutoencoder(unittest.TestCase):
             )
 
     def test_flatten_slice_identity(self):
-        TestAutoencoder = Autoencoder(
-            os.path.join(self.main_dir, "ai", "traffic.keras"),
-            os.path.join(self.main_dir, "ai", "traffic.ini")
-        )
         np.random.seed(0)
         rand_data = np.random.rand(32, 3)
-        sliced_data = TestAutoencoder.slice(rand_data)
-        flattened_data = TestAutoencoder.flatten(sliced_data)
+        sliced_data = self.autoencoder.slice(rand_data)
+        flattened_data = self.autoencoder.flatten(sliced_data)
         self.assertTrue(np.allclose(flattened_data, rand_data))
+
+    def test_scale_descale_identity(self):
+        np.random.seed(0)
+        rand_data = np.random.rand(32, len(TestAutoencoder.columns))
+        rescaled_data = self.autoencoder.rescale(rand_data.copy())
+        descaled_data = self.autoencoder.descale(rescaled_data)
+        self.assertTrue(np.allclose(descaled_data, rand_data))
 
 if __name__ == '__main__':
     unittest.main()

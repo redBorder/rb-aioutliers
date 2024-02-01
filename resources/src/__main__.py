@@ -80,7 +80,10 @@ class Outliers:
         options = {
             'bind': f"{__binding_host__}:{__binding_port__}",
             'workers': gunicorn_workers,
-            'threads': gunicorn_threads
+            'threads': gunicorn_threads,
+            'worker_class': 'gthread',
+            'max_requests': 100,
+            'max_worker_lifetime': 3600
         }
         self.server = APIServer()
         self.app = GunicornApp(self.server, options)
