@@ -148,7 +148,6 @@ class Autoencoder:
         descaled[..., num_metrics]=descaled[..., num_metrics]*1440
         return descaled
 
-    @tf.function
     def model_loss(self, y_true, y_pred, single_value=True):
         """
         Calculate the weighted loss for the model.
