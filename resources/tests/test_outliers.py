@@ -20,10 +20,18 @@
 
 import unittest
 import os
+'''
+Start of important OS Variables
+'''
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
+'''
+End of important OS Variables
+'''
 import sys
 import json
 import tempfile
 import numpy as np
+import tensorflow as tf
 
 from resources.src.ai.outliers import Autoencoder
 
@@ -119,6 +127,30 @@ class TestAutoencoder(unittest.TestCase):
         rescaled_data = self.autoencoder.rescale(rand_data.copy())
         descaled_data = self.autoencoder.descale(rescaled_data)
         self.assertTrue(np.allclose(descaled_data, rand_data))
+
+    def test_loss_execution_single_value(self):
+        np.random.seed(0)
+        y_true = tf.random.uniform((32, len(self.autoencoder.columns)), dtype=tf.float16)
+        y_pred = tf.random.uniform((32, len(self.autoencoder.columns)), dtype=tf.float16)
+        try:
+            loss = self.autoencoder.model_loss(y_true, y_pred, single_value=True)
+            execution_success = True
+        except Exception as e:
+            execution_success = False
+            print(e)
+        self.assertTrue(execution_success, "model_loss execution failed with an exception.")
+
+    def test_loss_execution_3d_array(self):
+        np.random.seed(0)
+        y_true = tf.random.uniform((32, len(self.autoencoder.columns)), dtype=tf.float16)
+        y_pred = tf.random.uniform((32, len(self.autoencoder.columns)), dtype=tf.float16)
+        try:
+            loss = self.autoencoder.model_loss(y_true, y_pred, single_value=False)
+            execution_success = True
+        except Exception as e:
+            execution_success = False
+            print(e)
+        self.assertTrue(execution_success, "model_loss execution failed with an exception.")
 
 if __name__ == '__main__':
     unittest.main()

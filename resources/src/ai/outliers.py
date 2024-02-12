@@ -167,24 +167,21 @@ class Autoencoder:
         Returns:
             (tf.Tensor): Weighted loss value or a 3D loss array.
         """
-        y_true = tf.cast(y_true, tf.float16)
-        y_pred = tf.cast(y_pred, tf.float16)
+        y_true = tf.cast(y_true, tf.bfloat16)
+        y_pred = tf.cast(y_pred, tf.bfloat16)
         num_metrics = len(self.metrics)
         num_features = len(self.columns)
         is_metric = (tf.range(num_features) < num_metrics)
         is_minute = (tf.range(num_features) == num_metrics)
-        mult_true = tf.where(
-            is_metric, self.loss_mult_metric * y_true,
-            tf.where(is_minute, self.loss_mult_minute * y_true, y_true)
-        )
-        mult_pred = tf.where(
-            is_metric, self.loss_mult_metric * y_pred,
-            tf.where(is_minute, self.loss_mult_minute * y_pred, y_pred)
-        )
-        standard_loss = tf.math.log(tf.cosh((mult_true - mult_pred)))
+        mult_true = tf.where(is_metric, self.loss_mult_metric * y_true, y_true)
+        mult_true = tf.where(is_minute, self.loss_mult_minute * mult_true, mult_true)
+        mult_pred = tf.where(is_metric, self.loss_mult_metric * y_pred, y_pred)
+        mult_pred = tf.where(is_minute, self.loss_mult_minute * mult_pred, mult_pred)
+        loss = tf.math.abs(mult_true-mult_pred)
+        loss = loss-tf.math.log(tf.cast(2.0, tf.bfloat16))+tf.math.log1p(tf.math.exp(-2.0*loss))
         if single_value:
-            standard_loss = tf.reduce_mean(standard_loss)
-        return standard_loss
+            loss = tf.reduce_mean(loss)
+        return loss
 
 
     def slice(self, data, index=None):
