@@ -9,27 +9,21 @@
 
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FredBorder%2Frb-aioutliers.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FredBorder%2Frb-aioutliers?ref=badge_large)
 
-Main package to install redborder ai outliers in Centos7
+Main package to install redborder AI outliers in Rocky Linux 9
 
 #### Platforms
 
-- Centos 7
+- Rocky Linux 9
 
-#### Installation
+## Installation
 
-1. yum install epel-release && yum install centos-release-scl && rpm -ivh http://repo.redborder.com/redborder-repo-0.0.3-1.el7.rb.noarch.rpm
+1. yum install epel-release && rpm -ivh http://repo.redborder.com/redborder-repo-0.0.3-1.el7.rb.noarch.rpm
 
 2. yum install rb-aioutliers
 
 ## Model design
 Initially, data is extracted from a designated druid datasource in timeseries format, with configurable metrics and settings. After rescaling from zero to one and segmentation, an autoencoder reconstructs the data, enabling anomaly detection through k-sigma thresholding.
 The anomalies are outputed in Json format together with the data reconstructed by the autoencoder.
-
-If you cannot see the image probably you are outside of the redborder organization, probably in the future we will release this...
-
-See [#23](https://github.com/redBorder/rb-aioutliers/pull/23)
-
-![img](https://lh3.googleusercontent.com/fife/AK0iWDwRKtXzeZRyn9412b9OHio5ZiiiIM_Xjr33XQ0tQ-jNQDBWnzWvUweMe_ZmmDwxC2QCCNcjjC0T9NqupTZTlUMMGmd7lqitlhhhOJgfvJs2U0o2lQ2w76kt4DCk0Go4QNku-xN-1FxAePOFKGx4jdaKD9hAfBQwhLSD6dNoJl29DcZgb8C9tjWekjvBeXo_treEXwK0Ts2TaKfhHngtov641fXM42b-5qLpBt_0ARgARUKtI0mwquEe5QaeJiXqQzGWBhdWOCuI-52IZt_7TT11ksYhxCdSQFSqyBhZoRXtMJ23h1EnQeyT_tVjetXCVfe3TNgM5pWCKPdr0wKRv6P_QgfTXnukmk-lmuRSwD4IkSllCOD6COnlGrbJZCFjIzm6_hq-o8PY3o9wuT2aw0a9QvUx7FbrTZJg2bSh-pnRRSLskOHJhgd5-vn5PkHvUskKiP4ZveW32nMEDstiqxKuf2cvnFuXCFzhSHy0AQGnQHvQ2obIlyHqVObHH9x9ve50zNG7wVBtAWEmCgkxM0DPt1j9UIpiwFQ_Qz3sEGyGggrn1HYYcQsMJsW64FTuEuzCiEP9IL0dSQVWGE6B9BLR2hu47P9nZNGN2RQYLusqi05jGVxbg7vBTGSZDiLlxxFLak8DGYf0ohQhjfVbfGw1m_td74x3d6d23GWilscYyJAPQdC46W5ddRaKJWirsaZElPuiMnevCA6v-ctnNVcNn1IKDd1nMWISCVt8CzPLfss0JGnHqELz1Og_LrNl-iYYjzB5TxajeQ5sz5xLkmSVnzhQZOAo5VHr0vE256Z36Rk5a7OvpWG4Nl8U4SoYsuDI7V6Fv-wLSlVkGGZ8imYDpw6wtcp365-OzsWoRfHWWHQ9V56yfkTz_ZuG0aVA8nQpmMBop396uQMctFjgVDgrW529QhYUuo9yv6rLaWcuhjBAfxW31qEExNLnzMkJlld8v-VNAyJc7qKuT1JpUVvUTAOn1dYtHxO85iL9wga-WUOcV27FaBeklFQv3FQz8K2yiEqoltVCr14HHj--F61pSm1HC0TOwZ2x3JcI-o9QmXWh_kZ9VCCCycGhiODnLM5YwcsM-vY8uCtk4mng2_2XejdFA2RL_vKNFkQeSX_fpoZab0ekT4-UCMPFYGdh--L_se-GfJJF8Px1xtLFl9C6HcT7EsNj7WYn7lxBzSZ-IUZKA4w1st4oBIPGPGvX9_MROwPRZNHmWxYbZ0zk2OVT-iyb6GseZ1V_OBLmln0nIqDVtxW2u32Bgi38Y0jwqXc_UfQnpLzL7i0_ePaGAakS4zdbx_HwVGlru5yUyArsx9-s4fLJAwCrswmBWXO8odCFO16qPNhWTtkVTFRDWzC3v3G18LKqSoLfai0qq1zzGie06cOA2bNe9YHWxn5efVsrtez0kiRMb5Ro7gGRIt2OYMp39VfIje7aXOetmfc1Z-CT_gcKdEQpMQGBELo0xUE_qgbmTZwj7_qgG1TjPCeVUudVD0Xb5fO5r8x_L9Xv1i81WffPnSjEhy9axM_JG7QYvJ_IC0qhhVrTe7EyFmtktYADftkTSbKFif8l-BGWqucPQw04yIH44A=w1107-h975)
 
 ## Model execution
 rb-aioutliers utilizes the Flask framework to create an HTTP server. Users can send Druid queries via POST requests to the /calculate endpoint. When rb-aioutliers receives the Druid query, it sends a request to the Druid broker, retrieves the necessary data, and then proceeds to execute the anomaly detection model.
