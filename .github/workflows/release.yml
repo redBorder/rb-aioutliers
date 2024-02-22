@@ -9,6 +9,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
