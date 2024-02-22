@@ -1,0 +1,52 @@
+name: Update CHANGELOG
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  update-changelog:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Get PR number and author
+      id: pr_info
+      run: |
+        PR_NUMBER=$(echo $GITHUB_REF | cut -d'/' -f3)
+        PR_TITLE=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                    -H "Accept: application/vnd.github.v3+json" \
+                    https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER \
+                    | jq -r '.title')
+        PR_BODY=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                    -H "Accept: application/vnd.github.v3+json" \
+                    https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER \
+                    | jq -r '.body')
+        PR_AUTHOR=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                    -H "Accept: application/vnd.github.v3+json" \
+                    https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER \
+                    | jq -r '.user.login')
+        echo "::set-output name=title::$PR_TITLE"
+        echo "::set-output name=body::$PR_BODY"
+        echo "::set-output name=author::$PR_AUTHOR"
+
+    - name: Update CHANGELOG
+      run: |
+        PR_TITLE="${{ steps.pr_info.outputs.title }}"
+        PR_BODY="${{ steps.pr_info.outputs.body }}"
+        PR_AUTHOR="${{ steps.pr_info.outputs.author }}"
+        TITLE="$(date +'%Y%m%d%H%M').0.0"
+        echo "Updating CHANGELOG with Title: $TITLE"
+        echo "PR Author: $PR_AUTHOR" >> CHANGELOG.md
+        echo "$TITLE" >> CHANGELOG.md
+        echo "$PR_BODY" >> CHANGELOG.md
+        echo "" >> CHANGELOG.md  # Add newline
+        git add CHANGELOG.md
+        git config user.name "${{ github.actor }}"
+        git config user.email "${{ github.actor }}@users.noreply.github.com"
+        git commit -m "chore: Update CHANGELOG after PR merge by $PR_AUTHOR" || exit 0
+        git push origin HEAD:${{ github.ref }}
+
