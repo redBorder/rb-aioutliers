@@ -47,15 +47,14 @@ jobs:
         PR_TITLE="${{ steps.pr_info.outputs.title }}"
         PR_BODY="${{ steps.pr_info.outputs.body }}"
         PR_AUTHOR="${{ steps.pr_info.outputs.author }}"
-        TITLE="$(date +'%Y%m%d%H%M').0.0"
+        TITLE="release - $(date +'%Y%m%d%H%M').0.0 - $(date +'%Y-%m-%d %H:%M:%S')"
         echo "Updating CHANGELOG with Title: $TITLE"
-        echo "PR Author: $PR_AUTHOR" >> CHANGELOG.md
+        echo "Author: $PR_AUTHOR" >> CHANGELOG.md
         echo "$TITLE" >> CHANGELOG.md
         echo "$PR_BODY" >> CHANGELOG.md
         echo "" >> CHANGELOG.md  # Add newline
         git add CHANGELOG.md
-        git config user.name "${{ github.actor }}"
-        git config user.email "${{ github.actor }}@users.noreply.github.com"
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
         git commit -m "chore: Update CHANGELOG after PR merge by $PR_AUTHOR" || exit 0
         git push origin HEAD:${{ github.ref }}
-
