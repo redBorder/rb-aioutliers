@@ -61,14 +61,13 @@ class ShallowOutliers:
 
         window_size = max(int(0.05 * len(arr)), min(len(arr), int(5 + np.log(len(arr)))))
         window_size += 1 if window_size % 2 == 0 else 0
-        kernel = np.arange(1, window_size // 2 + 2, dtype=float)
-        kernel = np.concatenate((kernel, kernel[-2::-1]))
-        kernel[window_size // 2] = 0.25*window_size ** 2
-        kernel /= np.sum(kernel)
-        padded_arr = np.pad(arr, (window_size // 2, window_size // 2), mode='edge')
+        half_size = window_size // 2
+        kernel = np.linspace(1, half_size, half_size, dtype=float)
+        kernel = np.concatenate((kernel, [half_size**2 * 0.25], kernel[::-1]))
+        kernel /= kernel.sum()
+        padded_arr = np.pad(arr, half_size, mode='edge')
         smooth_arr = np.convolve(padded_arr, kernel, mode='valid')
         return smooth_arr
-
 
     def get_outliers(self, arr, smoothed_arr):
         """
@@ -127,12 +126,10 @@ class ShallowOutliers:
     @staticmethod
     def execute_prediction_model(data):
         try:
-            result = ShallowOutliers.compute_json(data)
+            return ShallowOutliers().compute_json(data)
         except Exception as e:
-            result = ShallowOutliers.return_error(e)
-            raise
-        finally:
-            return result
+            logger.logger.error("Could not execute shallow model")
+            return ShallowOutliers.return_error(e)
 
     @staticmethod
     def return_error(error="error"):

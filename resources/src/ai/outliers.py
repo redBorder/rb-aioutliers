@@ -74,11 +74,11 @@ class Autoencoder:
             self.columns = self.metrics + self.timestamp
             general_section = model_config['General']
             self.avg_loss = float(general_section.get('AVG_LOSS', 0.0))
-            self.std_loss = float(general_section.get('STD_LOSS', 0.0))
-            self.window_size = int(general_section.get('WINDOW_SIZE', 0))
-            self.num_window = int(general_section.get('NUM_WINDOWS', 0))
-            self.loss_mult_metric = float(general_section.get('LOSS_MULT_METRIC', 0))
-            self.loss_mult_minute = float(general_section.get('LOSS_MULT_MINUTE', 0))
+            self.std_loss = float(general_section.get('STD_LOSS', 1.0))
+            self.window_size = int(general_section.get('WINDOW_SIZE', 1))
+            self.num_window = int(general_section.get('NUM_WINDOWS', 1))
+            self.loss_mult_metric = float(general_section.get('LOSS_MULT_METRIC', 1.0))
+            self.loss_mult_minute = float(general_section.get('LOSS_MULT_MINUTE', 1.0))
         except Exception as e:
             logger.logger.error(f"Could not load model conif: {e}")
             raise e
@@ -126,7 +126,7 @@ class Autoencoder:
             (numpy.ndarray): Rescaled data as a numpy array.
         """
         num_metrics = len(self.metrics)
-        rescaled=data.copy()
+        rescaled=data
         rescaled[..., 0:num_metrics]=np.tanh(np.log1p(rescaled[..., 0:num_metrics])/32)
         rescaled[..., num_metrics]=rescaled[..., num_metrics]/1440
         return rescaled
@@ -142,7 +142,7 @@ class Autoencoder:
             (numpy.ndarray): Descaled data as a numpy array.
         """
         num_metrics = len(self.metrics)
-        descaled = data.copy()
+        descaled = data
         descaled = np.where(descaled > 1.0, 1.0, np.where(descaled < -1.0, -1.0, descaled))
         descaled[..., 0:num_metrics] = np.expm1(32*np.arctanh(descaled[..., 0:num_metrics]))
         descaled[..., num_metrics]=descaled[..., num_metrics]*1440
@@ -166,44 +166,42 @@ class Autoencoder:
         Returns:
             (tf.Tensor): Weighted loss value or a 3D loss array.
         """
-        y_true = tf.cast(y_true, tf.float16)
-        y_pred = tf.cast(y_pred, tf.float16)
+        y_true = tf.cast(y_true, tf.bfloat16)
+        y_pred = tf.cast(y_pred, tf.bfloat16)
         num_metrics = len(self.metrics)
         num_features = len(self.columns)
         is_metric = (tf.range(num_features) < num_metrics)
         is_minute = (tf.range(num_features) == num_metrics)
-        mult_true = tf.where(
-            is_metric, self.loss_mult_metric * y_true,
-            tf.where(is_minute, self.loss_mult_minute * y_true, y_true)
-        )
-        mult_pred = tf.where(
-            is_metric, self.loss_mult_metric * y_pred,
-            tf.where(is_minute, self.loss_mult_minute * y_pred, y_pred)
-        )
-        standard_loss = tf.math.log(tf.cosh((mult_true - mult_pred)))
+        mult_true = tf.where(is_metric, self.loss_mult_metric * y_true, y_true)
+        mult_true = tf.where(is_minute, self.loss_mult_minute * mult_true, mult_true)
+        mult_pred = tf.where(is_metric, self.loss_mult_metric * y_pred, y_pred)
+        mult_pred = tf.where(is_minute, self.loss_mult_minute * mult_pred, mult_pred)
+        loss = tf.math.abs(mult_true-mult_pred)
+        loss = loss-tf.math.log(tf.cast(2.0, tf.bfloat16))+tf.math.log1p(tf.math.exp(-2.0*loss))
         if single_value:
-            standard_loss = tf.reduce_mean(standard_loss)
-        return standard_loss
+            loss = tf.reduce_mean(loss)
+        return loss
 
-    def slice(self, data, index = []):
+
+    def slice(self, data, index=None):
         """
-        Transform a 2D numpy array into a 3D array readable by the model.
+        Transform a 2D numpy array into a 3D array readable by the model, with overlapping slices.
 
         Args:
             data (numpy.ndarray): 2D numpy array with the data to prepare.
-            index (list): Index in case you want only some of the slices returned.
+            index (list or numpy.ndarray): Index in case you want only some of the slices returned.
 
         Returns:
             (numpy.ndarray): 3D numpy array that can be processed by the model.
         """
         _l = len(data)
-        sliced_data = []
         slice_length = self.window_size * self.num_window
-        if len(index) == 0:
-            index = np.arange(0, _l-slice_length+1 , self.window_size)
-        for i in index:
-            sliced_data.append(data[i:i+slice_length])
-        return np.array(sliced_data)
+        if index is None:
+            index = np.arange(0, _l - slice_length + 1, self.window_size)
+        sliced_data = np.zeros((len(index), slice_length) + data.shape[1:])
+        for idx, start in enumerate(index):
+            sliced_data[idx] = data[start:start + slice_length]
+        return sliced_data
 
     def flatten(self, data):
         """
@@ -213,18 +211,15 @@ class Autoencoder:
         Returns:
             (numpy.ndarray): 2D numpy array with the natural format of the data.
         """
-        tsr = data.copy()
-        num_slices, slice_len, features = tsr.shape
+        num_slices, slice_len, features = data.shape
         flattened_len = (num_slices-1)*self.window_size + slice_len
         flattened_tensor = np.zeros([flattened_len, features])
         scaling = np.zeros(flattened_len)
-        for i in range(num_slices):
-            left_pad = i*self.window_size
-            right_pad = left_pad+slice_len
-            flattened_tensor[left_pad:right_pad] += tsr[i]
-            scaling[left_pad:right_pad] +=1
-        flattened_tensor = flattened_tensor / scaling[:, np.newaxis]
-        return flattened_tensor
+        indices = np.arange(num_slices)[:, None]*self.window_size + np.arange(slice_len)
+        np.add.at(flattened_tensor, indices.ravel(), data.reshape(-1, features))
+        np.add.at(scaling, indices.ravel(), 1)
+        scaling[scaling == 0] = 1
+        return flattened_tensor / scaling[:, np.newaxis]
 
     def calculate_predictions(self, data):
         """
@@ -268,6 +263,12 @@ class Autoencoder:
             raise ValueError(error_msg)
         threshold = self.avg_loss+5*self.std_loss
         data, timestamps = self.input_json(raw_json)
+        if self.window_size*self.num_window > len(data):
+            error_msg = ("Too few datapoints for current model. The model "
+                         f"needs at least {self.window_size*self.num_window } "
+                         f"datapoints but only {len(data)} were inputted.")
+            logger.logger.error(error_msg)
+            raise ValueError(error_msg)
         predicted, loss = self.calculate_predictions(data)
         predicted = pd.DataFrame(predicted, columns=self.columns)
         predicted['timestamp'] = timestamps
@@ -304,18 +305,17 @@ class Autoencoder:
         """
         data = pd.json_normalize(raw_json)
         data["granularity"] = self.granularity_from_dataframe(data)
-        metrics_dict = {f"result.{metric}": metric for metric in self.metrics}
-        data.rename(columns=metrics_dict, inplace=True)
-        timestamps = data['timestamp'].copy()
-        data['timestamp'] = pd.to_datetime(data['timestamp'])
-        data['minute'] = data['timestamp'].dt.minute + 60 * data['timestamp'].dt.hour
-        data['weekday']= data['timestamp'].dt.weekday
+        data.rename(columns={f"result.{metric}": metric for metric in self.metrics}, inplace=True)
+        timestamps = data['timestamp']
+        timestamp_dt = pd.to_datetime(timestamps)
+        data['timestamp'] = timestamp_dt
+        data['minute'] = timestamp_dt.dt.minute + 60 * timestamp_dt.dt.hour
+        data['weekday'] = timestamp_dt.dt.weekday
         data = pd.get_dummies(data, columns=['weekday'], prefix=['weekday'], drop_first=True)
-        missing_columns = set(self.columns) - set(data.columns)
-        data[list(missing_columns)] = 0
+        for missing_column in set(self.columns) - set(data.columns):
+            data[missing_column] = 0
         data = data[self.columns].dropna().astype('float')
-        data_array = data.values
-        return data_array, timestamps
+        return data.values, timestamps
 
     def output_json(self, metric, anomalies, predicted):
         """
@@ -330,8 +330,6 @@ class Autoencoder:
             (dict): deserialized Json with the anomalies and predictions for the data with RedBorder prediction
               Json format.
         """
-        predicted = predicted.copy()
-        anomalies = anomalies.copy()
         predicted = predicted[[metric,'timestamp']].rename(columns={metric:"forecast"})
         anomalies = anomalies[[metric,'timestamp']].rename(columns={metric:"expected"})
         return  {
@@ -341,13 +339,15 @@ class Autoencoder:
         }
 
     @staticmethod
-    def execute_prediction_model(data, metric, model_file, model_config):
+    def execute_prediction_model(autoencoder, data, metric):
         try:
-            autoencoder = Autoencoder(model_file, model_config)
             return autoencoder.compute_json(metric, data)
         except Exception as e:
-            logger.logger.error("Couldn't execute model")
-            return Autoencoder.return_error(e)
+            logger.logger.error("Could not execute deep learning model")
+            return autoencoder.return_error(e)
+        finally:
+            tf.keras.backend.clear_session()
+
     @staticmethod
     def return_error(error="error"):
         """

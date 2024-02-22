@@ -55,6 +55,15 @@ class TestAPIServer(unittest.TestCase):
                 {'msg': 'Error decoding query', 'status': 'error'}
             )
 
+    def test_calculate_endpoint_druid_query_execution_malfunction(self):
+        data = {'model':'YXNkZg==', 'query':'eyJ0ZXN0IjoidGVzdCJ9'}
+        with self.api_server.app.test_client().post('/api/v1/outliers', data=data) as response:
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(
+                response.get_json(),
+                {'msg': 'Could not execute druid query', 'status': 'error'}
+            )
+
     @patch('resources.src.druid.client.DruidClient.execute_query')
     @patch('resources.src.ai.shallow_outliers.ShallowOutliers.execute_prediction_model')
     @patch('os.path.isfile')
@@ -110,7 +119,7 @@ class TestAPIServer(unittest.TestCase):
         mock_execute_model.return_value = self.output_data
         mock_query.return_value = {}
         mock_isfile.return_value = True
-        data = {'model':'YXNkZg==', 'query':'eyJhc2RmIjoiYXNkZiJ9'}
+        data = {'model':'dHJhZmZpYw==', 'query':'eyJhc2RmIjoiYXNkZiJ9'}
         with self.api_server.app.test_client().post('/api/v1/outliers', data=data) as response:
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.get_json(), self.output_data)
