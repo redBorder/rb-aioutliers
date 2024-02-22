@@ -1,33 +1,42 @@
 name: Update CHANGELOG
 
 on:
-  pull_request:
-    types: [closed]
+  push:
+    branches:
+      - master
 
 jobs:
   update-changelog:
-    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Get PR number and author
+    - name: Get PR information
       id: pr_info
       run: |
-        PR_NUMBER=$(echo $GITHUB_REF | cut -d'/' -f3)
+        # Get the SHA of the latest commit
+        COMMIT_SHA=$(git rev-parse HEAD)
+
+        # Find the associated pull request for the commit
+        PR_NUMBER=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                    -H "Accept: application/vnd.github.v3+json" \
+                    "https://api.github.com/repos/${{ github.repository }}/commits/$COMMIT_SHA/pulls" \
+                    | jq -r '.[0].number')
+
+        # Fetch pull request details
         PR_TITLE=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                     -H "Accept: application/vnd.github.v3+json" \
-                    https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER \
+                    "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER" \
                     | jq -r '.title')
         PR_BODY=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                     -H "Accept: application/vnd.github.v3+json" \
-                    https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER \
+                    "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER" \
                     | jq -r '.body')
         PR_AUTHOR=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                     -H "Accept: application/vnd.github.v3+json" \
-                    https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER \
+                    "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER" \
                     | jq -r '.user.login')
         echo "::set-output name=title::$PR_TITLE"
         echo "::set-output name=body::$PR_BODY"
