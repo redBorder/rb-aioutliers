@@ -11,3 +11,7 @@ Author: malvads
 release - 202402231029.0.0 - 2024-02-23 10:29:17
 * This PR fix deploy of doxygen docs
 
+Author: malvads
+release - 202402231033.0.0 - 2024-02-23 10:33:56
+* This PR reconfigures doxyfile
+
