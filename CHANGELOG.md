@@ -19,3 +19,7 @@ Author: malvads
 release - 202402231039.0.0 - 2024-02-23 10:39:30
 * Fix work path
 
+Author: malvads
+release - 202402231056.0.0 - 2024-02-23 10:56:35
+* optimize doxygen
+
