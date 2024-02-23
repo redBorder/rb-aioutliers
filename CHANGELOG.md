@@ -23,3 +23,7 @@ Author: malvads
 release - 202402231056.0.0 - 2024-02-23 10:56:35
 * optimize doxygen
 
+Author: malvads
+release - 202402231108.0.0 - 2024-02-23 11:08:06
+* Update doxyfile and create doxygen main page
+
