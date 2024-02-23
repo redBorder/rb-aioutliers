@@ -7,3 +7,7 @@ Author: malvads
 release - 202402231007.0.0 - 2024-02-23 10:07:48
 * Add auto code documentation based on doxygen
 
+Author: malvads
+release - 202402231029.0.0 - 2024-02-23 10:29:17
+* This PR fix deploy of doxygen docs
+
