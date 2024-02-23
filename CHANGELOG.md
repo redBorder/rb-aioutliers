@@ -15,3 +15,7 @@ Author: malvads
 release - 202402231033.0.0 - 2024-02-23 10:33:56
 * This PR reconfigures doxyfile
 
+Author: malvads
+release - 202402231039.0.0 - 2024-02-23 10:39:30
+* Fix work path
+
