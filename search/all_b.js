@@ -1,5 +1,7 @@
 var searchData=
 [
-  ['outliers_0',['Outliers',['../class____main_____1_1Outliers.html',1,'__main__']]],
-  ['output_5fjson_1',['output_json',['../classoutliers_1_1Autoencoder.html#a98145ce7a2ae40814a54af6b1d3be19b',1,'outliers::Autoencoder']]]
+  ['trainer_0',['Trainer',['../md__r_e_a_d_m_e.html#autotoc_md8',1,'']]],
+  ['trainer_20jobs_1',['Trainer Jobs',['../md__r_e_a_d_m_e.html#autotoc_md9',1,'']]],
+  ['training_2',['Model training',['../md__r_e_a_d_m_e.html#autotoc_md5',1,'']]],
+  ['tt_20calculate_20tt_3',['&lt;tt&gt;/calculate&lt;/tt&gt;',['../md__r_e_a_d_m_e.html#autotoc_md12',1,'']]]
 ];
