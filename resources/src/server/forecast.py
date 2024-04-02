@@ -6,7 +6,7 @@ from sktime.forecasting.sarimax import SARIMAX
 import time
 
 
-def read_json(ruta, frecuencia='H'):
+def read_json(ruta, gran):
 
   # ruta: ruta del archivo json
 
@@ -26,15 +26,14 @@ def read_json(ruta, frecuencia='H'):
   df.set_index('timestamp', inplace=True)  
 
   # Especificar la frecuencia del índice según la granularidad elegida
-  df = df.asfreq(frecuencia)  # Rellena con datos NaN si falta algún tiempo
+  df = df.asfreq(gran)  # Rellena con datos NaN si falta algún tiempo
 
   return df
 
 def granularity_to_minutes(granularity):
     """
-    Get the number of seconds for each possible druid
-    granularity. For example, "pt2m" would return 120
-    and "thirty_minute" would return 1800.
+    Get the number of minutes for each possible druid
+    granularity.
 
     Args:
         -granularity (string): druid granularity.
@@ -63,6 +62,7 @@ def granularity_to_minutes(granularity):
         raise ValueError(error_msg)
     return (numbers * multiplier / 60)
 
+
 def plot_forecast(y, y_pred):
   labels = ['y', 'y_pred']
   plt.figure(figsize=(10, 6)) 
@@ -79,21 +79,32 @@ def plot_forecast(y, y_pred):
 
 
 def predict(data, gran):
+  '''
+  data: serie temporal para hacer el forecast (con una columna de timestamp y otra columna con los valores a predecir)
+  gran: granularidad utilizada (H: hora, 2H: 2 horas, 8H: 8 horas, D: día)
+        NO FUNCIONA PARA GRANULARIDADES MENORES A UNA HORA (consume muchos recursos)
+  '''
   print(gran)
-  gran = granularity_to_minutes(gran)
+  gran = granularity_to_minutes(gran) # Obtenemos la granularidad en minutos (H = 60, 2H = 120, etc)
   print(gran)
-  y = data.iloc[-int(20160/gran):]    # últimas 2 semanas
-  sp = 10080/gran
-  fh = np.arange(1, 20)               # horizonte de predicción 
+  y = data.iloc[-int(20160/gran):]    # últimas 2 semanas (2 semanas = 20160 minutos)
+  sp = 10080/gran                     # Seasonality Period, lo fijamos a 1 semana (1 semana = 10080 minutos)
+  fh = np.arange(1, 60)               # horizonte de predicción (en este caso 20 puntos en el tiempo hacia delante, se puede cambiar)
 
   y = y.interpolate(method='linear')  # interpolación lineal para imputar datos faltantes
-  forecaster = SARIMAX(order=(0, 1, 0), seasonal_order=(0, 1, 1, sp))
+  forecaster = SARIMAX(order=(0, 1, 0), seasonal_order=(0, 1, 1, sp))  # Modelo SARIMAX
   forecaster.fit(y)
-  y_pred = forecaster.predict(fh)
+  y_pred = forecaster.predict(fh)     # Se obtienen las predicciones
 
   return y_pred
 
+
 def __main__(file, gran, aggr):
+  '''
+  file: ruta hacia un archivo json con los datos
+  gran: granularidad (H: hora, 2H: 2 horas, 8H: 8 horas, D: día)
+  aggr: agregación que se va a utilizar para la predicción (bytes, pkts, etc)
+  '''
   df = read_json(file, gran)
   print(df)
   data = df[f"result.{aggr}"]
@@ -105,4 +116,4 @@ def __main__(file, gran, aggr):
   print('Time:', fin-inicio)
   plot_forecast(data, y_pred)
 
-__main__('<file name>', '<gran>', 'bytes')
+__main__('/home/bhcaceres/Downloads/data_60.json', 'H', 'bytes')
