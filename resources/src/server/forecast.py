@@ -105,4 +105,4 @@ def __main__(file, gran, aggr):
   print('Time:', fin-inicio)
   plot_forecast(data, y_pred)
 
-__main__('/home/bhcaceres/Downloads/data_60.json', 'H', 'bytes')
+__main__('<file name>', '<gran>', 'bytes')
