@@ -47,9 +47,9 @@ def granularity_to_minutes(granularity):
         error_msg="Granularity must be a non-empty string"
         raise ValueError(error_msg)
     base_granularities = {
-        "minute": 60, "hour": 3600, "day": 86400,
+        "minute": 1, "hour": 3600, "day": 86400,
         "fifteen_minute": 900, "thirty_minute": 1800,
-        "m": 60, "h": 3600, "d": 86400
+        "m": 60, "h": 3600, "d": 86400, "D": 86400
     }
     granularity = granularity.lower()
     if granularity in base_granularities:
@@ -85,11 +85,11 @@ def predict(data, gran):
         NO FUNCIONA PARA GRANULARIDADES MENORES A UNA HORA (consume muchos recursos)
   '''
   print(gran)
-  gran = granularity_to_minutes(gran) # Obtenemos la granularidad en minutos (H = 60, 2H = 120, etc)
+  gran = granularity_to_minutes(gran) # Obtenemos la granularidad en minutos (H = 60, 2H = 120, 8H = 480, D = 1440)
   print(gran)
-  y = data.iloc[-int(20160/gran):]    # últimas 2 semanas (2 semanas = 20160 minutos)
-  sp = 10080/gran                     # Seasonality Period, lo fijamos a 1 semana (1 semana = 10080 minutos)
-  fh = np.arange(1, 60)               # horizonte de predicción (en este caso 20 puntos en el tiempo hacia delante, se puede cambiar)
+  y = data.iloc[-int(20160/gran):]    # utilizamos para predecir las últimas 2 semanas (2 semanas = 20160 minutos)
+  sp = int(10080/gran)                # Seasonality Period, lo fijamos a 1 semana (1 semana = 10080 minutos)
+  fh = np.arange(1, sp)               # horizonte de predicción (en este caso predecimos la semana siguiente)
 
   y = y.interpolate(method='linear')  # interpolación lineal para imputar datos faltantes
   forecaster = SARIMAX(order=(0, 1, 0), seasonal_order=(0, 1, 1, sp))  # Modelo SARIMAX
@@ -116,4 +116,4 @@ def __main__(file, gran, aggr):
   print('Time:', fin-inicio)
   plot_forecast(data, y_pred)
 
-__main__('/home/bhcaceres/Downloads/data_60.json', 'H', 'bytes')
+__main__('<file>', '<granularity>', '<aggregation>')
