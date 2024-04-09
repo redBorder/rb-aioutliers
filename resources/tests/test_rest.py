@@ -43,7 +43,7 @@ class TestAPIServer(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(
                 response.get_json(),
-                {'msg': 'Error decoding query', 'status': 'error'}
+                {'msg': 'No data provided or requested', 'status': 'error'}
             )
 
     def test_calculate_endpoint_invalid_query(self):
@@ -52,7 +52,7 @@ class TestAPIServer(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(
                 response.get_json(),
-                {'msg': 'Error decoding query', 'status': 'error'}
+                {'msg': 'Error decoding json', 'status': 'error'}
             )
 
     def test_calculate_endpoint_druid_query_execution_malfunction(self):
