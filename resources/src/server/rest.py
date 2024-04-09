@@ -102,7 +102,7 @@ class APIServer:
         druid_query = request.form.get('query')
         if data is None and druid_query is None:
             error_message="No data provided or requested"
-            logger.logger.error(error_message)     
+            logger.logger.error(error_message)
             return self.return_error(error=error_message)
         try:
             if data is None:
@@ -119,7 +119,7 @@ class APIServer:
     def decode_b64_json(self, b64_json):
         """
         Decode a base64 json into a python dictionary.
-        
+
         Args:
             model (str): Base64 encoded json.
 
@@ -138,7 +138,7 @@ class APIServer:
     def decode_model(self, model):
         """
         Decode the base64 model string and validate the model file existence.
-        
+
         Args:
             model (str): Base64 encoded model name.
 
