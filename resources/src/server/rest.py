@@ -113,6 +113,7 @@ class APIServer:
                 data = self.decode_b64_json(data)
         except Exception as e:
             return self.return_error(error=str(e))
+        logger.logger.info("Starting outliers execution")
         return self.execute_model(data, config.get("Outliers","metric"), model)
 
     def decode_b64_json(self, b64_json):

@@ -19,6 +19,8 @@
 
 import os
 import sys
+import json
+import base64
 import unittest
 from unittest.mock import patch
 
@@ -136,6 +138,16 @@ class TestAPIServer(unittest.TestCase):
                 response.get_json(),
                 {'msg': 'Error while calculating prediction model', 'status': 'error'}
             )
+
+    def test_post_base64_encoded_data(self):
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        data_file_path = os.path.join(current_dir, "outliers_test_data.json")
+        with open(data_file_path, 'r') as file:
+            json_data = json.load(file)
+        encoded_json = base64.b64encode(json.dumps(json_data).encode('utf-8')).decode('utf-8')
+        data = {'model':'dHJhZmZpYw==',  'data': encoded_json}
+        with self.api_server.app.test_client().post('/api/v1/outliers', data=data) as response:
+            self.assertEqual(response.status_code, 200)
 
 if __name__ == '__main__':
     unittest.main()
