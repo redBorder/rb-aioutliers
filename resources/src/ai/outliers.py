@@ -77,8 +77,6 @@ class Autoencoder:
             self.std_loss = float(general_section.get('STD_LOSS', 1.0))
             self.window_size = int(general_section.get('WINDOW_SIZE', 1))
             self.num_window = int(general_section.get('NUM_WINDOWS', 1))
-            self.loss_mult_metric = float(general_section.get('LOSS_MULT_METRIC', 1.0))
-            self.loss_mult_minute = float(general_section.get('LOSS_MULT_MINUTE', 1.0))
         except Exception as e:
             logger.logger.error(f"Could not load model conif: {e}")
             raise e
@@ -150,13 +148,8 @@ class Autoencoder:
 
     def model_loss(self, y_true, y_pred, single_value=True):
         """
-        Calculate the weighted loss for the model.
-        Compares the input with boolean-valued tensors IS_METRIC and IS_MINUTE.
-        Where IS_METRIC is true, the value of the input is multiplied by mult1,
-        where IS_MINUTE is true, the value of the input is multiplied by mult2,
-        otherwise, the value is left unchanged.
-        Then, the difference between both tensors is evaluated and a log_cosh loss
-        is applied.
+        Calculate the loss of the model as a mean absolute error. May be computed fo each separate
+        element of the input tensor or for the whole tensor.
 
         Args:
             y_true (tf.Tensor): True target values.
@@ -168,16 +161,7 @@ class Autoencoder:
         """
         y_true = tf.cast(y_true, tf.bfloat16)
         y_pred = tf.cast(y_pred, tf.bfloat16)
-        num_metrics = len(self.metrics)
-        num_features = len(self.columns)
-        is_metric = (tf.range(num_features) < num_metrics)
-        is_minute = (tf.range(num_features) == num_metrics)
-        mult_true = tf.where(is_metric, self.loss_mult_metric * y_true, y_true)
-        mult_true = tf.where(is_minute, self.loss_mult_minute * mult_true, mult_true)
-        mult_pred = tf.where(is_metric, self.loss_mult_metric * y_pred, y_pred)
-        mult_pred = tf.where(is_minute, self.loss_mult_minute * mult_pred, mult_pred)
-        loss = tf.math.abs(mult_true-mult_pred)
-        loss = loss-tf.math.log(tf.cast(2.0, tf.bfloat16))+tf.math.log1p(tf.math.exp(-2.0*loss))
+        loss = tf.math.abs(y_true-y_pred)
         if single_value:
             loss = tf.reduce_mean(loss)
         return loss
