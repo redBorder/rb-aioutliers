@@ -17,13 +17,13 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Set up Python 3.8 and pip
+    - name: Set up Python 3.9 and pip
       run: |
         sudo add-apt-repository ppa:deadsnakes/ppa -y
         sudo apt update
-        sudo apt install -y python3.8 python3.8-distutils
+        sudo apt install -y python3.9 python3.9-distutils
         curl -s https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-        sudo python3.8 get-pip.py
+        sudo python3.9 get-pip.py
 
     - name: Install project dependencies
       run: |
@@ -51,13 +51,13 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Set up Python 3.8 and pip
+    - name: Set up Python 3.9 and pip
       run: |
         sudo add-apt-repository ppa:deadsnakes/ppa -y
         sudo apt update
-        sudo apt install -y python3.8 python3.8-distutils
+        sudo apt install -y python3.9 python3.9-distutils
         curl -s https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-        sudo python3.8 get-pip.py
+        sudo python3.9 get-pip.py
 
     - name: Install dependencies
       run: |
@@ -65,7 +65,7 @@ jobs:
 
     - name: Run outliers
       run: |
-        ENVIRONMENT=test python3.8 resources/src/__main__.py
+        ENVIRONMENT=test python3.9 resources/src/__main__.py
       
 
         
