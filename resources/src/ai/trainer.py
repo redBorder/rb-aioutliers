@@ -92,8 +92,6 @@ class Trainer(Autoencoder):
         general_section['STD_LOSS'] = str(self.std_loss)
         general_section['WINDOW_SIZE'] = str(self.window_size)
         general_section['NUM_WINDOWS'] = str(self.num_window)
-        general_section['LOSS_MULT_METRIC'] = str(self.loss_mult_metric)
-        general_section['LOSS_MULT_MINUTE'] = str(self.loss_mult_minute)
         with open(save_config_file, 'w') as configfile:
             new_model_config.write(configfile)
 

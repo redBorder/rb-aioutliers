@@ -77,56 +77,97 @@ class APIServer:
         {
             "query": "<base64_encoded_json_druid_query>",
             "model": "<base64_encoded_model_name>"  # Optional field
+            "data": "<base64_encoded_data>" #Optional field
         }
 
         Where:
-        - `query`: A base64 encoded JSON Druid query specifying the data for analysis.
-        - `model` (Optional): A base64 encoded string representing the path of the predictive
+        - query: A base64 encoded JSON Druid query specifying the data for analysis.
+        - model (Optional): A base64 encoded string representing the path of the predictive
         model to be used. If not provided or if the specified model is not found, a default
         model is used.
+        - data (Optional): A base64 encoded json with the data to analyze. Overrides the query
+        parameter.
 
         Returns:
             A JSON response containing the prediction results or an error message.
         """
-
-        druid_query = request.form.get('query')
-        try:
-            druid_query = base64.b64decode(druid_query).decode('utf-8')
-            druid_query = json.loads(druid_query)
-        except Exception as e:
-            error_message = "Error decoding query"
-            logger.logger.error(error_message + ": " + str(e))
-            return self.return_error(error=error_message)
-        logger.logger.info("Druid query successfully decoded and loaded.")
-
         model = request.form.get('model')
+        model = self.decode_model(model)
+        if model != 'default':
+            logger.logger.info(f"Calculating predictions with keras model {model}.keras")
+        else:
+            logger.logger.info("Calculating predictions with default model")
+
+        data = request.form.get('data')
+        druid_query = request.form.get('query')
+        if data is None and druid_query is None:
+            error_message="No data provided or requested"
+            logger.logger.error(error_message)
+            return self.return_error(error=error_message)
+        try:
+            if data is None:
+                druid_query=self.decode_b64_json(druid_query)
+                data = self.get_data_from_druid(druid_query, model)
+                logger.logger.info("Druid query successfully decoded and loaded")
+            else:
+                data = self.decode_b64_json(data)
+        except Exception as e:
+            return self.return_error(error=str(e))
+        logger.logger.info("Starting outliers execution")
+        return self.execute_model(data, config.get("Outliers","metric"), model)
+
+    def decode_b64_json(self, b64_json):
+        """
+        Decode a base64 json into a python dictionary.
+
+        Args:
+            model (str): Base64 encoded json.
+
+        Returns:
+            dict: dictionary with the decoded json.
+        """
+        try:
+            decoded = base64.b64decode(b64_json).decode('utf-8')
+            decoded = json.loads(decoded)
+        except Exception as e:
+            error_message = "Error decoding json"
+            logger.logger.error(error_message + ": " + str(e))
+            raise Exception(error_message)
+        return decoded
+
+    def decode_model(self, model):
+        """
+        Decode the base64 model string and validate the model file existence.
+
+        Args:
+            model (str): Base64 encoded model name.
+
+        Returns:
+            str: Decoded model name if valid, 'default' otherwise.
+        """
         if model is None:
             logger.logger.info("No model requested")
-            model = 'default'
-        else:
-            try:
-                decoded_model = base64.b64decode(model).decode('utf-8')
-                model_path = os.path.normpath(os.path.join(self.ai_path, f"{decoded_model}.keras"))
-                if not model_path.startswith(os.path.normpath(self.ai_path)):
-                    logger.logger.error(f"Attempted unauthorized file access: {decoded_model}")
-                    model = 'default'
-                elif not os.path.isfile(model_path):
-                    logger.logger.error(f"Model {decoded_model} does not exist")
-                    model = 'default'
-                else:
-                    model = decoded_model
-            except Exception as e:
-                logger.logger.error(f"Error decoding or checking model: {e}")
-                model = 'default'
-        return self.execute_model(druid_query, config.get("Outliers","metric"), model)
+            return 'default'
+        try:
+            decoded_model = base64.b64decode(model).decode('utf-8')
+            model_path = os.path.normpath(os.path.join(self.ai_path, f"{decoded_model}.keras"))
+        except Exception as e:
+            logger.logger.error(f"Error decoding or checking model: {e}")
+            return 'default'
+        if not model_path.startswith(os.path.normpath(self.ai_path)):
+            logger.logger.error(f"Attempted unauthorized file access: {decoded_model}")
+            return 'default'
+        if not os.path.isfile(model_path):
+            logger.logger.error(f"Model {decoded_model} does not exist")
+            return 'default'
+        return decoded_model
 
-    def execute_model(self, druid_query, metric, model='default'):
+    def get_data_from_druid(self, druid_query, model='default'):
         """
-        Execute a keras deep learning model to detect outliers.
+        Get the data from druid for the execution of a model.
 
         Args:
             druid_query (dict): druid query for the data that we want to analyze.
-            metric (string): the name of field being analyzed.
             model (string): the name of the model we want to use.
 
         Returns:
@@ -139,12 +180,28 @@ class APIServer:
         else:
             logger.logger.info("Calculating predictions with default model")
         try:
+            logger.logger.info(f"Executing druid query: {druid_query}")
             data = druid_client.execute_query(druid_query)
         except Exception as e:
             error_message = "Could not execute druid query"
             logger.logger.error(error_message + ": " + str(e))
-            return self.return_error(error=error_message)
+            raise Exception(error_message)
         logger.logger.info("Druid query executed succesfully")
+        return data
+
+    def execute_model(self, data, metric, model='default'):
+        """
+        Execute a keras deep learning model to detect outliers.
+
+        Args:
+            druid_query (dict): druid query for the data that we want to analyze.
+            metric (string): the name of field being analyzed.
+            model (string): the name of the model we want to use.
+
+        Returns:
+            (JSON): json containing the model's predictions and the outliers detected.
+        """
+
         try:
             if model == 'default':
                 return jsonify(shallow_outliers.ShallowOutliers.execute_prediction_model(data))

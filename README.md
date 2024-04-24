@@ -15,6 +15,14 @@ Main package to install redborder AI outliers in Rocky Linux 9
 
 - Rocky Linux 9
 
+## Running the example
+This code shows runs the outlier detection on a mock dataset. Its recomended to use pipenv or similar to avoid overwritting dependencies.
+```bash
+git clone git@github.com:redBorder/rb-aioutliers.git
+cd rb-aioutliers
+pip install -r resources/src/requirements.txt
+bash resources/src/example/run_example.sh
+```
 ## Installation
 
 1. yum install epel-release && rpm -ivh http://repo.redborder.com/redborder-repo-0.0.3-1.el7.rb.noarch.rpm
