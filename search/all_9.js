@@ -8,7 +8,5 @@ var searchData=
   ['load_5ftraffic_5fquery_5',['load_traffic_query',['../classtrain__job_1_1RbOutlierTrainJob.html#aa306435ae4e119c60af7e24d45289042',1,'train_job::RbOutlierTrainJob']]],
   ['logger_6',['logger',['../namespacelogger.html',1,'logger'],['../classlogger_1_1Logger.html#a0b14e488ae28d98d262453f3e9cd6e4d',1,'logger.Logger.logger()'],['../namespacelogger.html#a0b14e488ae28d98d262453f3e9cd6e4d',1,'logger.logger()']]],
   ['logger_7',['Logger',['../classlogger_1_1Logger.html',1,'logger']]],
-  ['logger_2epy_8',['logger.py',['../logger_8py.html',1,'']]],
-  ['loss_5fmult_5fmetric_9',['loss_mult_metric',['../classoutliers_1_1Autoencoder.html#a895f1ae8ccf4098825f3e04a6d14d089',1,'outliers::Autoencoder']]],
-  ['loss_5fmult_5fminute_10',['loss_mult_minute',['../classoutliers_1_1Autoencoder.html#a391b8d541fe4545e1ba740c464cd50f3',1,'outliers::Autoencoder']]]
+  ['logger_2epy_8',['logger.py',['../logger_8py.html',1,'']]]
 ];

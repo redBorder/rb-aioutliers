@@ -122,10 +122,6 @@ Public Attributes</h2></td></tr>
 <tr class="separator:a48cb1697c2945a6c266e9eb413bd3ffb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2236b72f560276e1c4ca3409b8b3ecb5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classoutliers_1_1Autoencoder.html#a2236b72f560276e1c4ca3409b8b3ecb5">columns</a></td></tr>
 <tr class="separator:a2236b72f560276e1c4ca3409b8b3ecb5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a895f1ae8ccf4098825f3e04a6d14d089"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classoutliers_1_1Autoencoder.html#a895f1ae8ccf4098825f3e04a6d14d089">loss_mult_metric</a></td></tr>
-<tr class="separator:a895f1ae8ccf4098825f3e04a6d14d089"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a391b8d541fe4545e1ba740c464cd50f3"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classoutliers_1_1Autoencoder.html#a391b8d541fe4545e1ba740c464cd50f3">loss_mult_minute</a></td></tr>
-<tr class="separator:a391b8d541fe4545e1ba740c464cd50f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abcce662da2a75360795281c4d193ac56"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classoutliers_1_1Autoencoder.html#abcce662da2a75360795281c4d193ac56">metrics</a></td></tr>
 <tr class="separator:abcce662da2a75360795281c4d193ac56"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a508cc3106d2c29fe07dc87cbe3ea6927"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classoutliers_1_1Autoencoder.html#a508cc3106d2c29fe07dc87cbe3ea6927">model</a></td></tr>
@@ -541,13 +537,8 @@ Returns:
         </tr>
       </table>
 </div><div class="memdoc">
-<pre class="fragment">Calculate the weighted loss for the model.
-Compares the input with boolean-valued tensors IS_METRIC and IS_MINUTE.
-Where IS_METRIC is true, the value of the input is multiplied by mult1,
-where IS_MINUTE is true, the value of the input is multiplied by mult2,
-otherwise, the value is left unchanged.
-Then, the difference between both tensors is evaluated and a log_cosh loss
-is applied.
+<pre class="fragment">Calculate the loss of the model as a mean absolute error. May be computed fo each separate
+element of the input tensor or for the whole tensor.
 
 Args:
     y_true (tf.Tensor): True target values.
@@ -741,34 +732,6 @@ Returns:
       <table class="memname">
         <tr>
           <td class="memname">columns</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a895f1ae8ccf4098825f3e04a6d14d089" name="a895f1ae8ccf4098825f3e04a6d14d089"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a895f1ae8ccf4098825f3e04a6d14d089">&#9670;&#160;</a></span>loss_mult_metric</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">loss_mult_metric</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a391b8d541fe4545e1ba740c464cd50f3" name="a391b8d541fe4545e1ba740c464cd50f3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a391b8d541fe4545e1ba740c464cd50f3">&#9670;&#160;</a></span>loss_mult_minute</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">loss_mult_minute</td>
         </tr>
       </table>
 </div><div class="memdoc">

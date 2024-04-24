@@ -87,8 +87,14 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ae64f0875afe3067b97ba370b354b9213"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0323e195383d2d7450c50a1466897915"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classrest_1_1APIServer.html#a0323e195383d2d7450c50a1466897915">calculate</a> (self)</td></tr>
 <tr class="separator:a0323e195383d2d7450c50a1466897915"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9175e96c65956f5e393c988ac1f9089a"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classrest_1_1APIServer.html#a9175e96c65956f5e393c988ac1f9089a">execute_model</a> (self, druid_query, metric, model='default')</td></tr>
-<tr class="separator:a9175e96c65956f5e393c988ac1f9089a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a561c6d61a905e00eeaf7f1ecd4152e19"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classrest_1_1APIServer.html#a561c6d61a905e00eeaf7f1ecd4152e19">decode_b64_json</a> (self, b64_json)</td></tr>
+<tr class="separator:a561c6d61a905e00eeaf7f1ecd4152e19"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afcf42671612a3b2ea3da0edc30e280bd"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classrest_1_1APIServer.html#afcf42671612a3b2ea3da0edc30e280bd">decode_model</a> (self, model)</td></tr>
+<tr class="separator:afcf42671612a3b2ea3da0edc30e280bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa2dcc588af885f30968019eae18bd8c3"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classrest_1_1APIServer.html#aa2dcc588af885f30968019eae18bd8c3">execute_model</a> (self, data, metric, model='default')</td></tr>
+<tr class="separator:aa2dcc588af885f30968019eae18bd8c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abd3e5726dcc3ecb5cd005350fe8da97e"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classrest_1_1APIServer.html#abd3e5726dcc3ecb5cd005350fe8da97e">get_data_from_druid</a> (self, druid_query, model='default')</td></tr>
+<tr class="separator:abd3e5726dcc3ecb5cd005350fe8da97e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a62567b0caaa1b7cdbba24df441c0625d"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classrest_1_1APIServer.html#a62567b0caaa1b7cdbba24df441c0625d">return_error</a> (self, error=&quot;error&quot;)</td></tr>
 <tr class="separator:a62567b0caaa1b7cdbba24df441c0625d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a226b012c2968bdefd981622ad548a37b"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classrest_1_1APIServer.html#a226b012c2968bdefd981622ad548a37b">run_test_app</a> (self)</td></tr>
@@ -165,21 +171,94 @@ the following format:
 {
     "query": "&lt;base64_encoded_json_druid_query&gt;",
     "model": "&lt;base64_encoded_model_name&gt;"  # Optional field
+    "data": "&lt;base64_encoded_data&gt;" #Optional field
 }
 
 Where:
-- `query`: A base64 encoded JSON Druid query specifying the data for analysis.
-- `model` (Optional): A base64 encoded string representing the path of the predictive
+- query: A base64 encoded JSON Druid query specifying the data for analysis.
+- model (Optional): A base64 encoded string representing the path of the predictive
 model to be used. If not provided or if the specified model is not found, a default
 model is used.
+- data (Optional): A base64 encoded json with the data to analyze. Overrides the query
+parameter.
 
 Returns:
     A JSON response containing the prediction results or an error message.
 </pre> 
 </div>
 </div>
-<a id="a9175e96c65956f5e393c988ac1f9089a" name="a9175e96c65956f5e393c988ac1f9089a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9175e96c65956f5e393c988ac1f9089a">&#9670;&#160;</a></span>execute_model()</h2>
+<a id="a561c6d61a905e00eeaf7f1ecd4152e19" name="a561c6d61a905e00eeaf7f1ecd4152e19"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a561c6d61a905e00eeaf7f1ecd4152e19">&#9670;&#160;</a></span>decode_b64_json()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def decode_b64_json </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>b64_json</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<pre class="fragment">Decode a base64 json into a python dictionary.
+
+Args:
+    model (str): Base64 encoded json.
+
+Returns:
+    dict: dictionary with the decoded json.
+</pre> 
+</div>
+</div>
+<a id="afcf42671612a3b2ea3da0edc30e280bd" name="afcf42671612a3b2ea3da0edc30e280bd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afcf42671612a3b2ea3da0edc30e280bd">&#9670;&#160;</a></span>decode_model()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def decode_model </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>model</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<pre class="fragment">Decode the base64 model string and validate the model file existence.
+
+Args:
+    model (str): Base64 encoded model name.
+
+Returns:
+    str: Decoded model name if valid, 'default' otherwise.
+</pre> 
+</div>
+</div>
+<a id="aa2dcc588af885f30968019eae18bd8c3" name="aa2dcc588af885f30968019eae18bd8c3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa2dcc588af885f30968019eae18bd8c3">&#9670;&#160;</a></span>execute_model()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -194,7 +273,7 @@ Returns:
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">&#160;</td>
-          <td class="paramname"><em>druid_query</em>, </td>
+          <td class="paramname"><em>data</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -220,6 +299,48 @@ Returns:
 Args:
     druid_query (dict): druid query for the data that we want to analyze.
     metric (string): the name of field being analyzed.
+    model (string): the name of the model we want to use.
+
+Returns:
+    (JSON): json containing the model's predictions and the outliers detected.
+</pre> 
+</div>
+</div>
+<a id="abd3e5726dcc3ecb5cd005350fe8da97e" name="abd3e5726dcc3ecb5cd005350fe8da97e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abd3e5726dcc3ecb5cd005350fe8da97e">&#9670;&#160;</a></span>get_data_from_druid()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def get_data_from_druid </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>druid_query</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>model</em> = <code>'default'</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<pre class="fragment">Get the data from druid for the execution of a model.
+
+Args:
+    druid_query (dict): druid query for the data that we want to analyze.
     model (string): the name of the model we want to use.
 
 Returns:
