@@ -22,3 +22,7 @@ Author: dependabot[bot]
 release - 202405101358.0.0 - 2024-05-10 13:58:30
 Bumps [gunicorn](https://github.com/benoitc/gunicorn) from 21.2.0 to 22.0.0.
 
+Author: PRodriguezFlores
+release - 202405101538.0.0 - 2024-05-10 15:38:28
+* Removed duplicated dependencies from requirements.txt
+
