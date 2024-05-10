@@ -18,3 +18,7 @@ Author: dependabot[bot]
 release - 202405101352.0.0 - 2024-05-10 13:52:15
 Bumps [werkzeug](https://github.com/pallets/werkzeug) from 3.0.1 to 3.0.3.
 
+Author: dependabot[bot]
+release - 202405101358.0.0 - 2024-05-10 13:58:30
+Bumps [gunicorn](https://github.com/benoitc/gunicorn) from 21.2.0 to 22.0.0.
+
