@@ -14,3 +14,7 @@ Author: dependabot[bot]
 release - 202405101330.0.0 - 2024-05-10 13:30:58
 Bumps [idna](https://github.com/kjd/idna) from 3.4 to 3.7.
 
+Author: dependabot[bot]
+release - 202405101352.0.0 - 2024-05-10 13:52:15
+Bumps [werkzeug](https://github.com/pallets/werkzeug) from 3.0.1 to 3.0.3.
+
