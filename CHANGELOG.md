@@ -26,3 +26,7 @@ Author: PRodriguezFlores
 release - 202405101538.0.0 - 2024-05-10 15:38:28
 * Removed duplicated dependencies from requirements.txt
 
+Author: PRodriguezFlores
+release - 202405201005.0.0 - 2024-05-20 10:05:35
+* Solved the issue.
+
