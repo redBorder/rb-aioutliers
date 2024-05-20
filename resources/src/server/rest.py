@@ -101,9 +101,7 @@ class APIServer:
         data = request.form.get('data')
         druid_query = request.form.get('query')
         if data is None and druid_query is None:
-            error_message="No data provided or requested"
-            logger.logger.error(error_message)
-            return self.return_error(error=error_message)
+            return self.return_error(msg="No data provided or requested")
         try:
             if data is None:
                 druid_query=self.decode_b64_json(druid_query)
@@ -112,7 +110,7 @@ class APIServer:
             else:
                 data = self.decode_b64_json(data)
         except Exception as e:
-            return self.return_error(error=str(e))
+            return self.return_error(msg="Could not execute druid query", exception=e)
         logger.logger.info("Starting outliers execution")
         return self.execute_model(data, config.get("Outliers","metric"), model)
 
@@ -217,18 +215,22 @@ class APIServer:
                 metric,
             ))
         except Exception as e:
-            error_message = "Error while calculating prediction model"
-            logger.logger.error(error_message + ": " + str(e))
-            return self.return_error(error=error_message)
+            return self.return_error(error="Error while calculating prediction model", exception=e)
 
-    def return_error(self, error="error"):
+    def return_error(self, msg="error", exception=None):
         """
-        Returns an adequate formatted JSON for whenever there is an error.
+        Returns a properly formatted JSON response for errors.
 
         Args:
-            error (string): message detailing what type of error has been fired.
+            msg (str): Message detailing the type of error that has occurred.
+            exception (Exception, optional): Exception object to include in the error message. Defaults to None.
+
+        Returns:
+            Response: JSON response indicating an error status.
         """
-        return jsonify({ "status": "error", "msg":error })
+        logged_error = msg + f": {exception}" if exception else msg
+        logger.logger.error(logged_error)
+        return jsonify({ "status": "error", "msg":msg })
 
     def start_s3_sync_thread(self):
         """
