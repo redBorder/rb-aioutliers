@@ -6,7 +6,7 @@ var searchData=
   ['rescale_3',['rescale',['../classoutliers_1_1Autoencoder.html#a81efd85946d8e5ac80b3d58e1dfdf63a',1,'outliers::Autoencoder']]],
   ['rest_4',['rest',['../namespacerest.html',1,'']]],
   ['rest_2epy_5',['rest.py',['../rest_8py.html',1,'']]],
-  ['return_5ferror_6',['return_error',['../classshallow__outliers_1_1ShallowOutliers.html#a64f52234879e3153b151a915d9549927',1,'shallow_outliers.ShallowOutliers.return_error()'],['../classrest_1_1APIServer.html#a62567b0caaa1b7cdbba24df441c0625d',1,'rest.APIServer.return_error()'],['../classoutliers_1_1Autoencoder.html#a64f52234879e3153b151a915d9549927',1,'outliers.Autoencoder.return_error()']]],
+  ['return_5ferror_6',['return_error',['../classshallow__outliers_1_1ShallowOutliers.html#a64f52234879e3153b151a915d9549927',1,'shallow_outliers.ShallowOutliers.return_error()'],['../classrest_1_1APIServer.html#a76881d2ca33b2160499ebd0779c51261',1,'rest.APIServer.return_error()'],['../classoutliers_1_1Autoencoder.html#a64f52234879e3153b151a915d9549927',1,'outliers.Autoencoder.return_error()']]],
   ['rq_7',['rq',['../namespacerq.html',1,'']]],
   ['rq_2epy_8',['rq.py',['../rq_8py.html',1,'']]],
   ['rq_5fmanager_9',['rq_manager',['../class____main_____1_1Outliers.html#afb7fb1638cd86df75576dd639f46f128',1,'__main__::Outliers']]],

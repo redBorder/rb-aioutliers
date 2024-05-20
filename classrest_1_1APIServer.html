@@ -95,8 +95,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:aa2dcc588af885f30968019eae18bd8c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abd3e5726dcc3ecb5cd005350fe8da97e"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classrest_1_1APIServer.html#abd3e5726dcc3ecb5cd005350fe8da97e">get_data_from_druid</a> (self, druid_query, model='default')</td></tr>
 <tr class="separator:abd3e5726dcc3ecb5cd005350fe8da97e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a62567b0caaa1b7cdbba24df441c0625d"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classrest_1_1APIServer.html#a62567b0caaa1b7cdbba24df441c0625d">return_error</a> (self, error=&quot;error&quot;)</td></tr>
-<tr class="separator:a62567b0caaa1b7cdbba24df441c0625d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a76881d2ca33b2160499ebd0779c51261"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classrest_1_1APIServer.html#a76881d2ca33b2160499ebd0779c51261">return_error</a> (self, msg=&quot;error&quot;, exception=None)</td></tr>
+<tr class="separator:a76881d2ca33b2160499ebd0779c51261"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a226b012c2968bdefd981622ad548a37b"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classrest_1_1APIServer.html#a226b012c2968bdefd981622ad548a37b">run_test_app</a> (self)</td></tr>
 <tr class="separator:a226b012c2968bdefd981622ad548a37b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6342303e3b6e03de6d0695b26c987861"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classrest_1_1APIServer.html#a6342303e3b6e03de6d0695b26c987861">start_s3_sync_thread</a> (self)</td></tr>
@@ -348,8 +348,8 @@ Returns:
 </pre> 
 </div>
 </div>
-<a id="a62567b0caaa1b7cdbba24df441c0625d" name="a62567b0caaa1b7cdbba24df441c0625d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a62567b0caaa1b7cdbba24df441c0625d">&#9670;&#160;</a></span>return_error()</h2>
+<a id="a76881d2ca33b2160499ebd0779c51261" name="a76881d2ca33b2160499ebd0779c51261"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a76881d2ca33b2160499ebd0779c51261">&#9670;&#160;</a></span>return_error()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -364,7 +364,13 @@ Returns:
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">&#160;</td>
-          <td class="paramname"><em>error</em> = <code>&quot;error&quot;</code>&#160;</td>
+          <td class="paramname"><em>msg</em> = <code>&quot;error&quot;</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>exception</em> = <code>None</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -373,10 +379,14 @@ Returns:
         </tr>
       </table>
 </div><div class="memdoc">
-<pre class="fragment">Returns an adequate formatted JSON for whenever there is an error.
+<pre class="fragment">Returns a properly formatted JSON response for errors.
 
 Args:
-    error (string): message detailing what type of error has been fired.
+    msg (str): Message detailing the type of error that has occurred.
+    exception (Exception, optional): Exception object to include in the error message. Defaults to None.
+
+Returns:
+    Response: JSON response indicating an error status.
 </pre> 
 </div>
 </div>
