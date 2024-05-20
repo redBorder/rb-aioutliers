@@ -54,7 +54,7 @@ class TestAPIServer(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(
                 response.get_json(),
-                {'msg': 'Error decoding json', 'status': 'error'}
+                {'msg': 'Could not execute druid query', 'status': 'error'}
             )
 
     def test_calculate_endpoint_druid_query_execution_malfunction(self):
