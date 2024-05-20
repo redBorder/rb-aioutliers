@@ -215,7 +215,7 @@ class APIServer:
                 metric,
             ))
         except Exception as e:
-            return self.return_error(error="Error while calculating prediction model", exception=e)
+            return self.return_error(msg="Error while calculating prediction model", exception=e)
 
     def return_error(self, msg="error", exception=None):
         """
