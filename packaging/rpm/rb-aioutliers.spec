@@ -4,7 +4,7 @@ Release: %{__release}%{?dist}
 BuildArch: noarch
 Summary: RedBorder Python AI Outliers Detection Service
 
-License: GPL-2.0
+License: AGPL 3.0
 URL: https://github.com/redBorder/rb-aioutliers
 Source0: %{name}-%{version}.tar.gz
 
@@ -67,6 +67,16 @@ source /opt/rb-aioutliers/aioutliers/bin/activate
 
 # Install project dependencies
 pip3 install -r /opt/rb-aioutliers/resources/src/requirements.txt
+
+# Add NVIDIA libraries to LD_LIBRARY_PATH (Necessary for using TensorFlow with GPU)
+cp /opt/rb-aioutliers/resources/src/setup_tensorflow_and_cuda.sh /opt/rb-aioutliers/aioutliers/bin/setup_tensorflow_and_cuda.sh
+
+# Append the sourcing of setup script to activate script
+echo "source /opt/rb-aioutliers/aioutliers/bin/setup_tensorflow_and_cuda.sh" | tee -a /opt/rb-aioutliers/aioutliers/bin/activate
+
+# Deactivate and reactivate to apply changes
+deactivate
+source /opt/rb-aioutliers/aioutliers/bin/activate
 
 %changelog
 * Tue Jan 30 2024 Miguel Álvarez <malvarez@redborder.com> - 0.0.3-1
