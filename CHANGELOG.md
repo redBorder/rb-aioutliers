@@ -34,3 +34,7 @@ Author: dependabot[bot]
 release - 202405240143.0.0 - 2024-05-24 01:43:46
 Bumps [requests](https://github.com/psf/requests) from 2.31.0 to 2.32.0.
 
+Author: PRodriguezFlores
+release - 202405240857.0.0 - 2024-05-24 08:57:32
+* Fixed a bug where the virtual environment of the service would be unable to find any gpu of the system.
+
