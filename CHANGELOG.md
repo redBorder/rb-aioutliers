@@ -38,3 +38,7 @@ Author: PRodriguezFlores
 release - 202405240857.0.0 - 2024-05-24 08:57:32
 * Fixed a bug where the virtual environment of the service would be unable to find any gpu of the system.
 
+Author: PRodriguezFlores
+release - 202405261349.0.0 - 2024-05-26 13:49:31
+* Upgraded Gunicorn version to comapt with 22.0.0
+
