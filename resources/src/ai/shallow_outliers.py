@@ -46,8 +46,8 @@ class ShallowOutliers:
             contamination (float, optional): A value between 0 and 1 that indicates the proportion of data points
                 to be considered anomalous during training. Default is 0.01.
         """
-        self.sensitivity = sensitivity
-        self.contamination = contamination
+        self.sens = sensitivity
+        self.cont = contamination
 
 
     def predict(self, arr):
@@ -122,11 +122,11 @@ class ShallowOutliers:
         hour of day and a cosine encoding for the day of the week. This encoding helps the model to
         learn periodic patterns in the data while maintaining simplicity.
         
-        Parameters:
-        timestamps (pd.Series): A Pandas Series of timestamps.
+        Args:
+            timestamps (pd.Series): A Pandas Series of timestamps.
         
         Returns:
-        pd.DataFrame: A DataFrame with sine-cosine encodings for daily and weekly periods.
+            pd.DataFrame: A DataFrame with sine-cosine encodings for daily and weekly periods.
         """
         if not isinstance(timestamp, pd.Series):
             raise ValueError("Input must be a Pandas Series")
