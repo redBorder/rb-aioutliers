@@ -42,3 +42,7 @@ Author: PRodriguezFlores
 release - 202405261349.0.0 - 2024-05-26 13:49:31
 * Upgraded Gunicorn version to comapt with 22.0.0
 
+Author: PRodriguezFlores
+release - 202405311717.0.0 - 2024-05-31 17:17:18
+* Fixed an issue where there would always be at least 1 anomaly detected, no matter the data, when using the shallow outliers models.
+
