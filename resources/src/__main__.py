@@ -23,7 +23,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..",
 from resources.src.logger.logger import logger
 from resources.src.server.rest import APIServer, config
 from resources.src.server.production import GunicornApp
-from resources.src.redborder.rq import RqManager
+from resources.src.redborder.zookeeper import RbOutliersZooSync
 
 class Outliers:
     def __init__(self) -> None:
@@ -36,7 +36,7 @@ class Outliers:
         self.server = None
         self.app = None
         self.query_builder = None
-        self.rq_manager = RqManager()
+        self.zoo_sync = RbOutliersZooSync()
         self.run()
 
     def run(self):
@@ -50,7 +50,7 @@ class Outliers:
         if "development" in self.environment:
             self.run_test_server(False)
         if "train" in self.environment:
-            self.rq_manager.schedule_train_job()
+            self.zoo_sync.sync_nodes()
         if "test" in self.environment:
             self.run_test_server(True)
 

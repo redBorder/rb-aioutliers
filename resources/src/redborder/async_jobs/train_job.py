@@ -16,7 +16,7 @@
 # If not, see <https://www.gnu.org/licenses/>.
 
 
-import sys, os, json
+import os, json
 
 from resources.src.rbntp.ntplib import NTPClient
 from resources.src.ai.trainer import Trainer
@@ -33,7 +33,6 @@ class RbOutlierTrainJob:
 
         This class manages the training and running of the Outliers application.
         """
-        self.models= None
         self.query_builder = None
         self.s3_client = None
         self.main_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
@@ -51,18 +50,6 @@ class RbOutlierTrainJob:
             config.get("AWS", "s3_bucket"),
             config.get("AWS", "s3_hostname")
         )
-
-    def setup_remote_model_sync(self):
-        """
-        Set up remote model synchronization for models.
-
-        This function iterates through a list of model names and calls functions to download the latest model
-        configuration and model files from Amazon S3 for each model.
-        """
-        for model_name in self.models:
-            self.download_latest_model_from_s3(model_name)
-            self.download_latest_model_config_from_s3(model_name)
-            self.download_latest_model_filter_from_s3(model_name)
 
     def download_latest_model_config_from_s3(self, model_name):
         """
@@ -113,7 +100,7 @@ class RbOutlierTrainJob:
         with open(os.path.join(self.main_dir,"ai", f"{model_name}_filter.json"), 'r') as json_file:
             return json.load(json_file)
 
-    def train_job(self, model_names):
+    def train_job(self, model_name):
         """
         Start the Outliers training job.
 
@@ -131,15 +118,11 @@ class RbOutlierTrainJob:
         self.query_builder = QueryBuilder(self.get_aggregation_config_path(), self.get_post_aggregations_config_path())
         query = self.query_builder.modify_aggregations(traffic_query)
 
-        self.model_names = model_names.join(model_names.split()).split(',')
-        self.setup_remote_model_sync()
-
-        for model_name in self.model_names:
-            self.trainer = Trainer(
-                os.path.join(self.main_dir, "ai", f"{model_name}.keras"),
-                os.path.join(self.main_dir, "ai", f"{model_name}.ini"),
-            )
-            self.process_model_data(model_name, query, redborder_ntp, manager_time, druid_client)
+        self.trainer = Trainer(
+            os.path.join(self.main_dir, "ai", f"{model_name}.keras"),
+            os.path.join(self.main_dir, "ai", f"{model_name}.ini"),
+        )
+        self.process_model_data(model_name, query, redborder_ntp, manager_time, druid_client)
 
     def initialize_ntp_client(self):
         """
@@ -212,16 +195,15 @@ class RbOutlierTrainJob:
             f'rbaioutliers/latest/{model_name}.ini'
         )
 
-    def upload_results_back_to_s3(self):
+    def upload_results_back_to_s3(self, model_name):
         """
         Upload results for all models to an Amazon S3 bucket.
 
         This function iterates through a list of models and uploads both the model file and model configuration
         file for each model to the 'rbaioutliers/latest' path in the S3 bucket.
         """
-        for model_name in self.model_names:
-            self.upload_model_results_back_to_s3(model_name)
-            self.upload_model_config_results_back_to_s3(model_name)
+        self.upload_model_results_back_to_s3(model_name)
+        self.upload_model_config_results_back_to_s3(model_name)
 
     def process_model_data(self, model_name, query, redborder_ntp, manager_time, druid_client):
         """
@@ -253,4 +235,4 @@ class RbOutlierTrainJob:
             int(config.get("Outliers", "batch_size")),
             config.get("Outliers", "backup_path")
         )
-        self.upload_results_back_to_s3()
+        self.upload_results_back_to_s3(model_name)
