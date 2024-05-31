@@ -25,33 +25,30 @@ from resources.src.logger import logger
 
 class ShallowOutliers:
     """
-    Shallow AI model for outliers detection. Used whenever there is no deep learning model defined.
-    Input data should be 1-dimensional.
+    Shallow AI model for detecting outliers in 1-dimensional data. Utilized when a deep learning model is not defined.
 
     Args:
-        - sensitivity (float): value between 0 and 1 that makes easier for a point to be considered
-        anomalous. Balances the fact that training and inference data is the same. At 1, there will
-        always be at least 1 anomaly. At 0 there will always be 0 anomalies. Default of 0.95.
-
-        - contamination (float): value between 0 and 1 that represents how many points will it try
-        to consider anomalous during training. Default of 0.01.
+        sensitivity (float, optional): A value between 0 and 1 that adjusts the threshold for identifying anomalies.
+            At 1, at least one anomaly is always identified. At 0, no anomalies are identified. Default is 0.95.
+        
+        contamination (float, optional): A value between 0 and 1 that indicates the proportion of data points
+            to be considered anomalous during training. Default is 0.01.
     """
 
     def __init__(self, sensitivity=0.95, contamination=0.01):
         """
-        Shallow AI model for outliers detection. Used whenever there is no deep learning model defined.
-        Input data should be 1-dimensional.
+        Initializes the ShallowOutliers model.
 
         Args:
-            - sensitivity (float): value between 0 and 1 that makes easier for a point to be considered
-            anomalous. Balances the fact that training and inference data is the same. At 1, there will
-            always be at least 1 anomaly. At 0 there will always be 0 anomalies. Default of 0.95.
+            sensitivity (float, optional): A value between 0 and 1 that adjusts the threshold for identifying anomalies.
+                At 1, at least one anomaly is always identified. At 0, no anomalies are identified. Default is 0.95.
 
-            - contamination (float): value between 0 and 1 that represents how many points will it try
-            to consider anomalous during training. Default of 0.01.
+            contamination (float, optional): A value between 0 and 1 that indicates the proportion of data points
+                to be considered anomalous during training. Default is 0.01.
         """
-        self.sens=sensitivity
-        self.cont=contamination
+        self.sensitivity = sensitivity
+        self.contamination = contamination
+
 
     def predict(self, arr):
         """
