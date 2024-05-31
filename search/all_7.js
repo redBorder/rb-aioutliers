@@ -6,7 +6,7 @@ var searchData=
   ['get_5flog_5ffile_3',['get_log_file',['../classlogger_1_1Logger.html#a8fc549adda30dcffa1c0f35c2262cf0b',1,'logger::Logger']]],
   ['get_5fmodel_5ffilter_4',['get_model_filter',['../classtrain__job_1_1RbOutlierTrainJob.html#af0a729eb297e9f827d7531cc411265ce',1,'train_job::RbOutlierTrainJob']]],
   ['get_5fntp_5ftime_5',['get_ntp_time',['../classntplib_1_1NTPClient.html#ae7c6041548ffbd82aaf78fc3ee2fcf05',1,'ntplib::NTPClient']]],
-  ['get_5foutliers_6',['get_outliers',['../classshallow__outliers_1_1ShallowOutliers.html#ab40d886d94c1a7f837028b1fd367538b',1,'shallow_outliers::ShallowOutliers']]],
+  ['get_5foutliers_6',['get_outliers',['../classshallow__outliers_1_1ShallowOutliers.html#adc9875aa489843ea42aba8eabaacf92b',1,'shallow_outliers::ShallowOutliers']]],
   ['get_5fpost_5faggregations_5fconfig_5fpath_7',['get_post_aggregations_config_path',['../classtrain__job_1_1RbOutlierTrainJob.html#ae1b2547fe1c2cb63e1c1a5df64e32031',1,'train_job::RbOutlierTrainJob']]],
   ['get_5fsubstracted_5fday_5ftime_8',['get_substracted_day_time',['../classntplib_1_1NTPClient.html#adf247d0877971d78243491e6eef0c3d2',1,'ntplib::NTPClient']]],
   ['granularity_5ffrom_5fdataframe_9',['granularity_from_dataframe',['../classoutliers_1_1Autoencoder.html#ad5c2e18fd8c8daccd8f58d9f09fac223',1,'outliers::Autoencoder']]],
