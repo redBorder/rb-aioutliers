@@ -64,6 +64,10 @@ class APIServer:
         self.app = Flask(__name__)
         self.app.add_url_rule('/api/v1/outliers', view_func=self.calculate, methods=['POST'])
         self.exit_code = 0
+        self.shallow = shallow_outliers.ShallowOutliers(
+            sensitivity = config.get("ShallowOutliers", "sensitivity"),
+            contamination = config.get("ShallowOutliers", "contamination")
+        )
         self.ai_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "ai")
         self.deep_models={}
 
@@ -200,7 +204,7 @@ class APIServer:
 
         try:
             if model == 'default':
-                return jsonify(shallow_outliers.ShallowOutliers.execute_prediction_model(data))
+                return jsonify(self.shallow.execute_prediction_model(data))
             if model not in self.deep_models:
                 logger.logger.info(f"Creating instance of model {model}")
                 self.deep_models[model]=outliers.Autoencoder(

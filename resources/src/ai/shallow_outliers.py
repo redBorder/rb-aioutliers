@@ -29,8 +29,30 @@ class ShallowOutliers:
     Input data should be 1-dimensional.
 
     Args:
-        (None)
+        - sensitivity (float): value between 0 and 1 that makes easier for a point to be considered
+        anomalous. Balances the fact that training and inference data is the same. At 1, there will
+        always be at least 1 anomaly. At 0 there will always be 0 anomalies. Default of 0.95.
+
+        - contamination (float): value between 0 and 1 that represents how many points will it try
+        to consider anomalous during training. Default of 0.01.
     """
+
+    def __init__(self, sensitivity=0.95, contamination=0.01):
+        """
+        Shallow AI model for outliers detection. Used whenever there is no deep learning model defined.
+        Input data should be 1-dimensional.
+
+        Args:
+            - sensitivity (float): value between 0 and 1 that makes easier for a point to be considered
+            anomalous. Balances the fact that training and inference data is the same. At 1, there will
+            always be at least 1 anomaly. At 0 there will always be 0 anomalies. Default of 0.95.
+
+            - contamination (float): value between 0 and 1 that represents how many points will it try
+            to consider anomalous during training. Default of 0.01.
+        """
+        self.sens=sensitivity
+        self.cont=contamination
+
     def predict(self, arr):
         """
         Given an array of data points, makes a smoothed prediction of the data. To do so,
@@ -91,9 +113,9 @@ class ShallowOutliers:
         data = np.stack((smoothed_arr, np.abs(error), sign), axis=1)
         if other is not None:
             data = np.concatenate([data, other], axis=1)
-        model = IsolationForest(n_estimators=100, contamination=0.01, random_state=42)
+        model = IsolationForest(n_estimators=100, contamination=self.cont, random_state=42)
         model.fit(data)
-        model.offset_=-0.05+0.95*model.offset_
+        model.offset_=self.sens*(1+model.offset_)-1
         outliers = model.predict(data)==-1
         return outliers
 
@@ -147,13 +169,12 @@ class ShallowOutliers:
             "status": "success"
         }
 
-    @staticmethod
-    def execute_prediction_model(data):
+    def execute_prediction_model(self, data):
         try:
-            return ShallowOutliers().compute_json(data)
+            return self.compute_json(data)
         except Exception as e:
             logger.logger.error("Could not execute shallow model")
-            return ShallowOutliers.return_error(e)
+            return self.return_error(e)
 
     @staticmethod
     def return_error(error="error"):
