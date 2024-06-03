@@ -17,7 +17,7 @@
 
 # Because distributed systems are a zoo......
 
-import threading, time, asyncpg, asyncio
+import threading, time
 from kazoo.client import KazooClient
 from kazoo.recipe.election import Election
 from resources.src.redborder.s3 import S3
@@ -81,7 +81,7 @@ class RbOutliersZooSync:
             config.get("AWS", "s3_bucket"),
             config.get("AWS", "s3_hostname")
         )
-    
+
     def locks_models_on_zoo(self):
         """
         Locks models in Zookeeper if the instance is elected as the master.
@@ -100,7 +100,7 @@ class RbOutliersZooSync:
                     model = model.replace('.ini', '')
                     # Persistent Znode
                     self.zookeeper.ensure_path(self.zk_sync_path + "/" + model)
-        
+
     def ensure_paths(self):
         """
         Ensure necessary paths exist in Zookeeper.
@@ -109,7 +109,7 @@ class RbOutliersZooSync:
         """
         self.zookeeper.ensure_path("/rb-aioutliers")
         self.setup_election()
-    
+
     def is_leader_elected(self):
         """
         Check if a leader is elected in Zookeeper.
@@ -125,7 +125,7 @@ class RbOutliersZooSync:
                 return True 
             else:
                 return False
-        
+
     def setup_election(self):
         """
         Set up leader election in Zookeeper.
@@ -151,7 +151,7 @@ class RbOutliersZooSync:
                 if not self.zookeeper.exists(lock_path):
                     self.zookeeper.create(lock_path, ephemeral=True)
                     return znode
-                
+
     def release_model_lock(self, model):
         """
         Release the lock on a trained model.
