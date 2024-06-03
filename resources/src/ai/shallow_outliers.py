@@ -46,8 +46,8 @@ class ShallowOutliers:
             contamination (float, optional): A value between 0 and 1 that indicates the proportion of data points
                 to be considered anomalous during training. Default is 0.01.
         """
-        self.sens = sensitivity
-        self.cont = contamination
+        self.sens = float(sensitivity)
+        self.cont = float(contamination)
 
 
     def predict(self, arr):
