@@ -25,30 +25,7 @@ from resources.src.server.rest import config
 from resources.src.logger.logger import logger
 from resources.src.redborder.async_jobs.train_job import RbOutlierTrainJob
 
-class RbOutliersPSQL:
-
-    RB_AIOUTLIERS_FILTERS_QUERY = "SELECT filter FROM saved_filters"
-
-    def __init__(self) -> None:
-        self.filters = []
-        asyncio.run(self.get_filtered_data())
-
-    async def get_filtered_data(self):
-        connection = await asyncpg.connect(
-            host=config.get("rbpsql", "host"),
-            database=config.get("rbpsql", "database"),
-            user=config.get("rbpsql", "user"),
-            password=config.get("rbpsql", "password")
-        )
-        
-        try:
-            filtered_data = await connection.fetch(self.RB_AIOUTLIERS_FILTERS_QUERY)
-            self.filters = [record['filter'] for record in filtered_data]
-            print(self.filters)
-        finally:
-            await connection.close()
-
-class RbOutliersZooSync(RbOutliersPSQL):
+class RbOutliersZooSync:
     # Please, dont touch or you will break things
     # Make sure you know what you are doing here LMAO
     # atte: Malvads :) <3
@@ -61,8 +38,10 @@ class RbOutliersZooSync(RbOutliersPSQL):
     # of the models
 
     # Followers nodes will traing the sensors (only flow) with the saved filters
-    # When they get a znode without lock it will lock it in ZooKeeper (rb-aioutliers/{node}/lock), making it in-accesible
-    # for other nodes, when training finish or service dies the lock is released (ephemeral znode/ rmr (rb-aioutliers/{node}/lock))
+    # When they get a znode without lock it will lock it in
+    # ZooKeeper (rb-aioutliers/{node}/lock), making it in-accesible
+    # for other nodes, when training finish or service dies the lock is released
+    # (ephemeral znode/ rmr (rb-aioutliers/{node}/lock))
     # and it upload to s3 (if alive)
 
     RB_AIOUTLIERS_MAX_SLEEP = 1e3
@@ -73,7 +52,6 @@ class RbOutliersZooSync(RbOutliersPSQL):
 
         Establishes connection to Zookeeper, sets up necessary paths, and initializes S3 client.
         """
-        super().__init__()
         self.zookeeper = KazooClient(
             hosts=config.get("ZooKeeper", "zk_hosts")
         )

@@ -25,6 +25,7 @@ from resources.src.druid.client import DruidClient
 from resources.src.server.rest import config
 from resources.src.druid.query_builder import QueryBuilder
 from resources.src.redborder.s3 import S3
+from resources.src.redborder.postgresql import RbOutliersPSQL
 
 class RbOutlierTrainJob:
     def __init__(self) -> None:
@@ -115,7 +116,10 @@ class RbOutlierTrainJob:
 
         traffic_query = self.load_traffic_query()
 
-        self.query_builder = QueryBuilder(self.get_aggregation_config_path(), self.get_post_aggregations_config_path())
+        self.query_builder = QueryBuilder(
+            self.get_aggregation_config_path(),
+            self.get_post_aggregations_config_path()
+        )
         query = self.query_builder.modify_aggregations(traffic_query)
 
         self.trainer = Trainer(
@@ -180,7 +184,8 @@ class RbOutlierTrainJob:
         """
         self.s3_client.upload_file(
             os.path.join(self.main_dir, "ai", f"{model_name}.keras"),
-            f'rbaioutliers/latest/{model_name}.keras'
+            f'rbaioutliers/latest/{model_name}.keras',
+            f'rbaioutliers/latest/{model_name}_filter.json'
         )
 
     def upload_model_config_results_back_to_s3(self, model_name):
