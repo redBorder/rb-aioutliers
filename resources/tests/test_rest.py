@@ -149,7 +149,6 @@ class TestAPIServer(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
 
     def test_shallow_outliers_executes(self):
-        print("\n\n\n\n##############################################")
         current_dir = os.path.dirname(os.path.abspath(__file__))
         data_file_path = os.path.join(current_dir, "shallow_outliers_test_data.json")
         with open(data_file_path, 'r') as file:
@@ -159,7 +158,6 @@ class TestAPIServer(unittest.TestCase):
         with self.api_server.app.test_client().post('/api/v1/outliers', data=data) as response:
             self.assertEqual(response.get_json()["status"], "success")
             self.assertEqual(response.status_code, 200)
-        print("\n\n\n\n##############################################")
 
 if __name__ == '__main__':
     unittest.main()
