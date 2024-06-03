@@ -1,5 +1,5 @@
 [Unit]
-Description=redBorder AI Outliers with Keras (Training)
+Description=redBorder AI Outliers with Keras (Sync and Train)
 Requires=network.target
 After=network.target
 
@@ -7,15 +7,16 @@ After=network.target
 TimeoutStartSec=30
 RestartSec=10
 Restart=always
-WorkingDirectory=/opt/rb-aioutliers/
+WorkingDirectory=/opt/rb-aioutliers/resources
 
-User=root
-Group=root
+User=rb-aioutliers
+Group=rb-aioutliers
 
 KillSignal=SIGTERM
 Type=simple
 
-ExecStart=ENVIRONMENT=train python3 resources/src/__main__.py
+ExecStart=/opt/rb-aioutliers/aioutliers/bin/python3 /opt/rb-aioutliers/resources/src/__main__.py
+Environment=ENVIRONMENT=train
 
 TimeoutStopSec=60
 
