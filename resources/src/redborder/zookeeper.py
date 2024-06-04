@@ -122,7 +122,7 @@ class RbOutliersZooSync:
         if leader_exists:
             leader_children = self.zookeeper.get_children(leader_path)
             if len(leader_children) > 0:
-                return True 
+                return True
             else:
                 return False
 
