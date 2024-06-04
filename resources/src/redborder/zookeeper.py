@@ -107,7 +107,7 @@ class RbOutliersZooSync:
 
         Ensures that the required paths for the application exist in Zookeeper.
         """
-        self.zookeeper.ensure_path("/rb-aioutliers")
+        self.zookeeper.ensure_path(self.zk_sync_path)
         self.setup_election()
 
     def is_leader_elected(self):
