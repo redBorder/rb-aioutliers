@@ -46,3 +46,7 @@ Author: PRodriguezFlores
 release - 202405311717.0.0 - 2024-05-31 17:17:18
 * Fixed an issue where there would always be at least 1 anomaly detected, no matter the data, when using the shallow outliers models.
 
+Author: PRodriguezFlores
+release - 202406070335.0.0 - 2024-06-07 03:35:54
+* Fixed an issue where the shallow outliers wouldn't initialize properly in the API REST because it was not converting some values from the config to float.
+
