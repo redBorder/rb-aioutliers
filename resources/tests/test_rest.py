@@ -145,6 +145,18 @@ class TestAPIServer(unittest.TestCase):
         encoded_json = base64.b64encode(json.dumps(json_data).encode('utf-8')).decode('utf-8')
         data = {'model':'dHJhZmZpYw==',  'data': encoded_json}
         with self.api_server.app.test_client().post('/api/v1/outliers', data=data) as response:
+            self.assertEqual(response.get_json()["status"], "success")
+            self.assertEqual(response.status_code, 200)
+
+    def test_shallow_outliers_executes(self):
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        data_file_path = os.path.join(current_dir, "shallow_outliers_test_data.json")
+        with open(data_file_path, 'r') as file:
+            json_data = json.load(file)
+        encoded_json = base64.b64encode(json.dumps(json_data).encode('utf-8')).decode('utf-8')
+        data = {'data': encoded_json}
+        with self.api_server.app.test_client().post('/api/v1/outliers', data=data) as response:
+            self.assertEqual(response.get_json()["status"], "success")
             self.assertEqual(response.status_code, 200)
 
 if __name__ == '__main__':
