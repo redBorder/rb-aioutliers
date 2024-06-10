@@ -18,7 +18,6 @@
 # Because distributed systems are a zoo......
 
 import os
-import random
 import time
 from kazoo.recipe.election import Election
 from kazoo.recipe.queue import LockingQueue
@@ -45,7 +44,7 @@ class RbOutliersZooSync(ZooKeeperClient):
         configurations, including the ZooKeeper client and S3 client.
         """
         self.is_leader = False
-        self.running = False
+        self.is_running = False
         self.s3_client = None
         self.queue = None
         self.election = None
@@ -89,7 +88,7 @@ class RbOutliersZooSync(ZooKeeperClient):
         logger.info("Synchronizing nodes")
         self.setup_s3()
         self._ensure_paths()
-        self.running = True
+        self.is_running = True
         self.queue = LockingQueue(self.zookeeper, self.paths["queue"])
         self.election = Election(self.zookeeper, self.paths["election"], identifier=self.name)
         self.leader_watcher = ChildrenWatch(self.zookeeper, self.paths["leader"], self._participate_in_election)
@@ -104,7 +103,7 @@ class RbOutliersZooSync(ZooKeeperClient):
             frame: The current stack frame.
         """
         logger.info(f"Cleanup called with signal {signum}")
-        self.running = False
+        self.is_running = False
         self.election.cancel()
         self.leader_watcher._stopped = True
         if self.is_leader:
@@ -117,7 +116,7 @@ class RbOutliersZooSync(ZooKeeperClient):
         """
         Runs tasks based on the leadership status.
         """
-        while self.running:
+        while self.is_running:
             if self.is_leader:
                 self._leader_tasks()
             else:
@@ -129,7 +128,7 @@ class RbOutliersZooSync(ZooKeeperClient):
         Runs the tasks for the leader node.
         """
         logger.info("Running leader tasks")
-        while self.is_leader and self.running:
+        while self.is_leader and self.is_running:
             self._get_models()
             self._locks_models_on_zoo()
             next_task_time = time.time() + self.sleep_time
@@ -149,13 +148,15 @@ class RbOutliersZooSync(ZooKeeperClient):
         Runs the tasks for the follower nodes.
         """
         logger.info("Running follower tasks")
-        while self.running:
-            while not self.is_leader and self._leader_exists():
-                model = self._get_model_from_queue()
-                if model:
-                    self._process_model_as_follower(model)
-                time.sleep(2)
-            time.sleep(2)
+        while self.is_running and not self.is_leader:
+            if not self._leader_exists():
+                logger.info("No leader found, waiting...")
+                time.sleep(5)
+                continue
+            model = self._get_model_from_queue()
+            if model:
+                self._process_model_as_follower(model)
+            time.sleep(5)
 
     def _participate_in_election(self, leader_nodes: list[str]) -> None:
         """
@@ -164,7 +165,7 @@ class RbOutliersZooSync(ZooKeeperClient):
         Parameters:
             leader_nodes (list[str]): A list of leader nodes.
         """
-        if not self._leader_exists() and self.running:
+        if not self._leader_exists() and self.is_running:
             logger.info("Participating in election")
             try:
                 if self.election.lock.acquire(timeout=10):
@@ -222,7 +223,7 @@ class RbOutliersZooSync(ZooKeeperClient):
         """
         Locks the models in ZooKeeper.
         """
-        if self.is_leader and self.running:
+        if self.is_leader and self.is_running:
             b_models = [bytes(model, "utf-8") for model in self.models]
             self.queue.put_all(b_models)
             logger.info(f"Locked models {', '.join(self.models)}")
@@ -260,5 +261,4 @@ class RbOutliersZooSync(ZooKeeperClient):
             logger.info(f"Finished training of model {model}")
         except Exception as e:
             logger.error(f"Client {self.name} failed to process {model}: {e}")
-            self.queue.put(bytes(model, "utf-8"))
-            logger.error(f"Client {self.name} requeued {model}")
+            self._delete_node(self.paths["taken"], model)

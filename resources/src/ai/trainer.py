@@ -138,7 +138,7 @@ class Trainer(Autoencoder):
             backup_path (None or str): path to where the backups should be saved.
         """
         if backup_path is None:
-            backup_path = "./backups/"
+            backup_path = "resources/src/ai/backups/"
         date = datetime.now().strftime("%y-%m-%dT%H:%M")
         self.save_model(f"{backup_path}{date}.keras",f"{backup_path}{date}.ini")
         prep_data = self.prepare_data_for_training(raw_data)
