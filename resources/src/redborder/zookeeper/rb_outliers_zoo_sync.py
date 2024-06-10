@@ -48,11 +48,9 @@ class RbOutliersZooSync(ZooKeeperClient):
         self.s3_client = None
         self.queue = None
         self.election = None
-        self.models=[]
         self.paths = {}
         super().__init__()
         self.sleep_time = float(config.get("ZooKeeper", "zk_sleep_time"))
-        self.s3_client = None
 
     def _ensure_paths(self) -> None:
         """
@@ -91,7 +89,11 @@ class RbOutliersZooSync(ZooKeeperClient):
         self.is_running = True
         self.queue = LockingQueue(self.zookeeper, self.paths["queue"])
         self.election = Election(self.zookeeper, self.paths["election"], identifier=self.name)
-        self.leader_watcher = ChildrenWatch(self.zookeeper, self.paths["leader"], self._participate_in_election)
+        self.leader_watcher = ChildrenWatch(
+            self.zookeeper,
+            self.paths["leader"],
+            self._participate_in_election
+        )
         self._run_tasks()
 
     def cleanup(self, signum: int, frame) -> None:
@@ -129,11 +131,11 @@ class RbOutliersZooSync(ZooKeeperClient):
         """
         logger.info("Running leader tasks")
         while self.is_leader and self.is_running:
-            self._get_models()
-            self._locks_models_on_zoo()
+            models = self._get_models()
+            self._lock_models_on_zoo(models)
             next_task_time = time.time() + self.sleep_time
             while time.time() < next_task_time:
-                for model in self.models:
+                for model in models:
                     is_taken = self._check_node(self.paths["taken"], model)
                     is_training = self._check_node(self.paths["train"], model)
                     if is_taken and not is_training:
@@ -166,7 +168,7 @@ class RbOutliersZooSync(ZooKeeperClient):
             leader_nodes (list[str]): A list of leader nodes.
         """
         if not self._leader_exists() and self.is_running:
-            logger.info("Participating in election")
+            logger.info(f"Participating in election {len(leader_nodes)} nodes")
             try:
                 if self.election.lock.acquire(timeout=10):
                     try:
@@ -212,25 +214,34 @@ class RbOutliersZooSync(ZooKeeperClient):
         """
         return len(self.zookeeper.get_children(self.paths["leader"])) == 1
 
-    def _get_models(self) -> None:
+    def _get_models(self) -> list[str]:
         """
         Retrieves the models from S3.
+
+        Returns:
+            list[str]: Names of the models to train.
         """
         models = self.s3_client.list_objects_in_folder("rbaioutliers/latest")
-        self.models = [model.replace('.ini', '') for model in models if '.ini' in model]
+        return [model.replace('.ini', '') for model in models if '.ini' in model]
 
-    def _locks_models_on_zoo(self) -> None:
+    def _lock_models_on_zoo(self, models: list[str]) -> None:
         """
         Locks the models in ZooKeeper.
+        
+        Parameters:
+            models (list[str]): A list of models to be locked.
         """
         if self.is_leader and self.is_running:
-            b_models = [bytes(model, "utf-8") for model in self.models]
+            b_models = [bytes(model, "utf-8") for model in models]
             self.queue.put_all(b_models)
-            logger.info(f"Locked models {', '.join(self.models)}")
+            logger.info(f"Locked models {', '.join(models)}")
 
     def _get_model_from_queue(self) -> str:
         """
-        Attempts to get a model from the queue.
+        Attempts to get a model from the queue. Then, znodes with the model name are created both
+        in the train and in the taken nodes to indicate that the model is being trained. This is 
+        made so if the follower fails, the ephemeral node in "train" will disappear while the node
+        in "taken" would remain. The leader will notice this abnormal state and requeue the model.
 
         Returns:
             str: The model as a string if successful, otherwise None.

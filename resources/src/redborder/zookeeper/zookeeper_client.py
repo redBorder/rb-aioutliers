@@ -31,29 +31,6 @@ class ZooKeeperClient:
 
     This class provides methods to set up a ZooKeeper client, handle state changes, 
     clean up connections, and manage znodes.
-
-    Attributes:
-        zookeeper (KazooClient): The ZooKeeper client instance.
-        name (str): The name of the ZooKeeper instance.
-
-    Methods:
-        _setup_zookeeper():
-            Sets up the ZooKeeper client with retries and adds a state listener.
-
-        _listener(state: KazooState):
-            Listens for changes in the ZooKeeper connection state and logs the events.
-
-        cleanup(signum: int, frame):
-            Cleans up the ZooKeeper client and exits the application.
-
-        _check_node(*paths: str) -> bool:
-            Checks if a znode exists at the specified path.
-
-        _create_node(*paths: str, ephemeral: bool = False):
-            Creates a single znode at the specified path.
-
-        _delete_node(*paths: str):
-            Deletes a single znode at the specified path.
     """
 
     def __init__(self) -> None:
