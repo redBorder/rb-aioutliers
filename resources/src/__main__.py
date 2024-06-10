@@ -23,7 +23,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..",
 from resources.src.logger.logger import logger
 from resources.src.server.rest import APIServer, config
 from resources.src.server.production import GunicornApp
-from resources.src.redborder.zookeeper import RbOutliersZooSync
+from resources.src.redborder.zookeeper.rb_outliers_zoo_sync import RbOutliersZooSync
 
 class Outliers:
     def __init__(self) -> None:
