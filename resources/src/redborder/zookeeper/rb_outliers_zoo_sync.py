@@ -46,6 +46,10 @@ class RbOutliersZooSync(ZooKeeperClient):
         """
         self.is_leader = False
         self.running = False
+        self.s3_client = None
+        self.queue = None
+        self.election = None
+        self.models=[]
         self.paths = {}
         super().__init__()
         self.sleep_time = float(config.get("ZooKeeper", "zk_sleep_time"))
@@ -83,7 +87,7 @@ class RbOutliersZooSync(ZooKeeperClient):
         Synchronizes the nodes and starts the election and task processes.
         """
         logger.info("Synchronizing nodes")
-        #self.setup_s3()
+        self.setup_s3()
         self._ensure_paths()
         self.running = True
         self.queue = LockingQueue(self.zookeeper, self.paths["queue"])
@@ -120,6 +124,39 @@ class RbOutliersZooSync(ZooKeeperClient):
                 self._follower_tasks()
             time.sleep(2)
 
+    def _leader_tasks(self) -> None:
+        """
+        Runs the tasks for the leader node.
+        """
+        logger.info("Running leader tasks")
+        while self.is_leader and self.running:
+            self._get_models()
+            self._locks_models_on_zoo()
+            next_task_time = time.time() + self.sleep_time
+            while time.time() < next_task_time:
+                for model in self.models:
+                    is_taken = self._check_node(self.paths["taken"], model)
+                    is_training = self._check_node(self.paths["train"], model)
+                    if is_taken and not is_training:
+                        logger.error(f"Failure processing model {model}")
+                        self._delete_node(self.paths["taken"], model)
+                        self.queue.put(bytes(model, "utf-8"))
+                        logger.info(f"Model {model} requeued")
+                time.sleep(2)
+
+    def _follower_tasks(self) -> None:
+        """
+        Runs the tasks for the follower nodes.
+        """
+        logger.info("Running follower tasks")
+        while self.running:
+            while not self.is_leader and self._leader_exists():
+                model = self._get_model_from_queue()
+                if model:
+                    self._process_model_as_follower(model)
+                time.sleep(2)
+            time.sleep(2)
+
     def _participate_in_election(self, leader_nodes: list[str]) -> None:
         """
         Participates in the leader election process.
@@ -140,6 +177,16 @@ class RbOutliersZooSync(ZooKeeperClient):
         leader = self._get_leader_name()
         self.is_leader = leader == self.name
         logger.info(f"The leader is {leader}")
+
+    def _election_callback(self) -> None:
+        """
+        Callback function for election events.
+        """
+        try:
+            self._create_node(self.paths["leader"], self.name, ephemeral=True)
+            self.zookeeper.set(self.paths["leader"], bytes(self.name, "utf-8"))
+        except Exception as e:
+            logger.error(f"Failed to create leader node: {e}")
 
     def _get_leader_name(self) -> str:
         """
@@ -164,41 +211,11 @@ class RbOutliersZooSync(ZooKeeperClient):
         """
         return len(self.zookeeper.get_children(self.paths["leader"])) == 1
 
-    def _election_callback(self) -> None:
-        """
-        Callback function for election events.
-        """
-        try:
-            self._create_node(self.paths["leader"], self.name, ephemeral=True)
-            self.zookeeper.set(self.paths["leader"], bytes(self.name, "utf-8"))
-        except Exception as e:
-            logger.error(f"Failed to create leader node: {e}")
-
-    def _leader_tasks(self) -> None:
-        """
-        Runs the tasks for the leader node.
-        """
-        logger.info("Running leader tasks")
-        while self.is_leader and self.running:
-            self._get_models()
-            self._locks_models_on_zoo()
-            next_task_time = time.time() + self.sleep_time
-            while time.time() < next_task_time:
-                for model in self.models:
-                    is_taken = self._check_node(self.paths["taken"], model)
-                    is_training = self._check_node(self.paths["train"], model)
-                    if is_taken and not is_training:
-                        logger.error(f"Failure processing model {model}")
-                        self._delete_node(self.paths["taken"], model)
-                        self.queue.put(bytes(model, "utf-8"))
-                        logger.info(f"Model {model} requeued")
-                time.sleep(2)
-
     def _get_models(self) -> None:
         """
         Retrieves the models from S3.
         """
-        models = ["traffic_1.ini", "traffic_2.ini", "traffic_3.ini", "traffic_4.ini", "traffic_5.ini", "traffic_6.ini"]
+        models = self.s3_client.list_objects_in_folder("rbaioutliers/latest")
         self.models = [model.replace('.ini', '') for model in models if '.ini' in model]
 
     def _locks_models_on_zoo(self) -> None:
@@ -209,19 +226,6 @@ class RbOutliersZooSync(ZooKeeperClient):
             b_models = [bytes(model, "utf-8") for model in self.models]
             self.queue.put_all(b_models)
             logger.info(f"Locked models {', '.join(self.models)}")
-
-    def _follower_tasks(self) -> None:
-        """
-        Runs the tasks for the follower nodes.
-        """
-        logger.info("Running follower tasks")
-        while self.running:
-            while not self.is_leader and self._leader_exists():
-                model = self._get_model_from_queue()
-                if model:
-                    self._process_model_as_follower(model)
-                time.sleep(2)
-            time.sleep(2)
 
     def _get_model_from_queue(self) -> str:
         """
@@ -250,8 +254,7 @@ class RbOutliersZooSync(ZooKeeperClient):
         """
         try:
             outlier_job = RbOutlierTrainJob()
-            # outlier_job.train_job(model) #TODO
-            time.sleep(random.randint(1, 5))
+            outlier_job.train_job(model)
             self._delete_node(self.paths["taken"], model)
             self._delete_node(self.paths["train"], model)
             logger.info(f"Finished training of model {model}")
