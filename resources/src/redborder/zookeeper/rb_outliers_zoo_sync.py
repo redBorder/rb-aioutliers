@@ -48,6 +48,7 @@ class RbOutliersZooSync(ZooKeeperClient):
         self.s3_client = None
         self.queue = None
         self.election = None
+        self.leader_watcher = None
         self.paths = {}
         super().__init__()
         self.sleep_time = float(config.get("ZooKeeper", "zk_sleep_time"))
@@ -127,12 +128,13 @@ class RbOutliersZooSync(ZooKeeperClient):
 
     def _leader_tasks(self) -> None:
         """
-        Runs the tasks for the leader node.
+        Runs the tasks for the leader node. This involves queuing models to be trained by the 
+        followers and requeuing models whose clients or training have failed.
         """
         logger.info("Running leader tasks")
         while self.is_leader and self.is_running:
             models = self._get_models()
-            self._lock_models_on_zoo(models)
+            self._queue_models_on_zoo(models)
             next_task_time = time.time() + self.sleep_time
             while time.time() < next_task_time:
                 for model in models:
@@ -221,12 +223,14 @@ class RbOutliersZooSync(ZooKeeperClient):
         Returns:
             list[str]: Names of the models to train.
         """
-        models = self.s3_client.list_objects_in_folder("rbaioutliers/latest")
+        prefix = "rbaioutliers/latest/"
+        models = self.s3_client.list_objects_in_folder(prefix)
+        models = [model[len(prefix):] if model.startswith(prefix) else model for model in models]
         return [model.replace('.ini', '') for model in models if '.ini' in model]
 
-    def _lock_models_on_zoo(self, models: list[str]) -> None:
+    def _queue_models_on_zoo(self, models: list[str]) -> None:
         """
-        Locks the models in ZooKeeper.
+        Queues the models in ZooKeeper.
         
         Parameters:
             models (list[str]): A list of models to be locked.
@@ -234,7 +238,7 @@ class RbOutliersZooSync(ZooKeeperClient):
         if self.is_leader and self.is_running:
             b_models = [bytes(model, "utf-8") for model in models]
             self.queue.put_all(b_models)
-            logger.info(f"Locked models {', '.join(models)}")
+            logger.info(f"Queued models {', '.join(models)}")
 
     def _get_model_from_queue(self) -> str:
         """
@@ -248,8 +252,8 @@ class RbOutliersZooSync(ZooKeeperClient):
         """
         try:
             model = self.queue.get(timeout=2).decode("utf-8")
-            self.queue.consume()
             self._create_node(self.paths["train"], model, ephemeral=True)
+            self.queue.consume()
             self._create_node(self.paths["taken"], model, ephemeral=False)
             logger.info(f"Follower {self.name} locked model {model}")
             return model
