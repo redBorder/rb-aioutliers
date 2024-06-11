@@ -15,7 +15,10 @@
 # You should have received a copy of the GNU Affero General Public License along with this program.
 # If not, see <https://www.gnu.org/licenses/>.
 
+import json
 import requests
+import warnings
+from urllib3.exceptions import InsecureRequestWarning
 from resources.src.server.rest import config
 
 class RbAIOutliersFilters:
@@ -23,10 +26,11 @@ class RbAIOutliersFilters:
 
     def get_filtered_data(self, model_name):
         try:
-            endpoint = f"{config.get('rails', 'endpoint')}{self.WEBUI_API_ENDPOINT}/?auth_token{config.get('rails', 'auth_token')}"
-            req = requests.get(endpoint, verify=False)
+            endpoint = f"{config.get('Rails', 'endpoint')}{self.WEBUI_API_ENDPOINT}/?auth_token={config.get('Rails', 'auth_token')}"
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore', InsecureRequestWarning)
+                req = requests.get(endpoint, verify=False)
             filters = req.json()
-            return filters[model_name]
-
+            return json.loads(filters[model_name])
         except Exception:
             return {}
