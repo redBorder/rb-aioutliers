@@ -15,12 +15,14 @@
 # You should have received a copy of the GNU Affero General Public License along with this program.
 # If not, see <https://www.gnu.org/licenses/>.
 
-import os, json, shutil
+import os
+import json
+import shutil
+from datetime import datetime, timezone, timedelta
 from resources.src.redborder.s3 import S3
 from resources.src.ai.trainer import Trainer
 from resources.src.server.rest import config
 from resources.src.logger.logger import logger
-from resources.src.rbntp.ntplib import NTPClient
 from resources.src.druid.client import DruidClient
 from resources.src.druid.query_builder import QueryBuilder
 from resources.src.redborder.rb_ai_outliers_filters import RbAIOutliersFilters
@@ -112,6 +114,17 @@ class RbOutlierTrainJob:
             s3_path = f'rbaioutliers/latest/{filename}'
             self.upload_file(local_path, s3_path)
 
+    def get_iso_time(self):
+        """Returns a string with the current timestamp in ISO format."""
+        dt_utc = datetime.now(timezone.utc).replace(microsecond=0)
+        return dt_utc.isoformat
+
+    def subtract_one_day(self, iso_time_str):
+        """Given a timestamp string in ISO format, returns timestamp of one day before"""
+        dt = datetime.fromisoformat(iso_time_str)
+        dt_minus_one_day = dt - timedelta(days=1)
+        return dt_minus_one_day.isoformat()
+
     def train_job(self, model_name):
         """
         Start the Outliers training job.
@@ -122,9 +135,7 @@ class RbOutlierTrainJob:
         logger.logger.info("Getting model files from S3")
         self.download_model_from_s3(model_name)
         logger.info("Starting Outliers Train Job")
-        redborder_ntp = self.initialize_ntp_client()
         druid_client = self.initialize_druid_client()
-        manager_time = redborder_ntp.get_ntp_time()
         traffic_query = self.load_traffic_query()
         self.query_builder = QueryBuilder(
             self.get_aggregation_config_path(),
@@ -135,16 +146,7 @@ class RbOutlierTrainJob:
             os.path.join(self.main_dir, "ai", f"{model_name}.keras"),
             os.path.join(self.main_dir, "ai", f"{model_name}.ini"),
         )
-        self.process_model_data(model_name, query, redborder_ntp, manager_time, druid_client)
-
-    def initialize_ntp_client(self):
-        """
-        Initialize the NTP client.
-
-        Returns:
-            NTPClient: The initialized NTP client.
-        """
-        return NTPClient(config.get("NTP", "ntp_server"))
+        self.process_model_data(model_name, query,druid_client)
 
     def initialize_druid_client(self):
         """
@@ -184,22 +186,20 @@ class RbOutlierTrainJob:
         """
         return os.path.join(self.main_dir, "druid", "data", "postAggregations.json")
 
-    def process_model_data(self, model_name, query, redborder_ntp, manager_time, druid_client):
+    def process_model_data(self, model_name, query, druid_client):
         """
         Process data and train the model.
 
         Args:
             model_name (str): Model identifier.
             query (dict): The query to be modified.
-            redborder_ntp (NTPClient): The NTP client.
-            manager_time (datetime): The manager time.
             druid_client (DruidClient): The Druid client.
 
         This function processes data, modifies the query, and trains the model.
         """
         rb_granularities=["pt1m", "pt2m", "pt5m", "pt15m", "pt30m", "pt1h", "pt2h", "pt8h"]
-        start_time = redborder_ntp.time_to_iso8601_time(redborder_ntp.get_substracted_day_time(manager_time))
-        end_time = redborder_ntp.time_to_iso8601_time(manager_time)
+        end_time = self.get_iso_time()
+        start_time = self.subtract_one_day(end_time)
         model_filter = RbAIOutliersFilters().get_filtered_data(model_name)
         query = self.query_builder.modify_filter(query, model_filter)
         query = self.query_builder.set_time_origin(query, start_time)
