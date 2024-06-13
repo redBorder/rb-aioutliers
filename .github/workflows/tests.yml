@@ -13,6 +13,21 @@ jobs:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.user.login == 'dependabot[bot]')
     runs-on: ubuntu-latest
 
+    services:
+      minio:
+        image: minio/minio:latest
+        env:
+          MINIO_ACCESS_KEY: minioadmin
+          MINIO_SECRET_KEY: minioadmin
+        ports:
+          - 9000:9000
+        options: --name minio -d minio/minio server /data
+
+      zookeeper:
+        image: bitnami/zookeeper:latest
+        ports:
+          - 2181:2181
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -66,6 +81,3 @@ jobs:
     - name: Run outliers
       run: |
         ENVIRONMENT=test python3.9 resources/src/__main__.py
-      
-
-        

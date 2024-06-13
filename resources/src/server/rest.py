@@ -248,7 +248,7 @@ class APIServer:
         """
         while True:
             logger.logger.info("Sync with S3 Started")
-            self.sync_models_with_s3()
+            self.sync_models_with_s3(config)
             logger.logger.info("Sync with S3 Finished")
             time.sleep(self.s3_sync_interval)
 

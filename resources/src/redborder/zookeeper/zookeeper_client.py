@@ -22,30 +22,36 @@ import sys
 import signal
 from kazoo.client import KazooClient, KazooRetry
 from kazoo.protocol.states import KazooState
-from resources.src.server.rest import config
 from resources.src.logger.logger import logger
+from resources.src.config.configmanager import ConfigManager
 
 class ZooKeeperClient:
     """
     A client to manage interactions with a ZooKeeper service.
 
-    This class provides methods to set up a ZooKeeper client, handle state changes, 
+    This class provides methods to set up a ZooKeeper client, handle state changes,
     clean up connections, and manage znodes.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, config: ConfigManager) -> None:
         """
-        Initializes the ZooKeeperClient instance, setting up the ZooKeeper client and 
+        Initializes the ZooKeeperClient instance, setting up the ZooKeeper client and
         signal handlers for cleanup.
+
+        Args:
+            config (ConfigManager): Configuration settings including the ones for ZooKeeper client.
         """
         self.zookeeper = None
-        self._setup_zookeeper()
+        self._setup_zookeeper(config)
         signal.signal(signal.SIGINT, self.cleanup)
         signal.signal(signal.SIGTERM, self.cleanup)
 
-    def _setup_zookeeper(self) -> None:
+    def _setup_zookeeper(self, config: ConfigManager) -> None:
         """
         Sets up the ZooKeeper client with retry strategies and adds a state listener.
+
+        Args:
+            config (ConfigManager): Configuration settings including the ones for ZooKeeper client.
         """
         retry = KazooRetry(
             max_tries=15,
@@ -66,7 +72,7 @@ class ZooKeeperClient:
         """
         Listens for changes in the ZooKeeper connection state and logs the events.
 
-        Parameters:
+        Args:
             state (KazooState): The current state of the ZooKeeper connection.
         """
         if state == KazooState.LOST:
@@ -80,7 +86,7 @@ class ZooKeeperClient:
         """
         Cleans up the ZooKeeper client and exits the application.
 
-        Parameters:
+        Args:
             signum (int): The signal number.
             frame: The current stack frame.
         """
@@ -94,7 +100,7 @@ class ZooKeeperClient:
         """
         Checks if a znode exists at the specified path.
 
-        Parameters:
+        Args:
             *paths (str): The parts of the path to join and create the znode.
 
         Returns:
@@ -107,7 +113,7 @@ class ZooKeeperClient:
         """
         Creates a single znode at the specified path.
 
-        Parameters:
+        Args:
             *paths (str): The parts of the path to join and create the znode.
             ephemeral (bool, optional): Set to true if the node should be ephemeral.
         """
@@ -118,7 +124,7 @@ class ZooKeeperClient:
         """
         Deletes a single znode at the specified path.
 
-        Parameters:
+        Args:
             *paths (str): The parts of the path to join and delete the znode.
         """
         full_path = os.path.join(*paths)

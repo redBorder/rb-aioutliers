@@ -36,7 +36,7 @@ class Outliers:
         self.server = None
         self.app = None
         self.query_builder = None
-        self.zoo_sync = RbOutliersZooSync()
+        self.zoo_sync = RbOutliersZooSync(config)
         self.run()
 
     def run(self):

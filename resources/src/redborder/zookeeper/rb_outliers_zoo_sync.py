@@ -24,8 +24,8 @@ from kazoo.recipe.queue import LockingQueue
 from kazoo.recipe.watchers import ChildrenWatch
 from kazoo.exceptions import LockTimeout
 from resources.src.redborder.s3 import S3
-from resources.src.server.rest import config
 from resources.src.logger.logger import logger
+from resources.src.config.configmanager import ConfigManager
 from resources.src.redborder.async_jobs.train_job import RbOutlierTrainJob
 from resources.src.redborder.zookeeper.zookeeper_client import ZooKeeperClient
 
@@ -38,11 +38,15 @@ class RbOutliersZooSync(ZooKeeperClient):
     synchronization, and model processing tasks.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, config: ConfigManager) -> None:
         """
         Initializes the RbOutliersZooSync instance, setting up the necessary attributes and
         configurations, including the ZooKeeper client and S3 client.
+
+        Args:
+            config (ConfigManager): Configuration settings including the ones for ZooKeeper client.
         """
+        self.config = config
         self.is_leader = False
         self.is_running = False
         self.s3_client = None
@@ -50,14 +54,18 @@ class RbOutliersZooSync(ZooKeeperClient):
         self.election = None
         self.leader_watcher = None
         self.paths = {}
-        super().__init__()
+        super().__init__(config)
         self.sleep_time = float(config.get("ZooKeeper", "zk_sleep_time"))
+        self.tick_time = float(config.get("ZooKeeper", "zk_tick_time"))
+
+    def _tick(self) -> None:
+        time.sleep(self.tick_time)
 
     def _ensure_paths(self) -> None:
         """
         Ensures the required ZooKeeper paths are created.
         """
-        zk_sync_path = config.get("ZooKeeper", "zk_sync_path")
+        zk_sync_path = self.config.get("ZooKeeper", "zk_sync_path")
         self.paths = {
             "leader": os.path.join(zk_sync_path, "leader"),
             "queue": os.path.join(zk_sync_path, "models", "queue"),
@@ -73,11 +81,11 @@ class RbOutliersZooSync(ZooKeeperClient):
         Sets up the S3 client with the necessary configurations.
         """
         self.s3_client = S3(
-            config.get("AWS", "s3_public_key"),
-            config.get("AWS", "s3_private_key"),
-            config.get("AWS", "s3_region"),
-            config.get("AWS", "s3_bucket"),
-            config.get("AWS", "s3_hostname")
+            self.config.get("AWS", "s3_public_key"),
+            self.config.get("AWS", "s3_private_key"),
+            self.config.get("AWS", "s3_region"),
+            self.config.get("AWS", "s3_bucket"),
+            self.config.get("AWS", "s3_hostname")
         )
 
     def sync_nodes(self) -> None:
@@ -101,7 +109,7 @@ class RbOutliersZooSync(ZooKeeperClient):
         """
         Cleans up the resources and stops the synchronization process.
 
-        Parameters:
+        Args:
             signum (int): The signal number.
             frame: The current stack frame.
         """
@@ -112,7 +120,7 @@ class RbOutliersZooSync(ZooKeeperClient):
         if self.is_leader:
             self.is_leader = False
             self.zookeeper.set(self.paths["leader"], b"")
-        time.sleep(2)
+        self._tick()
         super().cleanup(signum, frame)
 
     def _run_tasks(self) -> None:
@@ -124,11 +132,11 @@ class RbOutliersZooSync(ZooKeeperClient):
                 self._leader_tasks()
             else:
                 self._follower_tasks()
-            time.sleep(2)
+            self._tick()
 
     def _leader_tasks(self) -> None:
         """
-        Runs the tasks for the leader node. This involves queuing models to be trained by the 
+        Runs the tasks for the leader node. This involves queuing models to be trained by the
         followers and requeuing models whose clients or training have failed.
         """
         logger.info("Running leader tasks")
@@ -145,7 +153,7 @@ class RbOutliersZooSync(ZooKeeperClient):
                         self._delete_node(self.paths["taken"], model)
                         self.queue.put(bytes(model, "utf-8"))
                         logger.info(f"Model {model} requeued")
-                time.sleep(2)
+                self._tick()
 
     def _follower_tasks(self) -> None:
         """
@@ -155,24 +163,24 @@ class RbOutliersZooSync(ZooKeeperClient):
         while self.is_running and not self.is_leader:
             if not self._leader_exists():
                 logger.info("No leader found, waiting...")
-                time.sleep(5)
+                self._tick()
                 continue
             model = self._get_model_from_queue()
             if model:
                 self._process_model_as_follower(model)
-            time.sleep(5)
+            self._tick()
 
     def _participate_in_election(self, leader_nodes: list[str]) -> None:
         """
         Participates in the leader election process.
 
-        Parameters:
+        Args:
             leader_nodes (list[str]): A list of leader nodes.
         """
         if not self._leader_exists() and self.is_running:
             logger.info(f"Participating in election {len(leader_nodes)} nodes")
             try:
-                if self.election.lock.acquire(timeout=10):
+                if self.election.lock.acquire(timeout=5*self.tick_time):
                     try:
                         self._election_callback()
                     finally:
@@ -231,8 +239,8 @@ class RbOutliersZooSync(ZooKeeperClient):
     def _queue_models_on_zoo(self, models: list[str]) -> None:
         """
         Queues the models in ZooKeeper.
-        
-        Parameters:
+
+        Args:
             models (list[str]): A list of models to be locked.
         """
         if self.is_leader and self.is_running:
@@ -243,7 +251,7 @@ class RbOutliersZooSync(ZooKeeperClient):
     def _get_model_from_queue(self) -> str:
         """
         Attempts to get a model from the queue. Then, znodes with the model name are created both
-        in the train and in the taken nodes to indicate that the model is being trained. This is 
+        in the train and in the taken nodes to indicate that the model is being trained. This is
         made so if the follower fails, the ephemeral node in "train" will disappear while the node
         in "taken" would remain. The leader will notice this abnormal state and requeue the model.
 
@@ -265,7 +273,7 @@ class RbOutliersZooSync(ZooKeeperClient):
         """
         Processes the model as a follower node.
 
-        Parameters:
+        Args:
             model (str): The model to process.
         """
         try:
