@@ -44,7 +44,7 @@ class RbOutliersZooSync(ZooKeeperClient):
         configurations, including the ZooKeeper client and S3 client.
 
         Args:
-            config (ConfigManager): Configuration settings including the ones for the ZooKeeper 
+            config (ConfigManager): Configuration settings including the ones for the ZooKeeper
                 and S3 clients.
         """
         self.is_leader = False
@@ -67,7 +67,6 @@ class RbOutliersZooSync(ZooKeeperClient):
         """
         Ensures the required ZooKeeper paths are created.
         """
-        
         self.paths = {
             "leader": os.path.join(self.zk_sync_path, "leader"),
             "queue": os.path.join(self.zk_sync_path, "models", "queue"),
