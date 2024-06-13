@@ -21,28 +21,40 @@ import shutil
 from datetime import datetime, timezone, timedelta
 from resources.src.redborder.s3 import S3
 from resources.src.ai.trainer import Trainer
-from resources.src.server.rest import config
+from resources.src.config.configmanager import ConfigManager
 from resources.src.logger.logger import logger
 from resources.src.druid.client import DruidClient
 from resources.src.druid.query_builder import QueryBuilder
 from resources.src.redborder.rb_ai_outliers_filters import RbAIOutliersFilters
 
 class RbOutlierTrainJob:
-    def __init__(self) -> None:
+    def __init__(self, config: ConfigManager) -> None:
         """
         Initialize the Outliers application.
 
         This class manages the training and running of the Outliers application.
+
+        Args:
+            config (ConfigManager): Configuration settings including the ones for the S3 client.
         """
         self.query_builder = None
-        self.s3_client = None
+        self.setup_s3(config)
         self.main_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
+        self.druid_client = DruidClient(config.get("Druid", "druid_endpoint"))
+        self.training_conf = {
+            "epochs": int(config.get("Outliers", "epochs")),
+            "batch_size": int(config.get("Outliers", "batch_size")),
+            "backup_path": config.get("Outliers", "backup_path")
+        }
 
-    def setup_s3(self):
+    def setup_s3(self, config: ConfigManager):
         """
         Set up the S3 client for handling interactions with Amazon S3.
 
         This function initializes the S3 client with the AWS public key, private key, region, bucket, and hostname as specified in the configuration.
+
+        Args:
+            config (ConfigManager): Configuration settings including the ones for the S3 client.
         """
         self.s3_client = S3(
             config.get("AWS", "s3_public_key"),
@@ -131,11 +143,9 @@ class RbOutlierTrainJob:
 
         This function handles the Outliers training process, fetching data, and training the model.
         """
-        self.setup_s3()
         logger.logger.info("Getting model files from S3")
         self.download_model_from_s3(model_name)
         logger.info("Starting Outliers Train Job")
-        druid_client = self.initialize_druid_client()
         traffic_query = self.load_traffic_query()
         self.query_builder = QueryBuilder(
             self.get_aggregation_config_path(),
@@ -146,16 +156,7 @@ class RbOutlierTrainJob:
             os.path.join(self.main_dir, "ai", f"{model_name}.keras"),
             os.path.join(self.main_dir, "ai", f"{model_name}.ini"),
         )
-        self.process_model_data(model_name, query,druid_client)
-
-    def initialize_druid_client(self):
-        """
-        Initialize the Druid client.
-
-        Returns:
-            DruidClient: The initialized Druid client.
-        """
-        return DruidClient(config.get("Druid", "druid_endpoint"))
+        self.process_model_data(model_name, query)
 
     def load_traffic_query(self):
         """
@@ -186,14 +187,13 @@ class RbOutlierTrainJob:
         """
         return os.path.join(self.main_dir, "druid", "data", "postAggregations.json")
 
-    def process_model_data(self, model_name, query, druid_client):
+    def process_model_data(self, model_name, query):
         """
         Process data and train the model.
 
         Args:
             model_name (str): Model identifier.
             query (dict): The query to be modified.
-            druid_client (DruidClient): The Druid client.
 
         This function processes data, modifies the query, and trains the model.
         """
@@ -207,11 +207,11 @@ class RbOutlierTrainJob:
         traffic_data=[]
         for gran in rb_granularities:
             temp_query = self.query_builder.modify_granularity(query,gran)
-            traffic_data.append(druid_client.execute_query(temp_query))
+            traffic_data.append(self.druid_client.execute_query(temp_query))
         self.trainer.train(
             traffic_data,
-            int(config.get("Outliers", "epochs")),
-            int(config.get("Outliers", "batch_size")),
-            config.get("Outliers", "backup_path")
+            self.training_conf["epochs"],
+            self.training_conf["batch_size"],
+            self.training_conf["backup_path"]
         )
         self.upload_model_to_s3(model_name)

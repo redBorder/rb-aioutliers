@@ -55,7 +55,6 @@ class TestRbOutliersZooSync(unittest.TestCase):
 
     def setUp(self):
         self.zk_sync = RbOutliersZooSync(config)
-        self.zk_sync.setup_s3()
         try:
             self.zk_sync.s3_client.s3_client.create_bucket(Bucket=self.zk_sync.s3_client.bucket_name)
         except:
@@ -122,9 +121,8 @@ class TestRbOutliersZooSync(unittest.TestCase):
             self.assertTrue(len(queue)==3) #Several loops of queueing + one requeued node
             self.assertFalse(self.zk_sync._check_node(self.zk_sync.paths["taken"], "model3"))
 
-    @patch('resources.src.redborder.zookeeper.rb_outliers_zoo_sync.RbOutlierTrainJob')
-    def test_follower_tasks(self, mock_train_job):
-        mock_train_job = MagicMock()
+    def test_follower_tasks(self):
+        self.zk_sync.outlier_job = MagicMock()
         with self.sync_thread:
             self.zk_sync.is_leader = False
             self.zk_sync.queue.put(b"model1")
@@ -163,9 +161,9 @@ class TestRbOutliersZooSync(unittest.TestCase):
             self.assertTrue(self.zk_sync._check_node(self.zk_sync.paths["train"], "model1"))
             self.assertTrue(self.zk_sync._check_node(self.zk_sync.paths["taken"], "model1"))
 
-    @patch('resources.src.redborder.zookeeper.rb_outliers_zoo_sync.RbOutlierTrainJob')
-    def test_process_model_as_follower(self, mock_train_job):
-        mock_train_job = MagicMock()
+
+    def test_process_model_as_follower(self):
+        self.zk_sync.outlier_job = MagicMock()
         with self.sync_thread:
             self.zk_sync._create_node(self.zk_sync.paths["train"], "model1")
             self.zk_sync._create_node(self.zk_sync.paths["taken"], "model1")

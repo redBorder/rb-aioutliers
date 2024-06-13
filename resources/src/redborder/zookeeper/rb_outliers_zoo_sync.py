@@ -44,12 +44,11 @@ class RbOutliersZooSync(ZooKeeperClient):
         configurations, including the ZooKeeper client and S3 client.
 
         Args:
-            config (ConfigManager): Configuration settings including the ones for ZooKeeper client.
+            config (ConfigManager): Configuration settings including the ones for the ZooKeeper 
+                and S3 clients.
         """
-        self.config = config
         self.is_leader = False
         self.is_running = False
-        self.s3_client = None
         self.queue = None
         self.election = None
         self.leader_watcher = None
@@ -57,6 +56,9 @@ class RbOutliersZooSync(ZooKeeperClient):
         super().__init__(config)
         self.sleep_time = float(config.get("ZooKeeper", "zk_sleep_time"))
         self.tick_time = float(config.get("ZooKeeper", "zk_tick_time"))
+        self.zk_sync_path = config.get("ZooKeeper", "zk_sync_path")
+        self.setup_s3(config)
+        self.outlier_job = RbOutlierTrainJob(config)
 
     def _tick(self) -> None:
         time.sleep(self.tick_time)
@@ -65,27 +67,27 @@ class RbOutliersZooSync(ZooKeeperClient):
         """
         Ensures the required ZooKeeper paths are created.
         """
-        zk_sync_path = self.config.get("ZooKeeper", "zk_sync_path")
+        
         self.paths = {
-            "leader": os.path.join(zk_sync_path, "leader"),
-            "queue": os.path.join(zk_sync_path, "models", "queue"),
-            "taken": os.path.join(zk_sync_path, "models", "taken"),
-            "train": os.path.join(zk_sync_path, "models", "train"),
-            "election": os.path.join(zk_sync_path, "election")
+            "leader": os.path.join(self.zk_sync_path, "leader"),
+            "queue": os.path.join(self.zk_sync_path, "models", "queue"),
+            "taken": os.path.join(self.zk_sync_path, "models", "taken"),
+            "train": os.path.join(self.zk_sync_path, "models", "train"),
+            "election": os.path.join(self.zk_sync_path, "election")
         }
         for path in self.paths.values():
             self.zookeeper.ensure_path(path)
 
-    def setup_s3(self) -> None:
+    def setup_s3(self, config) -> None:
         """
         Sets up the S3 client with the necessary configurations.
         """
         self.s3_client = S3(
-            self.config.get("AWS", "s3_public_key"),
-            self.config.get("AWS", "s3_private_key"),
-            self.config.get("AWS", "s3_region"),
-            self.config.get("AWS", "s3_bucket"),
-            self.config.get("AWS", "s3_hostname")
+            config.get("AWS", "s3_public_key"),
+            config.get("AWS", "s3_private_key"),
+            config.get("AWS", "s3_region"),
+            config.get("AWS", "s3_bucket"),
+            config.get("AWS", "s3_hostname")
         )
 
     def sync_nodes(self) -> None:
@@ -93,7 +95,6 @@ class RbOutliersZooSync(ZooKeeperClient):
         Synchronizes the nodes and starts the election and task processes.
         """
         logger.info("Synchronizing nodes")
-        self.setup_s3()
         self._ensure_paths()
         self.is_running = True
         self.queue = LockingQueue(self.zookeeper, self.paths["queue"])
@@ -116,10 +117,12 @@ class RbOutliersZooSync(ZooKeeperClient):
         logger.info(f"Cleanup called with signal {signum}")
         self.is_running = False
         self.election.cancel()
-        self.leader_watcher._stopped = True
+        if self.leader_watcher is not None:
+            self.leader_watcher._stopped = True
         if self.is_leader:
             self.is_leader = False
             self.zookeeper.set(self.paths["leader"], b"")
+        self._tick()
         self._tick()
         super().cleanup(signum, frame)
 
@@ -144,7 +147,7 @@ class RbOutliersZooSync(ZooKeeperClient):
             models = self._get_models()
             self._queue_models_on_zoo(models)
             next_task_time = time.time() + self.sleep_time
-            while time.time() < next_task_time:
+            while time.time() < next_task_time and self.is_running:
                 for model in models:
                     is_taken = self._check_node(self.paths["taken"], model)
                     is_training = self._check_node(self.paths["train"], model)
@@ -277,8 +280,7 @@ class RbOutliersZooSync(ZooKeeperClient):
             model (str): The model to process.
         """
         try:
-            outlier_job = RbOutlierTrainJob()
-            outlier_job.train_job(model)
+            self.outlier_job.train_job(model)
             self._delete_node(self.paths["taken"], model)
             self._delete_node(self.paths["train"], model)
             logger.info(f"Finished training of model {model}")
