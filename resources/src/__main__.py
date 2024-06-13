@@ -36,7 +36,6 @@ class Outliers:
         self.server = None
         self.app = None
         self.query_builder = None
-        self.zoo_sync = RbOutliersZooSync(config)
         self.run()
 
     def run(self):
@@ -50,6 +49,7 @@ class Outliers:
         if "development" in self.environment:
             self.run_test_server(False)
         if "train" in self.environment:
+            self.zoo_sync = RbOutliersZooSync(config)
             self.zoo_sync.sync_nodes()
         if "test" in self.environment:
             self.run_test_server(True)
