@@ -14,25 +14,12 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      minio:
-        image: minio/minio:latest
-        env:
-          MINIO_ACCESS_KEY: minioadmin
-          MINIO_SECRET_KEY: minioadmin
-        ports:
-          - 9000:9000
-        options: --entrypoint sh
-
       zookeeper:
         image: bitnami/zookeeper:latest
         ports:
           - 2181:2181
 
     steps:
-    - name: Start Minio
-      run: |
-        docker start minio
-        docker exec minio minio server /data
 
     - name: Checkout code
       uses: actions/checkout@v2
@@ -48,6 +35,14 @@ jobs:
     - name: Install project dependencies
       run: |
         pip install -r resources/src/requirements.txt
+
+    - name: Start Minio
+      run: |
+        docker run -d --name minio \
+          -e MINIO_ACCESS_KEY=minioadmin \
+          -e MINIO_SECRET_KEY=minioadmin \
+          -p 9000:9000 \
+          minio/minio server /data
 
     - name: Run tests
       run: |
