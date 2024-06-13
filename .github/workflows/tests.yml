@@ -21,7 +21,7 @@ jobs:
           MINIO_SECRET_KEY: minioadmin
         ports:
           - 9000:9000
-        options: --name minio -d minio/minio server /data
+        options: --entrypoint sh
 
       zookeeper:
         image: bitnami/zookeeper:latest
@@ -29,6 +29,11 @@ jobs:
           - 2181:2181
 
     steps:
+    - name: Start Minio
+      run: |
+        docker start minio
+        docker exec minio minio server /data
+
     - name: Checkout code
       uses: actions/checkout@v2
 
