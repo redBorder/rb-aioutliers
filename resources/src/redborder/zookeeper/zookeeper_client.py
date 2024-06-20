@@ -120,6 +120,30 @@ class ZooKeeperClient:
         full_path = os.path.join(*paths)
         self.zookeeper.create(full_path, ephemeral=ephemeral)
 
+    def _read_node(self, *paths: str) -> str:
+        """
+        Reads the value of a znode at the specified path.
+
+        Args:
+            *paths (str): The parts of the path to join and create the znode.
+
+        Returns:
+            str: Value of the znode.
+        """
+        full_path = os.path.join(*paths)
+        return self.zookeeper.get(full_path)[0].decode("utf-8")
+
+    def _update_node(self, value: str, *paths: str) -> None:
+        """
+        Updates the value of a znode at the specified path.
+
+        Args:
+            value (str): new value of the znode.
+            *paths (str): The parts of the path to join and create the znode.
+        """
+        full_path = os.path.join(*paths)
+        self.zookeeper.set(full_path, value.encode("utf-8"))
+
     def _delete_node(self, *paths: str) -> None:
         """
         Deletes a single znode at the specified path.

@@ -72,6 +72,7 @@ class RbOutliersZooSync(ZooKeeperClient):
             "queue": os.path.join(self.zk_sync_path, "models", "queue"),
             "taken": os.path.join(self.zk_sync_path, "models", "taken"),
             "train": os.path.join(self.zk_sync_path, "models", "train"),
+            "next_job": os.path.join(self.zk_sync_path, "next_job"),
             "election": os.path.join(self.zk_sync_path, "election")
         }
         for path in self.paths.values():
@@ -142,20 +143,22 @@ class RbOutliersZooSync(ZooKeeperClient):
         followers and requeuing models whose clients or training have failed.
         """
         logger.info("Running leader tasks")
+        if self._read_node(self.paths["next_job"]):
+            next_task_time = float(self._read_node(self.paths["next_job"])) 
+        else:
+            next_task_time = time.time()-1
         while self.is_leader and self.is_running:
-            models = self._get_models()
-            self._queue_models_on_zoo(models)
-            next_task_time = time.time() + self.sleep_time
             while time.time() < next_task_time and self.is_running:
-                for model in models:
-                    is_taken = self._check_node(self.paths["taken"], model)
-                    is_training = self._check_node(self.paths["train"], model)
-                    if is_taken and not is_training:
+                for model in self._get_models():
+                    if self._check_node(self.paths["taken"], model) and not self._check_node(self.paths["train"], model):
                         logger.error(f"Failure processing model {model}")
                         self._delete_node(self.paths["taken"], model)
                         self.queue.put(bytes(model, "utf-8"))
                         logger.info(f"Model {model} requeued")
                 self._tick()
+            self._queue_models_on_zoo(self._get_models())
+            next_task_time = time.time() + self.sleep_time
+            self._update_node(str(next_task_time), self.paths["next_job"])
 
     def _follower_tasks(self) -> None:
         """
@@ -199,7 +202,7 @@ class RbOutliersZooSync(ZooKeeperClient):
         """
         try:
             self._create_node(self.paths["leader"], self.name, ephemeral=True)
-            self.zookeeper.set(self.paths["leader"], bytes(self.name, "utf-8"))
+            self._update_node(self.name, self.paths["leader"])
         except Exception as e:
             logger.error(f"Failed to create leader node: {e}")
 
@@ -211,8 +214,7 @@ class RbOutliersZooSync(ZooKeeperClient):
             str: The name of the leader.
         """
         try:
-            data, _ = self.zookeeper.get(self.paths["leader"])
-            return data.decode("utf-8")
+            return self._read_node(self.paths["leader"])
         except Exception as e:
             logger.error(f"Error getting leader name: {e}")
             return None
@@ -224,7 +226,12 @@ class RbOutliersZooSync(ZooKeeperClient):
         Returns:
             bool: True if a leader node exists, False otherwise.
         """
-        return len(self.zookeeper.get_children(self.paths["leader"])) == 1
+        try:
+            leaders = self.zookeeper.get_children(self.paths["leader"])
+        except Exception as e:
+            logger.error(f"Could not get leaders: {e}")
+            leaders = []
+        return len(leaders) == 1
 
     def _get_models(self) -> list[str]:
         """
