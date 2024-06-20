@@ -144,7 +144,7 @@ class RbOutliersZooSync(ZooKeeperClient):
         """
         logger.info("Running leader tasks")
         if self._read_node(self.paths["next_job"]):
-            next_task_time = float(self._read_node(self.paths["next_job"])) 
+            next_task_time = float(self._read_node(self.paths["next_job"]))
         else:
             next_task_time = time.time()-1
         while self.is_leader and self.is_running:
