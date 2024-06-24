@@ -158,6 +158,8 @@ class QueryBuilder:
         """
         new_query=query.copy()
         new_query["filter"] = filter_druid
+        if not new_query["filter"]:
+            new_query.pop("filter")
         return new_query
 
     def set_time_origin(self, query, time):
