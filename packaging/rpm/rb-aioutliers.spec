@@ -46,13 +46,11 @@ touch %{buildroot}/var/log/rb-aioutliers/outliers.log
 install -d -m 0755 %{buildroot}/usr/lib/systemd/system/
 install -m 0644 resources/systemd/rb-aioutliers.service %{buildroot}/usr/lib/systemd/system/
 install -m 0644 resources/systemd/rb-aioutliers-train.service %{buildroot}/usr/lib/systemd/system/
-install -m 0644 resources/systemd/rb-aioutliers-rq.service %{buildroot}/usr/lib/systemd/system/
 
 %files
 %defattr(-,root,root,-)
 /usr/lib/systemd/system/rb-aioutliers.service
 /usr/lib/systemd/system/rb-aioutliers-train.service
-/usr/lib/systemd/system/rb-aioutliers-rq.service
 %defattr(-,rb-aioutliers,rb-aioutliers,-)
 /opt/rb-aioutliers/*
 /var/log/rb-aioutliers/*
