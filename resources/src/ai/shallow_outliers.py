@@ -80,7 +80,10 @@ class ShallowOutliers:
         window_size += 1 if window_size % 2 == 0 else 0
         half_size = window_size // 2
         kernel = np.linspace(1, half_size, half_size, dtype=float)
-        kernel = np.concatenate((kernel, [half_size**2 * 0.25], kernel[::-1]))
+        kernel = np.concatenate((kernel, [0], kernel[::-1]))
+        # Give way more importance to points around the one being predicted
+        kernel[half_size] = kernel.sum()
+        kernel = kernel**2
         kernel /= kernel.sum()
         padded_arr = np.pad(arr, half_size, mode='edge')
         smooth_arr = np.convolve(padded_arr, kernel, mode='valid')
