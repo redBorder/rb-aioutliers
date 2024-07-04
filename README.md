@@ -99,6 +99,18 @@ The followers, or trainers, consume from the queue and train the models. Should 
 
 For more info about deploy with Chef Server take a look at [Outliers Cookbook](https://github.com/redBorder/cookbook-rb-aioutliers)
 
+## How to set models for training
+1. Run `ENVIRONMENT=training python resources/src/__main__.py` in at least 2 nodes.
+2. Save a taffic filter in the redborder-manager.
+3. Copy and rename the .keras and .ini files in the repository to <filter_name>.ini and a <filter_name>.keras.
+4. Upload the models in S3 to:
+
+`<bucket>/rbaioutliers/latest/<filter_name>.ini`
+
+and
+
+`<bucket>/rbaioutliers/latest/<filter_name>.keras`
+
 ## Docker support
 
 If you want to run the app inside a docker container run the following commands
