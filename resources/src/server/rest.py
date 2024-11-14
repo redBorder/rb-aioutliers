@@ -140,7 +140,8 @@ class APIServer:
             return jsonify(result), 200
 
         except Exception as e:
-            return jsonify({"error": str(e)}), 500
+            logger.logger.error(f"Exception in identify_ip: {e}")
+            return jsonify({"error": "An internal error has occurred!"}), 500
 
 
     def decode_b64_json(self, b64_json):
