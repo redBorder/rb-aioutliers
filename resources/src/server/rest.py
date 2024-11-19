@@ -25,11 +25,10 @@ import threading
 from flask import Flask, jsonify, request
 
 from resources.src.redborder.s3 import S3
-from resources.src.ai import outliers, shallow_outliers
+from resources.src.ai import outliers, shallow_outliers, outliers_identifier
 from resources.src.druid import client, query_builder
 from resources.src.logger import logger
 from resources.src.config import configmanager
-
 
 '''
 Init local variables
@@ -63,11 +62,13 @@ class APIServer:
         self.start_s3_sync_thread()
         self.app = Flask(__name__)
         self.app.add_url_rule('/api/v1/outliers', view_func=self.calculate, methods=['POST'])
+        self.app.add_url_rule('/api/v1/ip_identifier', view_func=self.identify_ip, methods=['POST'])
         self.exit_code = 0
         self.shallow = shallow_outliers.ShallowOutliers(
             sensitivity = config.get("ShallowOutliers", "sensitivity"),
             contamination = config.get("ShallowOutliers", "contamination")
         )
+        self.identifier = outliers_identifier.OutlierIdentifier()
         self.ai_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "ai")
         self.deep_models={}
 
@@ -115,6 +116,33 @@ class APIServer:
             return self.return_error(msg="Could not execute druid query", exception=e)
         logger.logger.info("Starting outliers execution")
         return self.execute_model(data, config.get("Outliers","metric"), model)
+
+    def identify_ip(self):
+        """
+        Process the incoming request to identify implicated IPs based on outlier data.
+
+        Returns:
+            Response: A JSON response with implicated IPs or an error message.
+        """
+        try:
+            payload = json.loads(request.form.get('payload', '{}'))
+
+            outliers = payload.get('outliers', [])
+            all_ips_data = payload.get('all_ips_data', {})
+
+            if not isinstance(outliers, list) or not isinstance(all_ips_data, dict):
+                return jsonify({"error": "Invalid data format"}), 400
+
+            result = self.identifier.train_and_execute_model(outliers, all_ips_data)
+
+            logger.logger.error(result)
+
+            return jsonify(result), 200
+
+        except Exception as e:
+            logger.logger.error(f"Exception in identify_ip: {e}")
+            return jsonify({"error": "An internal error has occurred!"}), 500
+
 
     def decode_b64_json(self, b64_json):
         """
