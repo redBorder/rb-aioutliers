@@ -50,3 +50,7 @@ Author: PRodriguezFlores
 release - 202406070335.0.0 - 2024-06-07 03:35:54
 * Fixed an issue where the shallow outliers wouldn't initialize properly in the API REST because it was not converting some values from the config to float.
 
+Author: malvads
+release - 202411191435.0.0 - 2024-11-19 14:35:03
+* the objetive is to create a relation with outliers and the ips to identify the ips  that caused the outliers
+
