@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['logger_0',['logger',['../classlogger_1_1Logger.html#a0b14e488ae28d98d262453f3e9cd6e4d',1,'logger.Logger.logger()'],['../namespacelogger.html#a0b14e488ae28d98d262453f3e9cd6e4d',1,'logger.logger()']]]
+  ['identifier_0',['identifier',['../classrest_1_1APIServer.html#afc486b0767ef05e2dc12f5b98be72902',1,'rest::APIServer']]]
 ];

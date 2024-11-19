@@ -2,7 +2,7 @@ var searchData=
 [
   ['main_5fdir_0',['main_dir',['../classtrain__job_1_1RbOutlierTrainJob.html#aca22051f2be00fc88784db09b8fe6400',1,'train_job::RbOutlierTrainJob']]],
   ['metrics_1',['metrics',['../classoutliers_1_1Autoencoder.html#abcce662da2a75360795281c4d193ac56',1,'outliers::Autoencoder']]],
-  ['model_2',['model',['../classoutliers_1_1Autoencoder.html#a508cc3106d2c29fe07dc87cbe3ea6927',1,'outliers::Autoencoder']]],
+  ['model_2',['model',['../classoutliers_1_1Autoencoder.html#a508cc3106d2c29fe07dc87cbe3ea6927',1,'outliers.Autoencoder.model()'],['../classoutliers__identifier_1_1OutlierIdentifier.html#a508cc3106d2c29fe07dc87cbe3ea6927',1,'outliers_identifier.OutlierIdentifier.model()']]],
   ['model_5fconfig_5ffile_3',['model_config_file',['../classtrainer_1_1Trainer.html#aeecc10a1d63448f51dc525916948924e',1,'trainer::Trainer']]],
   ['model_5ffile_4',['model_file',['../classtrainer_1_1Trainer.html#a3e85a644e3e0d90ed1cc0f0bace15f81',1,'trainer::Trainer']]],
   ['model_5floss_5',['model_loss',['../classoutliers_1_1Autoencoder.html#a59128bc45344a891a5d1c6f40f1c28c2',1,'outliers::Autoencoder']]],
