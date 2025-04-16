@@ -54,3 +54,7 @@ Author: malvads
 release - 202411191435.0.0 - 2024-11-19 14:35:03
 * the objetive is to create a relation with outliers and the ips to identify the ips  that caused the outliers
 
+Author: rgomezborder
+release - 202504161046.0.0 - 2025-04-16 10:46:34
+- Update default druid_broker port to 8082
+
