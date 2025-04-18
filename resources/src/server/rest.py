@@ -117,6 +117,56 @@ class APIServer:
         logger.logger.info("Starting outliers execution")
         return self.execute_model(data, config.get("Outliers","metric"), model)
 
+def calculate_forecast(self):
+    """
+        Handle POST requests to /api/v1/forecast.
+        Processes input data for forecasting, either from a direct request or by querying Druid.
+        This function retrieves data from the request form, either as raw input (`data`) or as
+        Base64-encoded Druid query (`query`). If no direct data is provided, it decodes and executes
+        the Druid query to fetch the required data.
+        The retrieved data is then processed for forecasting predictions and evaluation metrics.
+        Expects:
+            - data: Base64-encoded JSON data for forecasting or Druid query.
+        Returns:
+            dict: JSON response containing both forecasted values and evaluation metrics, or an error message.
+    """
+
+    data = request.form.get('data')
+    druid_query = request.form.get('query')
+    request_type = request.form.get('type', 'forecast')  # New parameter to decide if metrics are needed
+
+    model = 'default'
+
+    if data is None and druid_query is None:
+        return self.return_error(msg="No data provided or requested")
+
+    try:
+        # Decode the data or execute the Druid query to fetch the data
+        if data is None:
+            druid_query = self.decode_b64_json(druid_query)
+            data = self.get_data_from_druid(druid_query, model)
+            logger.logger.info("Druid query successfully decoded and loaded")
+        else:
+            data = self.decode_b64_json(data)
+
+    except Exception as e:
+        return self.return_error(msg="Could not execute druid query", exception=e)
+
+    logger.logger.info("Starting forecasting execution")
+
+    # Calculate both forecasting and metrics
+    predictions = self.forecasting.calculate_predictions(data)
+    metrics = self.forecasting.calculate_metrics(data)
+
+    # Combine the results
+    response = {
+        'forecast': predictions,
+        'metrics': metrics
+    }
+
+    return response
+
+
     def identify_ip(self):
         """
         Process the incoming request to identify implicated IPs based on outlier data.
