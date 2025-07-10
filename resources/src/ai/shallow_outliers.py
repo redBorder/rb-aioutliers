@@ -137,7 +137,23 @@ class ShallowOutliers:
         weekly_cos = np.cos(2*np.pi*day_of_week/7)
         encoded = np.stack((daily_sin, weekly_cos), axis=1)
         return encoded
+    
+    def extract_array(self, data):
+        """
+        Extracts the relevant array from the DataFrame.
+        If 'result.monitors' column exists, returns its values; otherwise, returns the second column's values.
 
+        Args:
+            data (pd.DataFrame): Input DataFrame.
+
+        Returns:
+            np.ndarray: Extracted array.
+        """
+        if "result.monitors" in data.columns:
+            return data["result.monitors"].values
+        else:
+            return data.iloc[:, 1].values
+    
     def compute_json(self, raw_json):
         """
         Main method used for anomaly detection.
@@ -153,7 +169,7 @@ class ShallowOutliers:
               Json format.
         """
         data = pd.json_normalize(raw_json)
-        arr = data.iloc[:, 1].values
+        arr = self.extract_array(data)
         smoothed_arr = self.predict(arr)
         encoded_timestamp = self.encode_timestamp(data["timestamp"])
         outliers = self.get_outliers(arr, smoothed_arr, other=encoded_timestamp)
