@@ -58,3 +58,7 @@ Author: rgomezborder
 release - 202504161046.0.0 - 2025-04-16 10:46:34
 - Update default druid_broker port to 8082
 
+Author: rgomezborder
+release - 202507111317.0.0 - 2025-07-11 13:17:21
+## Description
+
