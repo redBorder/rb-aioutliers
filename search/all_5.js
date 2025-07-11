@@ -7,5 +7,6 @@ var searchData=
   ['execute_5fmodel_4',['execute_model',['../classrest_1_1APIServer.html#aa2dcc588af885f30968019eae18bd8c3',1,'rest::APIServer']]],
   ['execute_5fprediction_5fmodel_5',['execute_prediction_model',['../classoutliers_1_1Autoencoder.html#a66abb370937f20b0698b757e48edf86d',1,'outliers.Autoencoder.execute_prediction_model()'],['../classshallow__outliers_1_1ShallowOutliers.html#a0b680b0d27b0a037084e4c9dbc35885e',1,'shallow_outliers.ShallowOutliers.execute_prediction_model()']]],
   ['execute_5fquery_6',['execute_query',['../classclient_1_1DruidClient.html#a6c35542a5ea7e8a2a8dff481c900c35a',1,'client::DruidClient']]],
-  ['exit_5fcode_7',['exit_code',['../classrest_1_1APIServer.html#ab45d8ea6639edac36ac747cbf562be9a',1,'rest::APIServer']]]
+  ['exit_5fcode_7',['exit_code',['../classrest_1_1APIServer.html#ab45d8ea6639edac36ac747cbf562be9a',1,'rest::APIServer']]],
+  ['extract_5farray_8',['extract_array',['../classshallow__outliers_1_1ShallowOutliers.html#aab3e858526a153fa179182cfb9bd2078',1,'shallow_outliers::ShallowOutliers']]]
 ];

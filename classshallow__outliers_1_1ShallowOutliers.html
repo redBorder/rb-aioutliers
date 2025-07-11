@@ -92,6 +92,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a31f2e29999830ad2f574036d1c7a5e59"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0b680b0d27b0a037084e4c9dbc35885e"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classshallow__outliers_1_1ShallowOutliers.html#a0b680b0d27b0a037084e4c9dbc35885e">execute_prediction_model</a> (self, data)</td></tr>
 <tr class="separator:a0b680b0d27b0a037084e4c9dbc35885e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aab3e858526a153fa179182cfb9bd2078"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classshallow__outliers_1_1ShallowOutliers.html#aab3e858526a153fa179182cfb9bd2078">extract_array</a> (self, data)</td></tr>
+<tr class="separator:aab3e858526a153fa179182cfb9bd2078"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adc9875aa489843ea42aba8eabaacf92b"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classshallow__outliers_1_1ShallowOutliers.html#adc9875aa489843ea42aba8eabaacf92b">get_outliers</a> (self, arr, smoothed_arr, other=None)</td></tr>
 <tr class="separator:adc9875aa489843ea42aba8eabaacf92b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a04b23ce905f46dfce2caa799944bf75e"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classshallow__outliers_1_1ShallowOutliers.html#a04b23ce905f46dfce2caa799944bf75e">predict</a> (self, arr)</td></tr>
@@ -264,6 +266,42 @@ Returns:
       </table>
 </div><div class="memdoc">
 
+</div>
+</div>
+<a id="aab3e858526a153fa179182cfb9bd2078" name="aab3e858526a153fa179182cfb9bd2078"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aab3e858526a153fa179182cfb9bd2078">&#9670;&#160;</a></span>extract_array()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def extract_array </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>data</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<pre class="fragment">Extracts the relevant array from the DataFrame.
+If 'result.monitors' column exists, returns its values; otherwise, returns the second column's values.
+
+Args:
+    data (pd.DataFrame): Input DataFrame.
+
+Returns:
+    np.ndarray: Extracted array.
+</pre> 
 </div>
 </div>
 <a id="adc9875aa489843ea42aba8eabaacf92b" name="adc9875aa489843ea42aba8eabaacf92b"></a>
