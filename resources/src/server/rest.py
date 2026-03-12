@@ -63,6 +63,7 @@ class APIServer:
         self.app = Flask(__name__)
         self.app.add_url_rule('/api/v1/outliers', view_func=self.calculate, methods=['POST'])
         self.app.add_url_rule('/api/v1/ip_identifier', view_func=self.identify_ip, methods=['POST'])
+        self.app.add_url_rule('/api/v1/forecast', view_func=self.calculate_forecast, methods=['POST'])
         self.exit_code = 0
         self.shallow = shallow_outliers.ShallowOutliers(
             sensitivity = config.get("ShallowOutliers", "sensitivity"),
@@ -116,6 +117,50 @@ class APIServer:
             return self.return_error(msg="Could not execute druid query", exception=e)
         logger.logger.info("Starting outliers execution")
         return self.execute_model(data, config.get("Outliers","metric"), model)
+
+
+    def calculate_forecast(self):
+        """
+            Handle POST requests to /api/v1/forecast.
+
+            Processes input data for forecasting, either from a direct request or by querying Druid.
+
+            This function retrieves data from the request form, either as raw input (`data`) or as a
+            Base64-encoded Druid query (`query`). If no direct data is provided, it decodes and executes
+            the Druid query to fetch the required data.
+            The retrieved data is then processed for forecasting predictions.
+
+            Expects:
+                - data: Base64-encoded JSON data for forecasting or Druid query.
+
+            Returns:
+                dict: JSON response containing the forecasted values or an error message.
+            """
+
+        data = request.form.get('data')
+        druid_query = request.form.get('query')
+
+        model = 'default'
+
+        if data is None and druid_query is None:
+            return self.return_error(msg="No data provided or requested")
+
+        try:
+            # Decode the data or execute the Druid query to fetch the data
+            if data is None:
+                druid_query=self.decode_b64_json(druid_query)
+                data = self.get_data_from_druid(druid_query, model)
+                logger.logger.info("Druid query successfully decoded and loaded")
+            else:
+                data = self.decode_b64_json(data)
+
+        except Exception as e:
+            return self.return_error(msg="Could not execute druid query", exception=e)
+
+        logger.logger.info("Starting forecasting prediction execution")
+
+        return self.forecasting.calculate_predictions(data)
+
 
     def identify_ip(self):
         """
