@@ -25,7 +25,7 @@ import threading
 from flask import Flask, jsonify, request
 
 from resources.src.redborder.s3 import S3
-from resources.src.ai import outliers, shallow_outliers, outliers_identifier
+from resources.src.ai import outliers, shallow_outliers, outliers_identifier, forecast
 from resources.src.druid import client, query_builder
 from resources.src.logger import logger
 from resources.src.config import configmanager
@@ -72,6 +72,7 @@ class APIServer:
         self.identifier = outliers_identifier.OutlierIdentifier()
         self.ai_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "ai")
         self.deep_models={}
+        self.forecasting=forecast.ForecastingModel()
 
     def calculate(self):
         """
