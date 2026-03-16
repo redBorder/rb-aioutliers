@@ -37,7 +37,8 @@ class ForecastingModel:
             # Convert timestamps to datetime
             data["timestamp"] = pd.to_datetime(data["timestamp"])
             print("TIMEZONE----------------------")
-            time_zone=str(data["timestamp"].tz)
+            time_zone=str(data["timestamp"].dt.tz)
+            print(time_zone)
             gran=self.granularity_from_dataframe(data)
             gran= int(gran)
             print("-------------Granularity:")
@@ -48,7 +49,7 @@ class ForecastingModel:
             predictions_df=self.execute_model(data,"Prophet",gran)
             #self.output_json(predictions_df)
             print(predictions_df)
-            print(self.output_json(predictions_df))
+            print(self.output_json(predictions_df, time_zone))
             #df=pd.concat([predictions_df,data["y"]],axis=1)
 
             #data.set_index("timestamp", inplace=True)
@@ -106,9 +107,10 @@ class ForecastingModel:
             forecast_df= forecast[["ds","yhat"]].tail(p)
         return forecast_df
 
-    def output_json(self,df):
+    def output_json(self,df, time_zone):
         df.rename(columns ={"ds":"timestamp","yhat":"forecast" },inplace=True)
-        df["timestamp"] = df["timestamp"].dt.strftime("%Y-%m-%d %H:%M:%S")
+        df["timestamp"] = df["timestamp"].dt.tz_localize(time_zone)
+        df["timestamp"] = df["timestamp"].dt.strftime("%Y-%m-%dT%H:%M:%S.000Z")
         #df.set_index('timestamp', inplace=True)  
 
         return  {
