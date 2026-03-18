@@ -24,44 +24,21 @@ class ForecastingModel:
         Returns:
             (Json): JSON with the calculated forecasted values.
         """
+        logger.logger.info("Inside calulate_predictions")
         try:
-            data = pd.DataFrame(raw_json)  # Convert JSON into DataFrame without considering column names
-                     
-
+            data = pd.DataFrame(raw_json)  
+    
             if data.shape[1] < 2:
                 raise ValueError("The JSON does not have the expected format. Two columns are required: timestamp and value.")
-
-            # The first column is the timestamp, the second is the value
             data.columns = ["timestamp", "value"]
-
-            # Convert timestamps to datetime
             data["timestamp"] = pd.to_datetime(data["timestamp"])
-            print("TIMEZONE----------------------")
             time_zone=str(data["timestamp"].dt.tz)
-            print(time_zone)
             gran=self.granularity_from_dataframe(data)
             gran= int(gran)
-            print("-------------Granularity:")
-            print(gran)
-            print(type(gran))
             data=self.data_handle(data,"Prophet")
-            #print(data)
             predictions_df=self.execute_model(data,"Prophet",gran)
-            #self.output_json(predictions_df)
-            print(predictions_df)
-            print(self.output_json(predictions_df, time_zone))
-            #df=pd.concat([predictions_df,data["y"]],axis=1)
 
-            #data.set_index("timestamp", inplace=True)
-
-            # Filter the last two weeks of data (if enough data is available)
-            #two_weeks_ago = data.index.max() - pd.Timedelta(days=14)
-            #data = data.loc[data.index >= two_weeks_ago]
-#
-            #if len(data) < 2:
-            #    logger.warning("Not enough data in the last two weeks, using available data instead.")
-
-            #return {"forecasted": predictions_series.to_dict(orient="records"), "status": "success"}
+            return self.output_json(predictions_df, time_zone)
 
         except Exception as e:
             logger.error(f"Error in prediction: {str(e)}")
