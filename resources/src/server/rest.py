@@ -140,8 +140,6 @@ class APIServer:
 
         data = request.form.get('data')
         druid_query = request.form.get('query')
-        print(druid_query)
-
         model = 'default'
 
         if data is None and druid_query is None:
