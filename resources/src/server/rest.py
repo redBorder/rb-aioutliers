@@ -140,6 +140,7 @@ class APIServer:
 
         data = request.form.get('data')
         druid_query = request.form.get('query')
+        print(druid_query)
 
         model = 'default'
 

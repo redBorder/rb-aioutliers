@@ -24,7 +24,6 @@ class ForecastingModel:
         Returns:
             (Json): JSON with the calculated forecasted values.
         """
-        logger.logger.info("Inside calulate_predictions")
         try:
             data = pd.DataFrame(raw_json)  
     
