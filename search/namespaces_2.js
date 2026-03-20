@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['logger_0',['logger',['../namespacelogger.html',1,'']]]
+  ['forecast_0',['forecast',['../namespaceforecast.html',1,'']]]
 ];

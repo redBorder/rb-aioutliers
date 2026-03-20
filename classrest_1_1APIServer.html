@@ -87,6 +87,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ae64f0875afe3067b97ba370b354b9213"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0323e195383d2d7450c50a1466897915"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classrest_1_1APIServer.html#a0323e195383d2d7450c50a1466897915">calculate</a> (self)</td></tr>
 <tr class="separator:a0323e195383d2d7450c50a1466897915"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac327a7e7936b23ad77dac2872df534cd"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classrest_1_1APIServer.html#ac327a7e7936b23ad77dac2872df534cd">calculate_forecast</a> (self)</td></tr>
+<tr class="separator:ac327a7e7936b23ad77dac2872df534cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a561c6d61a905e00eeaf7f1ecd4152e19"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classrest_1_1APIServer.html#a561c6d61a905e00eeaf7f1ecd4152e19">decode_b64_json</a> (self, b64_json)</td></tr>
 <tr class="separator:a561c6d61a905e00eeaf7f1ecd4152e19"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afcf42671612a3b2ea3da0edc30e280bd"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classrest_1_1APIServer.html#afcf42671612a3b2ea3da0edc30e280bd">decode_model</a> (self, model)</td></tr>
@@ -120,6 +122,8 @@ Public Attributes</h2></td></tr>
 <tr class="separator:a86ccb77537edc1ea25d72a5a1da5e017"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab45d8ea6639edac36ac747cbf562be9a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classrest_1_1APIServer.html#ab45d8ea6639edac36ac747cbf562be9a">exit_code</a></td></tr>
 <tr class="separator:ab45d8ea6639edac36ac747cbf562be9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2160358eafe70cb95ed0deb736ea2edd"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classrest_1_1APIServer.html#a2160358eafe70cb95ed0deb736ea2edd">forecasting</a></td></tr>
+<tr class="separator:a2160358eafe70cb95ed0deb736ea2edd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afc486b0767ef05e2dc12f5b98be72902"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classrest_1_1APIServer.html#afc486b0767ef05e2dc12f5b98be72902">identifier</a></td></tr>
 <tr class="separator:afc486b0767ef05e2dc12f5b98be72902"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad6cbdddba4ed1be7c6d0af492611bf16"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classrest_1_1APIServer.html#ad6cbdddba4ed1be7c6d0af492611bf16">s3_client</a></td></tr>
@@ -191,6 +195,37 @@ parameter.
 Returns:
     A JSON response containing the prediction results or an error message.
 </pre> 
+</div>
+</div>
+<a id="ac327a7e7936b23ad77dac2872df534cd" name="ac327a7e7936b23ad77dac2872df534cd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac327a7e7936b23ad77dac2872df534cd">&#9670;&#160;</a></span>calculate_forecast()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def calculate_forecast </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<pre class="fragment">    Handle POST requests to /api/v1/forecast.
+
+    Processes input data for forecasting, either from a direct request or by querying Druid.
+
+    This function retrieves data from the request form, either as raw input (`data`) or as a
+    Base64-encoded Druid query (`query`). If no direct data is provided, it decodes and executes
+    the Druid query to fetch the required data.
+    The retrieved data is then processed for forecasting predictions.
+
+    Expects:
+        - data: Base64-encoded JSON data for forecasting or Druid query.
+
+    Returns:
+        dict: JSON response containing the forecasted values or an error message.</pre> 
 </div>
 </div>
 <a id="a561c6d61a905e00eeaf7f1ecd4152e19" name="a561c6d61a905e00eeaf7f1ecd4152e19"></a>
@@ -584,6 +619,20 @@ It then iterates through the list, extracts the file name, and downloads each ob
       <table class="memname">
         <tr>
           <td class="memname">exit_code</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a2160358eafe70cb95ed0deb736ea2edd" name="a2160358eafe70cb95ed0deb736ea2edd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2160358eafe70cb95ed0deb736ea2edd">&#9670;&#160;</a></span>forecasting</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">forecasting</td>
         </tr>
       </table>
 </div><div class="memdoc">

@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['s3_0',['S3',['../classs3_1_1S3.html',1,'s3']]],
-  ['shallowoutliers_1',['ShallowOutliers',['../classshallow__outliers_1_1ShallowOutliers.html',1,'shallow_outliers']]]
+  ['rboutliertrainjob_0',['RbOutlierTrainJob',['../classtrain__job_1_1RbOutlierTrainJob.html',1,'train_job']]],
+  ['rqmanager_1',['RqManager',['../classrq_1_1RqManager.html',1,'rq']]]
 ];

@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['rest_0',['rest',['../namespacerest.html',1,'']]],
-  ['rq_1',['rq',['../namespacerq.html',1,'']]]
+  ['query_5fbuilder_0',['query_builder',['../namespacequery__builder.html',1,'']]]
 ];

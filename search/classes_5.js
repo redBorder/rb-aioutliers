@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['ntpclient_0',['NTPClient',['../classntplib_1_1NTPClient.html',1,'ntplib']]]
+  ['logger_0',['Logger',['../classlogger_1_1Logger.html',1,'logger']]]
 ];

@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['train_5fjob_0',['train_job',['../namespacetrain__job.html',1,'']]],
-  ['trainer_1',['trainer',['../namespacetrainer.html',1,'']]]
+  ['s3_0',['s3',['../namespaces3.html',1,'']]],
+  ['shallow_5foutliers_1',['shallow_outliers',['../namespaceshallow__outliers.html',1,'']]]
 ];

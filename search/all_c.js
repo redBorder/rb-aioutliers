@@ -7,5 +7,5 @@ var searchData=
   ['outliers_2epy_4',['outliers.py',['../outliers_8py.html',1,'']]],
   ['outliers_5fidentifier_5',['outliers_identifier',['../namespaceoutliers__identifier.html',1,'']]],
   ['outliers_5fidentifier_2epy_6',['outliers_identifier.py',['../outliers__identifier_8py.html',1,'']]],
-  ['output_5fjson_7',['output_json',['../classoutliers_1_1Autoencoder.html#abaf647370ac896b2c24cc751fbb08e5a',1,'outliers::Autoencoder']]]
+  ['output_5fjson_7',['output_json',['../classforecast_1_1ForecastingModel.html#a79a90e689cd8305b3e21cd0a8068db7c',1,'forecast.ForecastingModel.output_json()'],['../classoutliers_1_1Autoencoder.html#abaf647370ac896b2c24cc751fbb08e5a',1,'outliers.Autoencoder.output_json()']]]
 ];

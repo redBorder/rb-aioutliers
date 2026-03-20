@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['querybuilder_0',['QueryBuilder',['../classquery__builder_1_1QueryBuilder.html',1,'query_builder']]]
+  ['outlieridentifier_0',['OutlierIdentifier',['../classoutliers__identifier_1_1OutlierIdentifier.html',1,'outliers_identifier']]],
+  ['outliers_1',['Outliers',['../class____main_____1_1Outliers.html',1,'__main__']]]
 ];

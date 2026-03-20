@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['options_0',['options',['../classproduction_1_1GunicornApp.html#a02eacfd40be9042ceb0f07547365203d',1,'production::GunicornApp']]]
+  ['num_5fwindow_0',['num_window',['../classoutliers_1_1Autoencoder.html#a2dcf1f53cf8b2f6bab8ea38e1023539f',1,'outliers::Autoencoder']]]
 ];

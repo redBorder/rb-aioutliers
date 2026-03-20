@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['rq_5fmanager_0',['rq_manager',['../class____main_____1_1Outliers.html#afb7fb1638cd86df75576dd639f46f128',1,'__main__::Outliers']]],
-  ['rq_5fqueue_1',['rq_queue',['../classrq_1_1RqManager.html#a8bc09aa188185cc57dd9009903baaf3b',1,'rq::RqManager']]]
+  ['query_5fbuilder_0',['query_builder',['../class____main_____1_1Outliers.html#a3e4151df60d40e4285ca37fce85b5ede',1,'__main__.Outliers.query_builder()'],['../classtrain__job_1_1RbOutlierTrainJob.html#a3e4151df60d40e4285ca37fce85b5ede',1,'train_job.RbOutlierTrainJob.query_builder()']]],
+  ['query_5fmodifier_1',['query_modifier',['../namespacerest.html#a722042368c6efcf522b3194406da991e',1,'rest']]]
 ];

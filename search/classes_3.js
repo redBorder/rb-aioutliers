@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['gunicornapp_0',['GunicornApp',['../classproduction_1_1GunicornApp.html',1,'production']]]
+  ['forecastingmodel_0',['ForecastingModel',['../classforecast_1_1ForecastingModel.html',1,'forecast']]]
 ];

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['logger_0',['Logger',['../classlogger_1_1Logger.html',1,'logger']]]
+  ['gunicornapp_0',['GunicornApp',['../classproduction_1_1GunicornApp.html',1,'production']]]
 ];

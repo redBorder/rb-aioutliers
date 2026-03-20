@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['ntplib_0',['ntplib',['../namespacentplib.html',1,'']]]
+  ['logger_0',['logger',['../namespacelogger.html',1,'']]]
 ];

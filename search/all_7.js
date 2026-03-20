@@ -9,7 +9,7 @@ var searchData=
   ['get_5foutliers_6',['get_outliers',['../classshallow__outliers_1_1ShallowOutliers.html#adc9875aa489843ea42aba8eabaacf92b',1,'shallow_outliers::ShallowOutliers']]],
   ['get_5fpost_5faggregations_5fconfig_5fpath_7',['get_post_aggregations_config_path',['../classtrain__job_1_1RbOutlierTrainJob.html#ae1b2547fe1c2cb63e1c1a5df64e32031',1,'train_job::RbOutlierTrainJob']]],
   ['get_5fsubstracted_5fday_5ftime_8',['get_substracted_day_time',['../classntplib_1_1NTPClient.html#adf247d0877971d78243491e6eef0c3d2',1,'ntplib::NTPClient']]],
-  ['granularity_5ffrom_5fdataframe_9',['granularity_from_dataframe',['../classoutliers_1_1Autoencoder.html#ad5c2e18fd8c8daccd8f58d9f09fac223',1,'outliers::Autoencoder']]],
+  ['granularity_5ffrom_5fdataframe_9',['granularity_from_dataframe',['../classforecast_1_1ForecastingModel.html#ad5c2e18fd8c8daccd8f58d9f09fac223',1,'forecast.ForecastingModel.granularity_from_dataframe()'],['../classoutliers_1_1Autoencoder.html#ad5c2e18fd8c8daccd8f58d9f09fac223',1,'outliers.Autoencoder.granularity_from_dataframe()']]],
   ['granularity_5fto_5fseconds_10',['granularity_to_seconds',['../classquery__builder_1_1QueryBuilder.html#ab5cbdd82f6b494319b0958fbfaec98c3',1,'query_builder::QueryBuilder']]],
   ['gunicornapp_11',['GunicornApp',['../classproduction_1_1GunicornApp.html',1,'production']]]
 ];
