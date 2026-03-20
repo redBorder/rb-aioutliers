@@ -1,8 +1,9 @@
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
-from resources.src.logger import logger
+from resources.src.logger.logger import logger
 from prophet import Prophet
+from flask import jsonify
 class ForecastingModel:
     """
     A statistical forecasting model to calculate predictions from data obtained from Druid.
@@ -40,9 +41,14 @@ class ForecastingModel:
             return self.output_json(predictions_df, time_zone)
 
         except Exception as e:
+            import traceback
             logger.error(f"Error in prediction: {str(e)}")
-            return {"error": str(e)}
-
+            logger.error(traceback.format_exc())
+        
+            return self.return_error(
+                msg="Error while calculating prediction model",
+                exception=e
+            )
 
     def granularity_from_dataframe(self, dataframe):
         """
@@ -70,7 +76,6 @@ class ForecastingModel:
         return df
     
     def execute_model(self,df, model, gran):
-        
         p= df.shape[0]//10
 
         if model == "Prophet":
@@ -87,10 +92,25 @@ class ForecastingModel:
         df.rename(columns ={"ds":"timestamp","yhat":"forecast" },inplace=True)
         df["timestamp"] = df["timestamp"].dt.tz_localize(time_zone)
         df["timestamp"] = df["timestamp"].dt.strftime("%Y-%m-%dT%H:%M:%S.000Z")
-        #df.set_index('timestamp', inplace=True)  
 
         return  {
             "predicted":df.to_dict(orient="records"),
             "status": "success"
         }
         
+    def return_error(self, msg="error", exception=None):
+         import traceback
+        
+         # log the main error message
+         logger.error(f"{msg}: {str(exception)}")
+        
+         # log the full traceback manually
+         if exception:
+             logger.error(traceback.format_exc())
+        
+         # return JSON to API client
+         return jsonify({
+             "status": "error",
+             "msg": msg,
+             "error": str(exception) if exception else None
+         })
