@@ -111,6 +111,5 @@ class ForecastingModel:
          # return JSON to API client
          return jsonify({
              "status": "error",
-             "msg": msg,
-             "error": str(exception) if exception else None
+             "msg": msg
          })
